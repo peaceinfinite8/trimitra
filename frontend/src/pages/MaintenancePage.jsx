@@ -1,296 +1,398 @@
 import { useState, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 
-export default function MaintenancePage() {
-    const [timeLeft, setTimeLeft] = useState({
-        hours: 24,
-        minutes: 0,
-        seconds: 0,
-    });
+// SVG Icon Components
+const BuildingIcon = () => (
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ width: '80px', height: '80px' }}>
+        <defs>
+            <linearGradient id="buildingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#FF6B6B" />
+                <stop offset="100%" stopColor="#FF8E72" />
+            </linearGradient>
+        </defs>
+        <rect x="20" y="30" width="60" height="60" fill="url(#buildingGrad)" rx="4" />
+        <rect x="30" y="40" width="10" height="10" fill="#fff" opacity="0.8" rx="2" />
+        <rect x="50" y="40" width="10" height="10" fill="#fff" opacity="0.8" rx="2" />
+        <rect x="70" y="40" width="10" height="10" fill="#fff" opacity="0.8" rx="2" />
+        <rect x="30" y="55" width="10" height="10" fill="#fff" opacity="0.8" rx="2" />
+        <rect x="50" y="55" width="10" height="10" fill="#fff" opacity="0.8" rx="2" />
+        <rect x="70" y="55" width="10" height="10" fill="#fff" opacity="0.8" rx="2" />
+        <polygon points="25,30 50,15 75,30" fill="url(#buildingGrad)" opacity="0.9" />
+    </svg>
+);
 
+const TimerIcon = () => (
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ width: '60px', height: '60px' }}>
+        <defs>
+            <linearGradient id="timerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#4F46E5" />
+                <stop offset="100%" stopColor="#7C3AED" />
+            </linearGradient>
+        </defs>
+        <circle cx="50" cy="50" r="40" fill="none" stroke="url(#timerGrad)" strokeWidth="3" opacity="0.3" />
+        <circle cx="50" cy="50" r="40" fill="none" stroke="url(#timerGrad)" strokeWidth="3" strokeDasharray="251" strokeDashoffset="50" strokeLinecap="round" />
+        <circle cx="50" cy="12" r="4" fill="url(#timerGrad)" />
+    </svg>
+);
+
+const EmailIcon = () => (
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ width: '50px', height: '50px' }}>
+        <defs>
+            <linearGradient id="emailGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#60A5FA" />
+                <stop offset="100%" stopColor="#3B82F6" />
+            </linearGradient>
+        </defs>
+        <rect x="15" y="25" width="70" height="50" fill="none" stroke="url(#emailGrad)" strokeWidth="2" rx="3" />
+        <path d="M 15 25 L 50 50 L 85 25" stroke="url(#emailGrad)" strokeWidth="2" fill="none" />
+    </svg>
+);
+
+const WhatsAppIcon = () => (
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ width: '50px', height: '50px' }}>
+        <defs>
+            <linearGradient id="waGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#10B981" />
+                <stop offset="100%" stopColor="#059669" />
+            </linearGradient>
+        </defs>
+        <circle cx="50" cy="50" r="35" fill="url(#waGrad)" opacity="0.2" />
+        <path d="M 50 25 C 36.2 25 25 36.2 25 50 C 25 55 26.5 59.7 29.2 63.5 L 25 75 L 37 71 C 40.5 73.4 44.8 75 50 75 C 63.8 75 75 63.8 75 50 C 75 36.2 63.8 25 50 25 Z" fill="none" stroke="url(#waGrad)" strokeWidth="2" />
+    </svg>
+);
+
+export default function MaintenancePage() {
+    const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
+    const [isMobile, setIsMobile] = useState(false);
     const containerRef = useRef(null);
     const titleRef = useRef(null);
-    const subtitleRef = useRef(null);
-    const timerRef = useRef(null);
     const floatingShapesRef = useRef([]);
+    const mouseRef = useRef({ x: 0, y: 0 });
 
-    // Timer countdown 24 jam
     useEffect(() => {
-        const timer = setInterval(() => {
-            setTimeLeft((prev) => {
-                let { hours, minutes, seconds } = prev;
+        setIsMobile(window.innerWidth < 768);
+    }, []);
 
-                if (seconds > 0) {
-                    seconds--;
-                } else if (minutes > 0) {
-                    minutes--;
-                    seconds = 59;
-                } else if (hours > 0) {
-                    hours--;
-                    minutes = 59;
-                    seconds = 59;
-                }
+    // Timer Effect
+    useEffect(() => {
+        const MAINTENANCE_END = new Date(2026, 3, 14, 23, 0, 0).getTime();
+        
+        const updateTimer = () => {
+            const now = new Date().getTime();
+            const distance = MAINTENANCE_END - now;
 
-                return { hours, minutes, seconds };
-            });
-        }, 1000);
+            if (distance > 0) {
+                setTimeLeft({
+                    hours: Math.floor((distance / (1000 * 60 * 60)) % 24),
+                    minutes: Math.floor((distance / (1000 * 60)) % 60),
+                    seconds: Math.floor((distance / 1000) % 60),
+                });
+            }
+        };
 
+        updateTimer();
+        const timer = setInterval(updateTimer, 1000);
         return () => clearInterval(timer);
     }, []);
 
-    // GSAP Animations
+    // GSAP Animations & Parallax Effect
     useEffect(() => {
-        if (!containerRef.current) return;
+        if (!containerRef.current || !titleRef.current) return;
 
-        // Timeline master animation
-        const tl = gsap.timeline();
-
-        // Animate title
-        tl.from(titleRef.current, {
+        // Title entrance
+        gsap.from(titleRef.current, {
             opacity: 0,
-            y: 50,
-            duration: 1,
-            ease: 'back.out',
-        }, 0);
+            y: 100,
+            duration: 1.2,
+            ease: 'cubic.out',
+        });
 
-        // Animate subtitle
-        tl.from(subtitleRef.current, {
-            opacity: 0,
-            y: 30,
-            duration: 0.8,
-            ease: 'power2.out',
-        }, 0.3);
-
-        // Animate timer
-        tl.from(timerRef.current, {
-            opacity: 0,
-            scale: 0.5,
-            duration: 0.8,
-            ease: 'back.out',
-        }, 0.5);
-
-        // Floating animation for decorative shapes
+        // Floating shapes with parallax
         floatingShapesRef.current.forEach((el, index) => {
             if (el) {
+                // Floating animation
                 gsap.to(el, {
-                    y: -30,
-                    duration: 3 + index * 0.5,
+                    y: -40 + index * 10,
+                    duration: 4 + index * 0.5,
                     repeat: -1,
                     yoyo: true,
                     ease: 'sine.inOut',
-                    delay: index * 0.2,
+                    delay: index * 0.3,
                 });
 
+                // Rotation
                 gsap.to(el, {
                     rotation: 360,
-                    duration: 15 + index * 2,
+                    duration: 20 + index * 3,
                     repeat: -1,
                     ease: 'none',
                 });
             }
         });
 
-        // Pulse animation for contact icons
-        const contactIcons = containerRef.current.querySelectorAll('[data-contact-icon]');
-        contactIcons.forEach((icon, index) => {
-            gsap.to(icon, {
-                scale: 1.1,
-                duration: 0.6,
-                repeat: -1,
-                yoyo: true,
-                ease: 'power2.inOut',
-                delay: index * 0.3,
+        // Parallax on mouse move
+        const handleMouseMove = (e) => {
+            mouseRef.current = { x: e.clientX, y: e.clientY };
+            
+            floatingShapesRef.current.forEach((el, index) => {
+                if (el) {
+                    const moveX = (mouseRef.current.x - window.innerWidth / 2) * 0.02 * (index + 1);
+                    const moveY = (mouseRef.current.y - window.innerHeight / 2) * 0.02 * (index + 1);
+                    
+                    gsap.to(el, {
+                        x: moveX,
+                        y: moveY,
+                        duration: 0.8,
+                        overwrite: 'auto',
+                    });
+                }
             });
-        });
+        };
+
+        window.addEventListener('mousemove', handleMouseMove);
+        return () => window.removeEventListener('mousemove', handleMouseMove);
     }, []);
 
     return (
-        <div
-            ref={containerRef}
-            className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-red-500 flex items-center justify-center px-4 overflow-hidden relative"
-        >
-            {/* Animated floating shapes background */}
-            <div className="fixed inset-0 overflow-hidden pointer-events-none">
-                {/* Floating circle 1 */}
-                <div
-                    ref={(el) => (floatingShapesRef.current[0] = el)}
-                    className="absolute top-20 left-10 w-96 h-96 bg-yellow-300 rounded-full opacity-20 blur-3xl"
-                />
-
-                {/* Floating circle 2 */}
-                <div
-                    ref={(el) => (floatingShapesRef.current[1] = el)}
-                    className="absolute top-40 right-10 w-80 h-80 bg-blue-400 rounded-full opacity-20 blur-3xl"
-                />
-
-                {/* Floating circle 3 */}
-                <div
-                    ref={(el) => (floatingShapesRef.current[2] = el)}
-                    className="absolute -bottom-20 left-1/3 w-96 h-96 bg-green-300 rounded-full opacity-20 blur-3xl"
-                />
-
-                {/* Floating square */}
-                <div
-                    ref={(el) => (floatingShapesRef.current[3] = el)}
-                    className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-indigo-300 rounded-3xl opacity-10 blur-3xl"
-                />
+        <div ref={containerRef} style={{
+            minHeight: '100vh',
+            background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: isMobile ? '16px' : '20px',
+            position: 'relative',
+            overflow: 'hidden',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        }}>
+            {/* Animated background shapes */}
+            <div style={{ position: 'fixed', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
+                {[
+                    { size: 350, color: 'rgba(239, 68, 68, 0.15)' },
+                    { size: 300, color: 'rgba(79, 70, 229, 0.15)' },
+                    { size: 280, color: 'rgba(16, 185, 129, 0.15)' },
+                    { size: 250, color: 'rgba(249, 115, 22, 0.15)' },
+                ].map((shape, i) => (
+                    <div
+                        key={i}
+                        ref={(el) => floatingShapesRef.current[i] = el}
+                        style={{
+                            position: 'absolute',
+                            width: `${shape.size}px`,
+                            height: `${shape.size}px`,
+                            background: shape.color,
+                            borderRadius: '50%',
+                            filter: 'blur(60px)',
+                            ...(i === 0 && { top: '10%', left: '5%' }),
+                            ...(i === 1 && { top: '50%', right: '5%' }),
+                            ...(i === 2 && { bottom: '10%', left: '20%' }),
+                            ...(i === 3 && { top: '60%', left: '50%' }),
+                        }}
+                    />
+                ))}
             </div>
 
-            {/* Decorative emoji/icons background */}
-            <div className="fixed inset-0 overflow-hidden pointer-events-none text-6xl opacity-10">
-                <div className="absolute top-10 left-20">🚀</div>
-                <div className="absolute top-1/3 right-20">⚡</div>
-                <div className="absolute bottom-20 left-1/4">🔧</div>
-                <div className="absolute bottom-1/3 right-1/4">💡</div>
-                <div className="absolute top-1/2 right-10">✨</div>
-            </div>
-
-            {/* Main content */}
-            <div className="relative z-20 max-w-3xl mx-auto text-center">
-                {/* Animated main icon */}
-                <div className="mb-8 flex justify-center">
-                    <div className="relative">
-                        <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full blur-3xl opacity-60 animate-pulse"></div>
-                        <div className="relative bg-gradient-to-br from-yellow-300 to-orange-400 rounded-full p-6 w-24 h-24 flex items-center justify-center shadow-2xl">
-                            <span className="text-5xl animate-bounce">🔨</span>
-                        </div>
+            {/* Content */}
+            <div style={{ position: 'relative', zIndex: 20, maxWidth: '1024px', width: '100%', textAlign: 'center' }}>
+                {/* Main Icon with Pulse Animation */}
+                <div style={{ marginBottom: isMobile ? '24px' : '40px', display: 'flex', justifyContent: 'center' }}>
+                    <div style={{
+                        background: 'linear-gradient(135deg, #FF6B6B, #FF8E72)',
+                        borderRadius: '50%',
+                        width: isMobile ? '70px' : '100px',
+                        height: isMobile ? '70px' : '100px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 0 40px rgba(255, 107, 107, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.1)',
+                        animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }}>
+                        <BuildingIcon />
                     </div>
                 </div>
 
                 {/* Title */}
-                <h1
-                    ref={titleRef}
-                    className="text-6xl md:text-7xl font-black text-white mb-4 drop-shadow-2xl"
-                >
-                    🏗️ Bagian Ini Sedang <br /> Dalam Pengembangan
+                <h1 ref={titleRef} style={{
+                    fontSize: isMobile ? '1.75rem' : '3.5rem',
+                    fontWeight: '900',
+                    background: 'linear-gradient(135deg, #FF6B6B, #FF8E72, #4F46E5, #10B981)',
+                    backgroundSize: '300% 300%',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                    margin: 0,
+                    lineHeight: '1.2',
+                    letterSpacing: '-0.02em',
+                    animation: 'gradientShift 8s ease infinite',
+                }}>
+                    Sedang Dalam Pengembangan
                 </h1>
 
-                {/* Animated subtitle */}
-                <p
-                    ref={subtitleRef}
-                    className="text-2xl md:text-3xl text-white font-bold mb-12 drop-shadow-lg"
-                >
-                    Kami sedang membangun sesuatu yang <span className="text-yellow-300 animate-pulse">luar biasa</span> untuk Anda! ✨
+                {/* Subtitle */}
+                <p style={{
+                    fontSize: isMobile ? '1rem' : '1.25rem',
+                    color: '#CBD5E1',
+                    fontWeight: '500',
+                    margin: isMobile ? '12px 0 32px 0' : '16px 0 48px 0',
+                    lineHeight: '1.6',
+                }}>
+                    Kami sedang membangun pengalaman yang luar biasa untuk Anda
                 </p>
 
-                {/* Timer section with GSAP animation */}
-                <div
-                    ref={timerRef}
-                    className="bg-white bg-opacity-15 backdrop-blur-xl rounded-3xl p-8 mb-12 border-2 border-white border-opacity-40 shadow-2xl"
-                >
-                    <h2 className="text-xl text-white font-bold mb-6 flex items-center justify-center gap-3">
-                        ⏱️ Waktu Tersisa
-                    </h2>
-                    <div className="grid grid-cols-3 gap-4">
-                        {/* Hours */}
-                        <div className="bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl p-6 transform hover:scale-110 transition-transform shadow-xl">
-                            <div className="text-5xl font-black text-white">
-                                {String(timeLeft.hours).padStart(2, '0')}
-                            </div>
-                            <div className="text-sm text-blue-100 mt-2 font-bold">JAM</div>
-                        </div>
+                {/* Timer Section */}
+                <div style={{
+                    background: 'rgba(15, 23, 42, 0.6)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(148, 163, 184, 0.2)',
+                    borderRadius: '20px',
+                    padding: isMobile ? '24px 16px' : '40px 32px',
+                    marginBottom: isMobile ? '32px' : '48px',
+                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', gap: '12px' }}>
+                        <TimerIcon />
+                        <h2 style={{ color: '#E2E8F0', fontSize: isMobile ? '1.125rem' : '1.5rem', fontWeight: 'bold', margin: 0 }}>
+                            Waktu Tersisa
+                        </h2>
+                    </div>
 
-                        {/* Minutes */}
-                        <div className="bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl p-6 transform hover:scale-110 transition-transform shadow-xl">
-                            <div className="text-5xl font-black text-white">
-                                {String(timeLeft.minutes).padStart(2, '0')}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: isMobile ? '12px' : '20px' }}>
+                        {[
+                            { value: timeLeft.hours, label: 'JAM' },
+                            { value: timeLeft.minutes, label: 'MENIT' },
+                            { value: timeLeft.seconds, label: 'DETIK' },
+                        ].map((item, i) => (
+                            <div key={i} style={{
+                                background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.8))',
+                                border: '1px solid rgba(148, 163, 184, 0.2)',
+                                borderRadius: '12px',
+                                padding: isMobile ? '16px' : '24px',
+                            }}>
+                                <div style={{
+                                    fontSize: isMobile ? '2rem' : '3.5rem',
+                                    fontWeight: 'bold',
+                                    background: 'linear-gradient(135deg, #FF6B6B, #FF8E72, #4F46E5, #10B981)',
+                                    backgroundSize: '300% 300%',
+                                    WebkitBackgroundClip: 'text',
+                                    WebkitTextFillColor: 'transparent',
+                                    backgroundClip: 'text',
+                                    animation: 'gradientShift 8s ease infinite',
+                                    fontVariantNumeric: 'tabular-nums',
+                                }}>
+                                    {String(item.value).padStart(2, '0')}
+                                </div>
+                                <div style={{ fontSize: isMobile ? '0.75rem' : '0.875rem', color: '#94A3B8', marginTop: '8px', fontWeight: '600' }}>
+                                    {item.label}
+                                </div>
                             </div>
-                            <div className="text-sm text-purple-100 mt-2 font-bold">MENIT</div>
-                        </div>
-
-                        {/* Seconds */}
-                        <div className="bg-gradient-to-br from-pink-400 to-pink-600 rounded-2xl p-6 transform hover:scale-110 transition-transform shadow-xl">
-                            <div className="text-5xl font-black text-white">
-                                {String(timeLeft.seconds).padStart(2, '0')}
-                            </div>
-                            <div className="text-sm text-pink-100 mt-2 font-bold">DETIK</div>
-                        </div>
+                        ))}
                     </div>
                 </div>
 
-                {/* Development features */}
-                <div className="bg-white bg-opacity-15 backdrop-blur-xl rounded-3xl p-8 mb-12 border-2 border-white border-opacity-40 shadow-2xl">
-                    <h3 className="text-2xl font-bold text-white mb-6">🎯 Fitur yang Sedang Dikerjakan</h3>
-                    <div className="grid md:grid-cols-2 gap-4">
-                        <div className="bg-gradient-to-br from-green-400 to-emerald-600 rounded-xl p-4 transform hover:scale-105 transition-transform">
-                            <p className="text-3xl mb-2">⚙️</p>
-                            <p className="text-white font-bold">Optimalisasi Performa</p>
-                        </div>
-                        <div className="bg-gradient-to-br from-blue-400 to-cyan-600 rounded-xl p-4 transform hover:scale-105 transition-transform">
-                            <p className="text-3xl mb-2">🎨</p>
-                            <p className="text-white font-bold">Desain UI Baru</p>
-                        </div>
-                        <div className="bg-gradient-to-br from-purple-400 to-indigo-600 rounded-xl p-4 transform hover:scale-105 transition-transform">
-                            <p className="text-3xl mb-2">📊</p>
-                            <p className="text-white font-bold">Fitur Analytics</p>
-                        </div>
-                        <div className="bg-gradient-to-br from-orange-400 to-red-600 rounded-xl p-4 transform hover:scale-105 transition-transform">
-                            <p className="text-3xl mb-2">🚀</p>
-                            <p className="text-white font-bold">Peningkatan Kecepatan</p>
-                        </div>
+                {/* Features Section */}
+                <div style={{
+                    background: 'rgba(15, 23, 42, 0.6)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(148, 163, 184, 0.2)',
+                    borderRadius: '20px',
+                    padding: isMobile ? '24px 16px' : '40px 32px',
+                    marginBottom: isMobile ? '32px' : '48px',
+                }}>
+                    <h3 style={{ color: '#E2E8F0', fontSize: isMobile ? '1.25rem' : '1.5rem', fontWeight: 'bold', margin: '0 0 24px 0' }}>
+                        🎯 Fitur yang Sedang Dikerjakan
+                    </h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: isMobile ? '12px' : '16px' }}>
+                        {[
+                            { icon: '⚙️', label: 'Performa', color: '#059669' },
+                            { icon: '🎨', label: 'Desain UI', color: '#0369a1' },
+                            { icon: '📊', label: 'Analytics', color: '#6d28d9' },
+                            { icon: '🚀', label: 'Kecepatan', color: '#dc2626' },
+                        ].map((f, i) => (
+                            <div key={i} style={{
+                                background: `linear-gradient(135deg, ${f.color}dd, ${f.color})`,
+                                borderRadius: '12px',
+                                padding: '16px',
+                                transition: 'transform 0.3s ease',
+                            }}>
+                                <div style={{ fontSize: '2rem', marginBottom: '8px' }}>{f.icon}</div>
+                                <p style={{ color: '#fff', fontWeight: 'bold', margin: 0, fontSize: isMobile ? '0.875rem' : '0.95rem' }}>{f.label}</p>
+                            </div>
+                        ))}
                     </div>
                 </div>
 
-                {/* Contact section with icons */}
-                <div className="bg-white bg-opacity-15 backdrop-blur-xl rounded-3xl p-8 border-2 border-white border-opacity-40 shadow-2xl">
-                    <h3 className="text-2xl font-bold text-white mb-8">📞 Hubungi Kami</h3>
-                    <div className="flex flex-col md:flex-row gap-6 justify-center">
-                        {/* Email */}
-                        <a
-                            href="mailto:haikallatief0@gmail.com"
-                            data-contact-icon
-                            className="flex-1 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl p-6 hover:shadow-2xl transition-all duration-300"
-                        >
-                            <div className="text-5xl mb-3">✉️</div>
-                            <p className="text-white font-bold text-lg mb-1">Email</p>
-                            <p className="text-blue-100 font-semibold">haikallatief0@gmail.com</p>
+                {/* Contact Section */}
+                <div style={{
+                    background: 'rgba(15, 23, 42, 0.6)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(148, 163, 184, 0.2)',
+                    borderRadius: '20px',
+                    padding: isMobile ? '24px 16px' : '40px 32px',
+                }}>
+                    <h3 style={{ color: '#E2E8F0', fontSize: isMobile ? '1.25rem' : '1.5rem', fontWeight: 'bold', margin: '0 0 24px 0' }}>
+                        📞 Hubungi Kami
+                    </h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: isMobile ? '16px' : '24px' }}>
+                        <a href="mailto:haikallatief0@gmail.com" style={{
+                            background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.8))',
+                            border: '1px solid rgba(148, 163, 184, 0.2)',
+                            borderRadius: '12px',
+                            padding: isMobile ? '20px' : '24px',
+                            textDecoration: 'none',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '12px',
+                            transition: 'all 0.3s ease',
+                            cursor: 'pointer',
+                        }}>
+                            <EmailIcon />
+                            <p style={{ color: '#E2E8F0', fontWeight: 'bold', margin: 0, fontSize: isMobile ? '0.95rem' : '1rem' }}>Email</p>
+                            <p style={{ color: '#94A3B8', fontSize: '0.875rem', margin: 0 }}>haikallatief0@gmail.com</p>
                         </a>
-
-                        {/* WhatsApp */}
-                        <a
-                            href="https://wa.me/6285185318501?text=Halo,%20saya%20ingin%20bertanya%20tentang%20pengembangan%20website"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            data-contact-icon
-                            className="flex-1 bg-gradient-to-br from-green-400 to-green-600 rounded-2xl p-6 hover:shadow-2xl transition-all duration-300"
-                        >
-                            <div className="text-5xl mb-3">💬</div>
-                            <p className="text-white font-bold text-lg mb-1">WhatsApp</p>
-                            <p className="text-green-100 font-semibold">+62 851 8531 8501</p>
+                        <a href="https://wa.me/6285185318501" target="_blank" rel="noopener noreferrer" style={{
+                            background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.8))',
+                            border: '1px solid rgba(148, 163, 184, 0.2)',
+                            borderRadius: '12px',
+                            padding: isMobile ? '20px' : '24px',
+                            textDecoration: 'none',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '12px',
+                            transition: 'all 0.3s ease',
+                            cursor: 'pointer',
+                        }}>
+                            <WhatsAppIcon />
+                            <p style={{ color: '#E2E8F0', fontWeight: 'bold', margin: 0, fontSize: isMobile ? '0.95rem' : '1rem' }}>WhatsApp</p>
+                            <p style={{ color: '#94A3B8', fontSize: '0.875rem', margin: 0 }}>+62 851 8531 8501</p>
                         </a>
                     </div>
                 </div>
 
-                {/* Footer message */}
-                <div className="mt-12">
-                    <p className="text-white text-lg font-semibold drop-shadow-lg mb-2">
-                        ✨ Terima kasih atas kesabaran Anda! ✨
+                {/* Footer */}
+                <div style={{ marginTop: isMobile ? '32px' : '48px' }}>
+                    <p style={{ color: '#E2E8F0', fontWeight: '600', margin: '0 0 8px 0', fontSize: isMobile ? '0.95rem' : '1rem' }}>
+                        Terima kasih atas kesabaran Anda
                     </p>
-                    <p className="text-blue-100 text-sm drop-shadow-lg">
-                        Kami bekerja keras untuk menghadirkan pengalaman terbaik. Kembali dalam waktu singkat! 🎉
+                    <p style={{ color: '#94A3B8', fontSize: '0.875rem', margin: 0 }}>
+                        Kami akan segera menghadirkan sesuatu yang istimewa
                     </p>
                 </div>
             </div>
 
-            {/* Animated CSS styles */}
+            {/* Global Styles */}
             <style>{`
-                @keyframes float {
-                    0%, 100% { transform: translateY(0px) rotate(0deg); }
-                    50% { transform: translateY(-20px) rotate(10deg); }
+                @keyframes pulse {
+                    0%, 100% { transform: scale(1); }
+                    50% { transform: scale(1.05); }
                 }
-
-                @keyframes shimmer {
-                    0%, 100% { opacity: 0.5; }
-                    50% { opacity: 1; }
+                @keyframes gradientShift {
+                    0% { background-position: 0% 50%; }
+                    50% { background-position: 100% 50%; }
+                    100% { background-position: 0% 50%; }
                 }
-
-                .animate-float {
-                    animation: float 3s ease-in-out infinite;
-                }
-
-                .animate-shimmer {
-                    animation: shimmer 2s ease-in-out infinite;
-                }
+                * { box-sizing: border-box; }
             `}</style>
         </div>
     );
