@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import LazyImage from '../components/ui/LazyImage'
 import {
+  getWordPressGalleryMedia,
   getWordPressGalleryFromPageBySlugs,
   isWordPressConfiguredForPages,
 } from '../data/wordpressPages'
@@ -135,9 +136,16 @@ function GaleriPage() {
     async function loadGalleryFromWordPress() {
       if (!isWordPressConfiguredForPages()) return
       try {
-        const media = await getWordPressGalleryFromPageBySlugs(['galeri'])
-        if (!cancelled && media.length > 0) {
-          setGalleryItems(media)
+        const pageMedia = await getWordPressGalleryFromPageBySlugs(['galeri', 'gallery'])
+        if (!cancelled && pageMedia.length > 0) {
+          setGalleryItems(pageMedia)
+          setIsLoadingWp(false)
+          return
+        }
+
+        const libraryMedia = await getWordPressGalleryMedia({ perPage: 100, allPages: true })
+        if (!cancelled && libraryMedia.length > 0) {
+          setGalleryItems(libraryMedia)
         }
       } catch {
         // Keep fallback gallery when WordPress media is unreachable.
