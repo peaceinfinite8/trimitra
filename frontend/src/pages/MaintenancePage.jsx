@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { Mail, MessageCircle } from 'lucide-react';
 import gsap from 'gsap';
 
 export default function MaintenancePage() {
@@ -242,7 +241,7 @@ export default function MaintenancePage() {
                             data-contact-icon
                             className="flex-1 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl p-6 hover:shadow-2xl transition-all duration-300"
                         >
-                            <Mail size={48} className="text-white mx-auto mb-3" />
+                            <div className="text-5xl mb-3">✉️</div>
                             <p className="text-white font-bold text-lg mb-1">Email</p>
                             <p className="text-blue-100 font-semibold">haikallatief0@gmail.com</p>
                         </a>
@@ -255,7 +254,7 @@ export default function MaintenancePage() {
                             data-contact-icon
                             className="flex-1 bg-gradient-to-br from-green-400 to-green-600 rounded-2xl p-6 hover:shadow-2xl transition-all duration-300"
                         >
-                            <MessageCircle size={48} className="text-white mx-auto mb-3" />
+                            <div className="text-5xl mb-3">💬</div>
                             <p className="text-white font-bold text-lg mb-1">WhatsApp</p>
                             <p className="text-green-100 font-semibold">+62 851 8531 8501</p>
                         </a>

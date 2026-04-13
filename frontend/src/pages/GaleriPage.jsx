@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import LazyImage from '../components/ui/LazyImage'
+import MaintenancePage from './MaintenancePage'
+import { isInMaintenanceWindow } from '../utils/maintenanceCheck'
 import {
   getWordPressGalleryMedia,
   getWordPressGalleryFromPageBySlugs,
@@ -116,6 +118,11 @@ const fallbackGallery = [
 ]
 
 function GaleriPage() {
+  // Check if in maintenance window
+  if (isInMaintenanceWindow()) {
+    return <MaintenancePage />
+  }
+
   const prefersReducedMotion = useReducedMotion()
   const [searchParams, setSearchParams] = useSearchParams()
   const [activeIndex, setActiveIndex] = useState(null)
