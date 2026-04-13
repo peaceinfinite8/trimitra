@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import gsap from 'gsap';
+import { animate, svg, stagger } from 'animejs';
 
 // Animated SVG Icon Components
 const BuildingIcon = () => (
@@ -67,11 +68,68 @@ const WhatsAppIcon = () => (
     </svg>
 );
 
+const PerformanceIcon = () => (
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ width: '36px', height: '36px' }}>
+        <defs>
+            <linearGradient id="perfGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#6EE7B7" />
+                <stop offset="100%" stopColor="#059669" />
+            </linearGradient>
+        </defs>
+        <circle cx="50" cy="50" r="28" fill="none" stroke="url(#perfGrad)" strokeWidth="4" opacity="0.45" />
+        <path d="M30 58 L45 42 L56 50 L70 34" fill="none" stroke="#ECFDF5" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="70" cy="34" r="4" fill="#ECFDF5" style={{ animation: 'dotBlink 1.2s ease-in-out infinite' }} />
+    </svg>
+);
+
+const DesignIcon = () => (
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ width: '36px', height: '36px' }}>
+        <defs>
+            <linearGradient id="designGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#7DD3FC" />
+                <stop offset="100%" stopColor="#2563EB" />
+            </linearGradient>
+        </defs>
+        <rect x="22" y="22" width="56" height="56" rx="14" fill="url(#designGrad)" opacity="0.25" />
+        <path d="M35 66 L52 33 L65 46 L49 69 Z" fill="none" stroke="#DBEAFE" strokeWidth="4" strokeLinejoin="round" />
+        <circle cx="52" cy="33" r="4" fill="#DBEAFE" style={{ animation: 'corePulse 1.8s ease-in-out infinite' }} />
+    </svg>
+);
+
+const AnalyticsIcon = () => (
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ width: '36px', height: '36px' }}>
+        <defs>
+            <linearGradient id="analyticsGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#C4B5FD" />
+                <stop offset="100%" stopColor="#7C3AED" />
+            </linearGradient>
+        </defs>
+        <rect x="24" y="56" width="12" height="18" rx="4" fill="url(#analyticsGrad)" />
+        <rect x="44" y="44" width="12" height="30" rx="4" fill="url(#analyticsGrad)" style={{ animation: 'barWave 1.8s ease-in-out infinite' }} />
+        <rect x="64" y="34" width="12" height="40" rx="4" fill="url(#analyticsGrad)" style={{ animation: 'barWave 1.8s ease-in-out infinite 0.2s' }} />
+    </svg>
+);
+
+const SpeedIcon = () => (
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ width: '36px', height: '36px' }}>
+        <defs>
+            <linearGradient id="speedGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#FCA5A5" />
+                <stop offset="100%" stopColor="#DC2626" />
+            </linearGradient>
+        </defs>
+        <path d="M24 62 L50 24 L46 46 L76 38 L48 76 L52 54 Z" fill="url(#speedGrad)" style={{ animation: 'boltPulse 1.4s ease-in-out infinite' }} />
+        <path d="M18 50 H30" stroke="#FEE2E2" strokeWidth="3" strokeLinecap="round" style={{ animation: 'dashMove 0.9s linear infinite' }} />
+        <path d="M72 50 H84" stroke="#FEE2E2" strokeWidth="3" strokeLinecap="round" style={{ animation: 'dashMove 0.9s linear infinite' }} />
+    </svg>
+);
+
 export default function MaintenancePage() {
     const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
     const [isMobile, setIsMobile] = useState(false);
     const containerRef = useRef(null);
     const titleRef = useRef(null);
+    const timerTitleRef = useRef(null);
     const floatingShapesRef = useRef([]);
     const mouseRef = useRef({ x: 0, y: 0 });
 
@@ -161,6 +219,24 @@ export default function MaintenancePage() {
         return () => window.removeEventListener('mousemove', handleMouseMove);
     }, []);
 
+    useEffect(() => {
+        if (!timerTitleRef.current) return;
+
+        const animation = animate(svg.createDrawable('.timer-draw-line'), {
+            draw: ['0 0', '0 1', '1 1'],
+            ease: 'inOutQuad',
+            duration: 2000,
+            delay: stagger(100),
+            loop: true,
+        });
+
+        return () => {
+            if (animation && typeof animation.pause === 'function') {
+                animation.pause();
+            }
+        };
+    }, []);
+
     return (
         <div ref={containerRef} style={{
             minHeight: '100vh',
@@ -175,6 +251,9 @@ export default function MaintenancePage() {
         }}>
             {/* Animated background shapes */}
             <div style={{ position: 'fixed', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
+                <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.18) 0%, rgba(15, 23, 42, 0) 50%)', animation: 'auroraDrift 12s ease-in-out infinite' }} />
+                <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 80% 70%, rgba(244, 114, 182, 0.14) 0%, rgba(15, 23, 42, 0) 55%)', animation: 'auroraDrift 14s ease-in-out infinite reverse' }} />
+                <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(148,163,184,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(148,163,184,0.07) 1px, transparent 1px)', backgroundSize: '42px 42px', opacity: 0.35, animation: 'gridPan 22s linear infinite' }} />
                 {[
                     { size: 350, color: 'rgba(239, 68, 68, 0.15)' },
                     { size: 300, color: 'rgba(79, 70, 229, 0.15)' },
@@ -195,6 +274,22 @@ export default function MaintenancePage() {
                             ...(i === 1 && { top: '50%', right: '5%' }),
                             ...(i === 2 && { bottom: '10%', left: '20%' }),
                             ...(i === 3 && { top: '60%', left: '50%' }),
+                        }}
+                    />
+                ))}
+                {Array.from({ length: 18 }).map((_, i) => (
+                    <span
+                        key={`particle-${i}`}
+                        style={{
+                            position: 'absolute',
+                            left: `${(i * 17) % 100}%`,
+                            top: `${(i * 29) % 100}%`,
+                            width: i % 3 === 0 ? '4px' : '3px',
+                            height: i % 3 === 0 ? '4px' : '3px',
+                            borderRadius: '50%',
+                            background: i % 2 ? 'rgba(167, 139, 250, 0.55)' : 'rgba(125, 211, 252, 0.55)',
+                            boxShadow: '0 0 10px rgba(148, 163, 184, 0.45)',
+                            animation: `particleFloat ${7 + (i % 5)}s ease-in-out ${i * 0.2}s infinite`,
                         }}
                     />
                 ))}
@@ -257,11 +352,17 @@ export default function MaintenancePage() {
                     marginBottom: isMobile ? '16px' : '48px',
                     boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
                 }}>
-                    <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: 'center', justifyContent: 'center', marginBottom: isMobile ? '12px' : '24px', gap: '6px' }}>
+                    <div ref={timerTitleRef} style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: 'center', justifyContent: 'center', marginBottom: isMobile ? '12px' : '24px', gap: '6px' }}>
                         <TimerIcon />
-                        <h2 style={{ color: '#E2E8F0', fontSize: isMobile ? '0.95rem' : '1.5rem', fontWeight: 'bold', margin: 0 }}>
-                            Waktu Tersisa
-                        </h2>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            <h2 style={{ color: '#E2E8F0', fontSize: isMobile ? '0.95rem' : '1.5rem', fontWeight: 'bold', margin: 0 }}>
+                                Waktu Tersisa
+                            </h2>
+                            <svg width={isMobile ? '140' : '210'} height="16" viewBox="0 0 210 16" style={{ marginTop: '4px' }}>
+                                <path className="timer-draw-line" d="M4 8 H86" fill="none" stroke="#93C5FD" strokeWidth="2" strokeLinecap="round" />
+                                <path className="timer-draw-line" d="M102 8 H208" fill="none" stroke="#A78BFA" strokeWidth="2" strokeLinecap="round" />
+                            </svg>
+                        </div>
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: isMobile ? '8px' : '20px' }}>
@@ -312,10 +413,10 @@ export default function MaintenancePage() {
                     </h3>
                     <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: isMobile ? '8px' : '16px' }}>
                         {[
-                            { icon: '⚙️', label: 'Performa', color: '#059669' },
-                            { icon: '🎨', label: 'Desain', color: '#0369a1' },
-                            { icon: '📊', label: 'Analytics', color: '#6d28d9' },
-                            { icon: '🚀', label: 'Kecepatan', color: '#dc2626' },
+                            { icon: PerformanceIcon, label: 'Performa', color: '#059669' },
+                            { icon: DesignIcon, label: 'Desain', color: '#0369a1' },
+                            { icon: AnalyticsIcon, label: 'Analytics', color: '#6d28d9' },
+                            { icon: SpeedIcon, label: 'Kecepatan', color: '#dc2626' },
                         ].map((f, i) => (
                             <div key={i} style={{
                                 background: `linear-gradient(135deg, ${f.color}dd, ${f.color})`,
@@ -323,7 +424,7 @@ export default function MaintenancePage() {
                                 padding: isMobile ? '10px' : '16px',
                                 transition: 'transform 0.3s ease',
                             }}>
-                                <div style={{ fontSize: isMobile ? '1.3rem' : '2rem', marginBottom: '4px' }}>{f.icon}</div>
+                                <div style={{ marginBottom: '4px' }}><f.icon /></div>
                                 <p style={{ color: '#fff', fontWeight: 'bold', margin: 0, fontSize: isMobile ? '0.75rem' : '0.95rem' }}>{f.label}</p>
                             </div>
                         ))}
@@ -400,6 +501,18 @@ export default function MaintenancePage() {
                     0%, 100% { transform: translateY(0px); }
                     50% { transform: translateY(-3px); }
                 }
+                @keyframes auroraDrift {
+                    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+                    50% { transform: translate3d(12px, -10px, 0) scale(1.06); }
+                }
+                @keyframes gridPan {
+                    from { transform: translate3d(0, 0, 0); }
+                    to { transform: translate3d(42px, 42px, 0); }
+                }
+                @keyframes particleFloat {
+                    0%, 100% { transform: translateY(0px) scale(0.9); opacity: 0.4; }
+                    50% { transform: translateY(-14px) scale(1.1); opacity: 0.95; }
+                }
                 @keyframes corePulse {
                     0%, 100% { transform: scale(0.92); opacity: 0.75; }
                     50% { transform: scale(1.08); opacity: 1; }
@@ -427,6 +540,14 @@ export default function MaintenancePage() {
                 @keyframes dotBlink {
                     0%, 80%, 100% { opacity: 0.35; transform: scale(0.85); }
                     40% { opacity: 1; transform: scale(1); }
+                }
+                @keyframes barWave {
+                    0%, 100% { transform: scaleY(0.84); transform-origin: bottom; }
+                    50% { transform: scaleY(1.08); transform-origin: bottom; }
+                }
+                @keyframes boltPulse {
+                    0%, 100% { transform: scale(0.95); filter: drop-shadow(0 0 0px rgba(254, 226, 226, 0)); }
+                    50% { transform: scale(1.06); filter: drop-shadow(0 0 7px rgba(254, 226, 226, 0.9)); }
                 }
                 @keyframes gradientShift {
                     0% { background-position: 0% 50%; }
