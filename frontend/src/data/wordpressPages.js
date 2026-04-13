@@ -1,4 +1,4 @@
-import { withCache } from './wpCache'
+﻿import { withCache } from './wpCache'
 
 const WP_SITE_URL = (import.meta.env.VITE_WP_SITE_URL || '').trim().replace(/\/$/, '')
 const WP_CACHE_TTL_MS = 5 * 60 * 1000
@@ -44,6 +44,52 @@ function inferGalleryTypeFromRatio(width, height) {
 function isImageUrl(value) {
   if (!value) return false
   return /\.(avif|webp|png|jpe?g|gif|bmp|svg)(\?.*)?$/i.test(value)
+}
+
+function extractGalleryImagesFromHtml(html) {
+  if (!html || !hasWindow) return []
+
+  const parser = new window.DOMParser()
+  const doc = parser.parseFromString(html, 'text/html')
+  const nodes = Array.from(doc.querySelectorAll('img, a[href]'))
+
+  const items = nodes
+    .map((node) => {
+      if (node.tagName === 'A') {
+        const href = node.getAttribute('href') || ''
+        if (!isImageUrl(href)) return null
+
+        const alt = decodeHtml(node.textContent || '').replace(/\s+/g, ' ').trim()
+        return href.includes('/uploads/')
+          ? {
+              src: href,
+              alt,
+            }
+          : null
+      }
+
+      const src = node.getAttribute('src') || node.getAttribute('data-src') || node.getAttribute('data-lazy-src') || ''
+      if (!src || !src.includes('/uploads/')) return null
+
+      const alt = decodeHtml(node.getAttribute('alt') || '').replace(/\s+/g, ' ').trim()
+      const width = Number(node.getAttribute('width') || '0') || undefined
+      const height = Number(node.getAttribute('height') || '0') || undefined
+
+      return {
+        src,
+        alt,
+        width,
+        height,
+      }
+    })
+    .filter(Boolean)
+
+  const seen = new Set()
+  return items.filter((item) => {
+    if (seen.has(item.src)) return false
+    seen.add(item.src)
+    return true
+  })
 }
 
 function parseImagesFromRenderedHtml(html) {
@@ -322,7 +368,7 @@ export async function getWordPressGalleryFromPageBySlugs(slugs = ['galeri', 'gal
       slug,
       status: 'publish',
       per_page: '1',
-      _fields: 'id,slug,content.rendered',
+      _fields: 'id,slug,link,content.rendered',
     })
     const pages = Array.isArray(result.data) ? result.data : []
     if (pages.length > 0) {
@@ -334,6 +380,19 @@ export async function getWordPressGalleryFromPageBySlugs(slugs = ['galeri', 'gal
   if (!page) return []
 
   const pageId = page.id
+  const pageUrl = page?.link || `${WP_SITE_URL}/${String(page.slug || '').replace(/^\/+|\/+$/g, '')}/`
+
+  let renderedHtml = ''
+  try {
+    const response = await fetch(pageUrl, { credentials: 'omit' })
+    if (response.ok) {
+      renderedHtml = await response.text()
+    }
+  } catch {
+    renderedHtml = ''
+  }
+
+  const renderedImages = extractGalleryImagesFromHtml(renderedHtml)
   const inlineImages = parseImagesFromRenderedHtml(page?.content?.rendered || '')
 
   const mediaFirstPage = await fetchWp('media', {
@@ -372,6 +431,19 @@ export async function getWordPressGalleryFromPageBySlugs(slugs = ['galeri', 'gal
     })
   }
 
+  const fromRendered = renderedImages.map((item) => {
+    const hintText = `${item.alt || ''} ${item.src || ''}`
+    return {
+      id: `rendered-${item.src}`,
+      src: item.src,
+      alt: item.alt || 'Galeri',
+      category: inferGalleryCategory(hintText),
+      type: inferGalleryTypeFromRatio(item.width, item.height),
+      width: item.width,
+      height: item.height,
+    }
+  })
+
   const fromMedia = mediaItems.map((item) => {
     const title = decodeHtml(item?.title?.rendered || '')
     const alt = decodeHtml(item?.alt_text || title)
@@ -404,7 +476,7 @@ export async function getWordPressGalleryFromPageBySlugs(slugs = ['galeri', 'gal
     }
   })
 
-  const combined = [...fromMedia, ...inlineMapped].filter((item) => item.src)
+  const combined = [...fromRendered, ...fromMedia, ...inlineMapped].filter((item) => item.src)
   const uniqueBySrc = []
   const seen = new Set()
 

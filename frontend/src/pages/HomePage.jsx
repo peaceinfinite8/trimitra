@@ -492,10 +492,9 @@ function HomePage() {
         <div className="container home-lumen-intro-grid">
           <div className="home-lumen-intro-copy">
             <p className="kicker">Studio Trimitra</p>
-            <h1 className="home-lumen-title">Membangun Pengalaman Brand dengan Standar Eksekusi yang Lebih Tinggi</h1>
+            <h1 className="home-lumen-title">Siap Membuat Booth Anda Jadi Pusat Perhatian di Setiap Pameran?</h1>
             <p className="muted home-lumen-copy">
-              Layout home kami fokus pada keseimbangan visual premium dan kenyamanan baca, sehingga setiap section terasa hidup,
-              terang, dan tetap jelas untuk calon klien.
+              Kami membantu brand tampil standout melalui desain, produksi, dan instalasi booth exhibition profesional.
             </p>
           </div>
 
