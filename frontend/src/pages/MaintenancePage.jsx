@@ -1,63 +1,69 @@
 import { useState, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 
-// SVG Icon Components
+// Animated SVG Icon Components
 const BuildingIcon = () => (
-    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ width: '80px', height: '80px' }}>
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ width: '76px', height: '76px' }}>
         <defs>
-            <linearGradient id="buildingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#FF6B6B" />
-                <stop offset="100%" stopColor="#FF8E72" />
+            <linearGradient id="coreGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#FF9F5A" />
+                <stop offset="100%" stopColor="#FF4D6D" />
+            </linearGradient>
+            <linearGradient id="shellGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#FDE68A" />
+                <stop offset="100%" stopColor="#F97316" />
             </linearGradient>
         </defs>
-        <rect x="20" y="30" width="60" height="60" fill="url(#buildingGrad)" rx="4" />
-        <rect x="30" y="40" width="10" height="10" fill="#fff" opacity="0.8" rx="2" />
-        <rect x="50" y="40" width="10" height="10" fill="#fff" opacity="0.8" rx="2" />
-        <rect x="70" y="40" width="10" height="10" fill="#fff" opacity="0.8" rx="2" />
-        <rect x="30" y="55" width="10" height="10" fill="#fff" opacity="0.8" rx="2" />
-        <rect x="50" y="55" width="10" height="10" fill="#fff" opacity="0.8" rx="2" />
-        <rect x="70" y="55" width="10" height="10" fill="#fff" opacity="0.8" rx="2" />
-        <polygon points="25,30 50,15 75,30" fill="url(#buildingGrad)" opacity="0.9" />
+        <g style={{ transformOrigin: '50px 50px', animation: 'iconFloat 3.2s ease-in-out infinite' }}>
+            <polygon points="50,12 82,30 82,70 50,88 18,70 18,30" fill="none" stroke="url(#shellGrad)" strokeWidth="3" />
+            <polygon points="50,24 70,35 70,65 50,76 30,65 30,35" fill="url(#coreGrad)" opacity="0.9" />
+            <circle cx="50" cy="50" r="7" fill="#F8FAFC" style={{ animation: 'corePulse 1.8s ease-in-out infinite' }} />
+            <circle cx="50" cy="50" r="22" fill="none" stroke="#FCD34D" strokeWidth="2" opacity="0.6" style={{ transformOrigin: '50px 50px', animation: 'ringSpin 6s linear infinite' }} />
+        </g>
     </svg>
 );
 
 const TimerIcon = () => (
     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ width: '50px', height: '50px' }}>
         <defs>
-            <linearGradient id="timerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#4F46E5" />
-                <stop offset="100%" stopColor="#7C3AED" />
+            <linearGradient id="radarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#60A5FA" />
+                <stop offset="100%" stopColor="#4F46E5" />
             </linearGradient>
         </defs>
-        <circle cx="50" cy="50" r="40" fill="none" stroke="url(#timerGrad)" strokeWidth="3" opacity="0.3" />
-        <circle cx="50" cy="50" r="40" fill="none" stroke="url(#timerGrad)" strokeWidth="3" strokeDasharray="251" strokeDashoffset="50" strokeLinecap="round" />
-        <circle cx="50" cy="12" r="4" fill="url(#timerGrad)" />
+        <circle cx="50" cy="50" r="36" fill="none" stroke="url(#radarGrad)" strokeWidth="3" opacity="0.35" />
+        <circle cx="50" cy="50" r="24" fill="none" stroke="url(#radarGrad)" strokeWidth="2" opacity="0.4" />
+        <circle cx="50" cy="50" r="12" fill="none" stroke="url(#radarGrad)" strokeWidth="2" opacity="0.55" />
+        <line x1="50" y1="50" x2="50" y2="14" stroke="#93C5FD" strokeWidth="3" strokeLinecap="round" style={{ transformOrigin: '50px 50px', animation: 'radarSweep 2.2s linear infinite' }} />
+        <circle cx="50" cy="50" r="4" fill="#E0E7FF" />
     </svg>
 );
 
 const EmailIcon = () => (
-    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ width: '40px', height: '40px' }}>
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ width: '42px', height: '42px' }}>
         <defs>
-            <linearGradient id="emailGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#60A5FA" />
-                <stop offset="100%" stopColor="#3B82F6" />
+            <linearGradient id="mailGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#7DD3FC" />
+                <stop offset="100%" stopColor="#2563EB" />
             </linearGradient>
         </defs>
-        <rect x="15" y="25" width="70" height="50" fill="none" stroke="url(#emailGrad)" strokeWidth="2" rx="3" />
-        <path d="M 15 25 L 50 50 L 85 25" stroke="url(#emailGrad)" strokeWidth="2" fill="none" />
+        <path d="M18 66 L82 50 L18 34 L26 50 Z" fill="url(#mailGrad)" style={{ transformOrigin: '50px 50px', animation: 'planeDrift 2.6s ease-in-out infinite' }} />
+        <path d="M28 50 H80" stroke="#BAE6FD" strokeWidth="2.2" strokeDasharray="5 6" style={{ animation: 'dashMove 1.1s linear infinite' }} />
     </svg>
 );
 
 const WhatsAppIcon = () => (
-    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ width: '40px', height: '40px' }}>
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ width: '42px', height: '42px' }}>
         <defs>
-            <linearGradient id="waGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#10B981" />
+            <linearGradient id="chatGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#34D399" />
                 <stop offset="100%" stopColor="#059669" />
             </linearGradient>
         </defs>
-        <circle cx="50" cy="50" r="35" fill="url(#waGrad)" opacity="0.2" />
-        <path d="M 50 25 C 36.2 25 25 36.2 25 50 C 25 55 26.5 59.7 29.2 63.5 L 25 75 L 37 71 C 40.5 73.4 44.8 75 50 75 C 63.8 75 75 63.8 75 50 C 75 36.2 63.8 25 50 25 Z" fill="none" stroke="url(#waGrad)" strokeWidth="2" />
+        <path d="M20 28 C20 21 26 16 34 16 H66 C74 16 80 21 80 28 V52 C80 59 74 64 66 64 H46 L30 78 L33 64 H34 C26 64 20 59 20 52 Z" fill="url(#chatGrad)" opacity="0.95" style={{ animation: 'chatBounce 2.4s ease-in-out infinite' }} />
+        <circle cx="40" cy="40" r="4" fill="#ECFDF5" style={{ animation: 'dotBlink 1.4s ease-in-out infinite' }} />
+        <circle cx="50" cy="40" r="4" fill="#ECFDF5" style={{ animation: 'dotBlink 1.4s ease-in-out infinite 0.2s' }} />
+        <circle cx="60" cy="40" r="4" fill="#ECFDF5" style={{ animation: 'dotBlink 1.4s ease-in-out infinite 0.4s' }} />
     </svg>
 );
 
@@ -389,6 +395,38 @@ export default function MaintenancePage() {
                 @keyframes pulse {
                     0%, 100% { transform: scale(1); }
                     50% { transform: scale(1.05); }
+                }
+                @keyframes iconFloat {
+                    0%, 100% { transform: translateY(0px); }
+                    50% { transform: translateY(-3px); }
+                }
+                @keyframes corePulse {
+                    0%, 100% { transform: scale(0.92); opacity: 0.75; }
+                    50% { transform: scale(1.08); opacity: 1; }
+                }
+                @keyframes ringSpin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+                @keyframes radarSweep {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+                @keyframes planeDrift {
+                    0%, 100% { transform: translateX(0px) translateY(0px); }
+                    50% { transform: translateX(4px) translateY(-2px); }
+                }
+                @keyframes dashMove {
+                    from { stroke-dashoffset: 0; }
+                    to { stroke-dashoffset: -22; }
+                }
+                @keyframes chatBounce {
+                    0%, 100% { transform: translateY(0px); }
+                    50% { transform: translateY(-3px); }
+                }
+                @keyframes dotBlink {
+                    0%, 80%, 100% { opacity: 0.35; transform: scale(0.85); }
+                    40% { opacity: 1; transform: scale(1); }
                 }
                 @keyframes gradientShift {
                     0% { background-position: 0% 50%; }
