@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { SectionReveal } from '../components/animation/Reveal'
 import LazyImage from '../components/ui/LazyImage'
@@ -17,6 +17,7 @@ function BeritaDetailPage() {
   const { slug } = useParams()
   const [isLoading, setIsLoading] = useState(true)
   const [post, setPost] = useState(() => getBlogPostBySlug(slug))
+  const [allPosts, setAllPosts] = useState(() => blogPosts)
   const [relatedPosts, setRelatedPosts] = useState(() => {
     const currentPost = getBlogPostBySlug(slug)
     if (!currentPost) return []
@@ -49,6 +50,7 @@ function BeritaDetailPage() {
         const fallbackPosts = blogPosts.filter(
           (item) => item.slug !== localPost.slug && item.category !== localPost.category,
         )
+        setAllPosts(blogPosts)
         setRelatedPosts([...sameCategoryPosts, ...fallbackPosts].slice(0, 3))
         if (initialLoad) setIsLoading(false)
         return
@@ -81,6 +83,7 @@ function BeritaDetailPage() {
         }
 
         setPost(wpPost)
+        setAllPosts(wpPosts)
         const sameCategory = wpPosts.filter(
           (item) => item.slug !== wpPost.slug && item.category === wpPost.category,
         )
@@ -94,6 +97,7 @@ function BeritaDetailPage() {
           console.warn('[BeritaDetailPage] WordPress API failed, using local fallback:', error?.message)
           const localPost = getBlogPostBySlug(slug)
           setPost(localPost)
+          setAllPosts(blogPosts)
           
           if (localPost) {
             const sameCategoryPosts = blogPosts.filter(
@@ -137,6 +141,25 @@ function BeritaDetailPage() {
     }
   }, [slug])
 
+  const popularPosts = useMemo(() => {
+    if (!post) return []
+    return allPosts.filter((item) => item.slug !== post.slug).slice(0, 4)
+  }, [allPosts, post])
+
+  const topicTags = useMemo(() => {
+    const unique = new Set()
+    const ordered = []
+    for (const item of allPosts) {
+      const value = (item.category || '').trim()
+      if (!value) continue
+      const key = value.toLowerCase()
+      if (unique.has(key)) continue
+      unique.add(key)
+      ordered.push(value)
+    }
+    return ordered.slice(0, 8)
+  }, [allPosts])
+
   const prefetchRelatedDetail = (targetSlug) => {
     if (!targetSlug) return
     prefetchRoute('/berita-detail')
@@ -167,67 +190,81 @@ function BeritaDetailPage() {
           </div>
         </header>
 
-        <article className="blog-detail-article">
-          <LazyImage
-            src={post.image}
-            alt={post.title}
-            wrapperClassName="blog-detail-image-wrap"
-            className="blog-detail-image"
-          />
+        <div className="blog-detail-layout">
+          <article className="blog-detail-article blog-detail-main">
+            <LazyImage
+              src={post.image}
+              alt={post.title}
+              wrapperClassName="blog-detail-image-wrap"
+              className="blog-detail-image"
+            />
 
-          <p className="blog-detail-lead">{post.excerpt}</p>
+            <p className="blog-detail-lead">{post.excerpt}</p>
 
-          {post.contentHtml ? (
-            <div className="blog-detail-content" dangerouslySetInnerHTML={{ __html: post.contentHtml }} />
-          ) : (
-            post.content?.map((paragraph) => <p key={paragraph}>{paragraph}</p>)
-          )}
-        </article>
+            {post.contentHtml ? (
+              <div className="blog-detail-content" dangerouslySetInnerHTML={{ __html: post.contentHtml }} />
+            ) : (
+              post.content?.map((paragraph) => <p key={paragraph}>{paragraph}</p>)
+            )}
+          </article>
 
-        {relatedPosts.length > 0 && (
-          <section className="blog-detail-related" aria-label="Related posts">
-            <div className="blog-detail-related-head">
-              <h2>Related posts</h2>
-            </div>
+          <aside className="blog-detail-sidebar" aria-label="Artikel terkait dan populer">
+            {relatedPosts.length > 0 && (
+              <section className="blog-detail-side-card">
+                <h2 className="blog-detail-side-title">Related Articles</h2>
+                <div className="blog-detail-side-list">
+                  {relatedPosts.map((item) => (
+                    <Link
+                      key={item.slug}
+                      to={`/berita/${item.slug}`}
+                      className="blog-detail-side-item"
+                      onMouseEnter={() => prefetchRelatedDetail(item.slug)}
+                      onFocus={() => prefetchRelatedDetail(item.slug)}
+                    >
+                      <LazyImage
+                        src={item.image}
+                        alt={item.title}
+                        wrapperClassName="blog-detail-side-thumb"
+                        className="blog-detail-side-thumb-img"
+                      />
+                      <div className="blog-detail-side-copy">
+                        <h3>{item.title}</h3>
+                        <p>{item.category}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
 
-            <div className="blog-post-grid">
-              {relatedPosts.map((item) => (
-                <article key={item.slug} className="blog-card">
-                  <Link
-                    to={`/berita/${item.slug}`}
-                    className="blog-card-media-link"
-                    aria-label={`Buka detail berita ${item.title}`}
-                    onMouseEnter={() => prefetchRelatedDetail(item.slug)}
-                    onFocus={() => prefetchRelatedDetail(item.slug)}
-                  >
-                    <LazyImage
-                      src={item.image}
-                      alt={item.title}
-                      wrapperClassName="blog-card-media"
-                      className="blog-card-image"
-                    />
-                  </Link>
-                  <div className="blog-card-body">
-                    <h3>{item.title}</h3>
-                    <p className="blog-card-category">{item.category}</p>
-                    <p>{item.excerpt}</p>
-                    <div className="blog-card-meta">
-                      <span className="blog-card-date">{item.date}</span>
-                      <Link
-                        className="blog-read-more-btn"
-                        to={`/berita/${item.slug}`}
-                        onMouseEnter={() => prefetchRelatedDetail(item.slug)}
-                        onFocus={() => prefetchRelatedDetail(item.slug)}
-                      >
-                        Read more
+            {popularPosts.length > 0 && (
+              <section className="blog-detail-side-card blog-detail-side-card-soft">
+                <h2 className="blog-detail-side-title">Artikel Populer</h2>
+                <ol className="blog-detail-popular-list">
+                  {popularPosts.map((item, index) => (
+                    <li key={item.slug}>
+                      <Link to={`/berita/${item.slug}`}>
+                        <span className="blog-detail-popular-rank">{String(index + 1).padStart(2, '0')}</span>
+                        <span className="blog-detail-popular-text">{item.title}</span>
                       </Link>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </section>
-        )}
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            )}
+
+            {topicTags.length > 0 && (
+              <section className="blog-detail-side-card blog-detail-side-card-mint">
+                <h2 className="blog-detail-side-title">Topik</h2>
+                <div className="blog-detail-topic-tags">
+                  {topicTags.map((tag) => (
+                    <Link key={tag} to={`/berita?type=${tag.toLowerCase()}&page=1#berita-list`}>#{tag}</Link>
+                  ))}
+                </div>
+              </section>
+            )}
+          </aside>
+        </div>
       </div>
     </SectionReveal>
   )
