@@ -62,9 +62,9 @@ function extractGalleryImagesFromHtml(html) {
         const alt = decodeHtml(node.textContent || '').replace(/\s+/g, ' ').trim()
         return href.includes('/uploads/')
           ? {
-              src: href,
-              alt,
-            }
+            src: href,
+            alt,
+          }
           : null
       }
 
