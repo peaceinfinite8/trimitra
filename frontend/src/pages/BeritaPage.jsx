@@ -1,67 +1,89 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import LazyImage from '../components/ui/LazyImage'
-import { blogPosts } from '../data/blogPosts'
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import LazyImage from "../components/ui/LazyImage";
+import { blogPosts } from "../data/blogPosts";
 import {
   getBlogPostsFromWordPress,
   isWordPressConfigured,
   prefetchBlogPostBySlugFromWordPress,
-} from '../data/wordpressBlog'
-import { prefetchRoute } from '../app/routePrefetch'
+} from "../data/wordpressBlog";
+import { prefetchRoute } from "../app/routePrefetch";
 
-const postCategories = ['Semua', 'Berita', 'Artikel']
-const ITEMS_PER_PAGE = 9
-const MAX_PAGINATION_NUMBERS = 10
-const LIVE_REFRESH_INTERVAL_MS = 20000
-const WP_NEWS_SNAPSHOT_KEY = 'berita:wp-posts:v1'
+const LIVE_REFRESH_INTERVAL_MS = 20000;
+const WP_NEWS_SNAPSHOT_KEY = "berita:wp-posts:v1";
+const ITEMS_PER_PAGE = 12;
+const MAX_PAGINATION_NUMBERS = 10;
+const CONTENT_TYPES = ["all", "blog", "news", "event"];
 
 function readWordPressPostsSnapshot() {
-  if (typeof window === 'undefined') return null
+  if (typeof window === "undefined") return null;
   try {
-    const raw = window.sessionStorage.getItem(WP_NEWS_SNAPSHOT_KEY)
-    if (!raw) return null
-    const parsed = JSON.parse(raw)
+    const raw = window.sessionStorage.getItem(WP_NEWS_SNAPSHOT_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
     if (Array.isArray(parsed) && parsed.length > 0) {
-      return parsed
+      return parsed;
     }
   } catch {
     // Ignore parsing/storage errors.
   }
-  return null
+  return null;
 }
 
 function writeWordPressPostsSnapshot(posts) {
-  if (typeof window === 'undefined') return
-  if (!Array.isArray(posts) || posts.length === 0) return
+  if (typeof window === "undefined") return;
+  if (!Array.isArray(posts) || posts.length === 0) return;
   try {
-    window.sessionStorage.setItem(WP_NEWS_SNAPSHOT_KEY, JSON.stringify(posts))
+    window.sessionStorage.setItem(WP_NEWS_SNAPSHOT_KEY, JSON.stringify(posts));
   } catch {
     // Ignore quota/storage errors.
   }
 }
 
 function normalizeCategoryForFilter(category) {
-  const source = (category || '').toLowerCase()
-  if (source.includes('artikel') || source.includes('article') || source.includes('blog')) {
-    return 'Artikel'
+  const source = (category || "").toLowerCase();
+  if (
+    source.includes("artikel") ||
+    source.includes("article") ||
+    source.includes("blog")
+  ) {
+    return "Artikel";
   }
-  return 'Berita'
+  return "Berita";
+}
+
+function inferContentTypeFromText(value) {
+  const source = String(value || "").toLowerCase();
+  if (source.includes("event") || source.includes("acara")) return "event";
+  if (source.includes("blog") || source.includes("artikel")) return "blog";
+  if (source.includes("news") || source.includes("berita")) return "news";
+  return "news";
+}
+
+function getContentChipLabel(value) {
+  return inferContentTypeFromText(value).toUpperCase();
+}
+
+function toSectionSlug(value) {
+  return String(value || "berita")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 function buildPageItems(currentPage, totalPages) {
   if (totalPages <= MAX_PAGINATION_NUMBERS) {
-    return Array.from({ length: totalPages }, (_, index) => index + 1)
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
   }
 
   if (currentPage <= 5) {
-    return [1, 2, 3, 4, 5, 6, 7, 8, 9, 'ellipsis-right', totalPages]
+    return [1, 2, 3, 4, 5, 6, 7, 8, 9, "ellipsis-right", totalPages];
   }
 
   if (currentPage >= totalPages - 4) {
     return [
       1,
-      'ellipsis-left',
+      "ellipsis-left",
       totalPages - 8,
       totalPages - 7,
       totalPages - 6,
@@ -71,12 +93,12 @@ function buildPageItems(currentPage, totalPages) {
       totalPages - 2,
       totalPages - 1,
       totalPages,
-    ]
+    ];
   }
 
   return [
     1,
-    'ellipsis-left',
+    "ellipsis-left",
     currentPage - 3,
     currentPage - 2,
     currentPage - 1,
@@ -85,444 +107,570 @@ function buildPageItems(currentPage, totalPages) {
     currentPage + 2,
     currentPage + 3,
     currentPage + 4,
-    'ellipsis-right',
+    "ellipsis-right",
     totalPages,
-  ]
+  ];
 }
 
 function BeritaPage() {
-  const prefersReducedMotion = useReducedMotion()
-  const initialDataRef = useRef(null)
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialDataRef = useRef(null);
   if (!initialDataRef.current) {
-    const snapshot = readWordPressPostsSnapshot()
+    const snapshot = readWordPressPostsSnapshot();
     initialDataRef.current = {
       posts: snapshot || blogPosts,
       hasWordPressData: Boolean(snapshot && snapshot.length > 0),
-    }
+    };
   }
 
-  const [searchParams, setSearchParams] = useSearchParams()
-  const [currentPage, setCurrentPage] = useState(1)
-  const [activeCategory, setActiveCategory] = useState('Semua')
-  const [posts, setPosts] = useState(initialDataRef.current.posts)
-  const [isLoadingWp, setIsLoadingWp] = useState(() => isWordPressConfigured())
-  const prefetchedImagesRef = useRef(new Set())
-  const prefetchedDetailRef = useRef(new Set())
-  const refreshPromiseRef = useRef(null)
-  const hasSyncedWordPressRef = useRef(initialDataRef.current.hasWordPressData)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [activeType, setActiveType] = useState("all");
+  const [posts, setPosts] = useState(initialDataRef.current.posts);
+  const [isLoadingWp, setIsLoadingWp] = useState(() => isWordPressConfigured());
+  const prefetchedImagesRef = useRef(new Set());
+  const prefetchedDetailRef = useRef(new Set());
+  const refreshPromiseRef = useRef(null);
+  const hasSyncedWordPressRef = useRef(initialDataRef.current.hasWordPressData);
 
   useEffect(() => {
-    const rawPage = Number(searchParams.get('page') ?? '1')
-    const parsedPage = Number.isFinite(rawPage) && rawPage > 0 ? Math.floor(rawPage) : 1
-    setCurrentPage(parsedPage)
-  }, [searchParams])
+    const rawPage = Number(searchParams.get("page") ?? "1");
+    const parsedPage =
+      Number.isFinite(rawPage) && rawPage > 0 ? Math.floor(rawPage) : 1;
+    setCurrentPage(parsedPage);
+
+    const rawType = (searchParams.get("type") ?? "all").toLowerCase();
+    setActiveType(CONTENT_TYPES.includes(rawType) ? rawType : "all");
+  }, [searchParams]);
 
   useEffect(() => {
-    let cancelled = false
+    let cancelled = false;
 
     const applyFetchedPosts = (wpPosts) => {
       if (Array.isArray(wpPosts) && wpPosts.length > 0) {
-        setPosts(wpPosts)
-        hasSyncedWordPressRef.current = true
-        writeWordPressPostsSnapshot(wpPosts)
-        return
+        setPosts(wpPosts);
+        hasSyncedWordPressRef.current = true;
+        writeWordPressPostsSnapshot(wpPosts);
+        return;
       }
 
       if (!hasSyncedWordPressRef.current) {
-        setPosts(blogPosts)
+        setPosts(blogPosts);
       }
-    }
+    };
 
-    async function refreshFromWordPress({ forceFresh = false, initialLoad = false } = {}) {
+    async function refreshFromWordPress({
+      forceFresh = false,
+      initialLoad = false,
+    } = {}) {
       if (!isWordPressConfigured()) {
         if (!cancelled && initialLoad) {
-          setIsLoadingWp(false)
+          setIsLoadingWp(false);
         }
-        return
+        return;
       }
 
-      let request = refreshPromiseRef.current
+      let request = refreshPromiseRef.current;
       if (!request) {
         request = getBlogPostsFromWordPress({
           skipCache: forceFresh,
           staleWhileRevalidate: !forceFresh,
           ttlMs: 60 * 1000,
-        })
-        refreshPromiseRef.current = request
+        });
+        refreshPromiseRef.current = request;
       }
 
       try {
-        const wpPosts = await request
+        const wpPosts = await request;
         if (!cancelled) {
-          applyFetchedPosts(wpPosts)
+          applyFetchedPosts(wpPosts);
         }
       } catch (error) {
         if (!cancelled) {
-          console.warn('[BeritaPage] WordPress API error, keeping last known posts:', error?.message)
+          console.warn(
+            "[BeritaPage] WordPress API error, keeping last known posts:",
+            error?.message,
+          );
           if (!hasSyncedWordPressRef.current) {
-            setPosts(blogPosts)
+            setPosts(blogPosts);
           }
         }
       } finally {
         if (refreshPromiseRef.current === request) {
-          refreshPromiseRef.current = null
+          refreshPromiseRef.current = null;
         }
         if (!cancelled && initialLoad) {
-          setIsLoadingWp(false)
+          setIsLoadingWp(false);
         }
       }
     }
 
-    refreshFromWordPress({ initialLoad: true, forceFresh: true })
+    refreshFromWordPress({ initialLoad: true, forceFresh: true });
 
-    const onFocus = () => refreshFromWordPress({ forceFresh: true })
+    const onFocus = () => refreshFromWordPress({ forceFresh: true });
     const onVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        refreshFromWordPress({ forceFresh: true })
+      if (document.visibilityState === "visible") {
+        refreshFromWordPress({ forceFresh: true });
       }
-    }
+    };
 
     const intervalId = window.setInterval(() => {
-      if (document.visibilityState === 'visible') {
-        refreshFromWordPress({ forceFresh: true })
+      if (document.visibilityState === "visible") {
+        refreshFromWordPress({ forceFresh: true });
       }
-    }, LIVE_REFRESH_INTERVAL_MS)
+    }, LIVE_REFRESH_INTERVAL_MS);
 
-    window.addEventListener('focus', onFocus)
-    document.addEventListener('visibilitychange', onVisibilityChange)
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibilityChange);
 
     return () => {
-      cancelled = true
-      window.clearInterval(intervalId)
-      window.removeEventListener('focus', onFocus)
-      document.removeEventListener('visibilitychange', onVisibilityChange)
-    }
-  }, [])
+      cancelled = true;
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, []);
 
-  const filteredPosts = useMemo(
-    () =>
-      activeCategory === 'Semua'
-        ? posts
-        : posts.filter((post) => normalizeCategoryForFilter(post.category) === activeCategory),
-    [activeCategory, posts],
-  )
+  const editorialPosts = useMemo(() => {
+    if (!Array.isArray(posts) || posts.length === 0) return blogPosts;
+    return posts;
+  }, [posts]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredPosts.length / ITEMS_PER_PAGE))
-  const pageStart = (currentPage - 1) * ITEMS_PER_PAGE
-  const pagedPosts = useMemo(
-    () => filteredPosts.slice(pageStart, pageStart + ITEMS_PER_PAGE),
-    [filteredPosts, pageStart],
-  )
+  const filteredPosts = useMemo(() => {
+    if (activeType === "all") return editorialPosts;
+    return editorialPosts.filter(
+      (post) => inferContentTypeFromText(post?.category) === activeType,
+    );
+  }, [activeType, editorialPosts]);
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredPosts.length / ITEMS_PER_PAGE),
+  );
+  const pagedEditorialPosts = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredPosts.slice(start, start + ITEMS_PER_PAGE);
+  }, [currentPage, filteredPosts]);
 
   useEffect(() => {
-    if (currentPage <= totalPages) return
+    if (currentPage <= totalPages) return;
     setSearchParams((prev) => {
-      const next = new URLSearchParams(prev)
-      next.set('page', String(totalPages))
-      return next
-    })
-  }, [currentPage, setSearchParams, totalPages])
+      const next = new URLSearchParams(prev);
+      next.set("page", String(totalPages));
+      return next;
+    });
+  }, [currentPage, setSearchParams, totalPages]);
 
-  const featuredPost = posts[0] || blogPosts[0]
-  const heroLines = ['Berita &', 'Wawasan']
+  const featuredPost =
+    pagedEditorialPosts[0] ||
+    filteredPosts[0] ||
+    editorialPosts[0] ||
+    blogPosts[0];
+  const sideHeroPosts = pagedEditorialPosts.slice(1, 3);
+  const latestPosts = pagedEditorialPosts.slice(3, 8);
 
-  const handleCategoryChange = (category) => {
-    setActiveCategory(category)
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev)
-      next.set('page', '1')
-      return next
-    })
-  }
+  const sectionGroups = useMemo(() => {
+    const groups = new Map();
+    pagedEditorialPosts.slice(8).forEach((post) => {
+      const fallback = normalizeCategoryForFilter(post.category);
+      const category = (post.category || fallback || "Berita").trim();
+      if (!groups.has(category)) {
+        groups.set(category, []);
+      }
+      groups.get(category).push(post);
+    });
+
+    return Array.from(groups.entries())
+      .map(([name, items]) => ({
+        name,
+        slug: toSectionSlug(name),
+        items,
+      }))
+      .filter((group) => group.items.length > 0)
+      .slice(0, 3);
+  }, [pagedEditorialPosts]);
+
+  const spotlightMain = pagedEditorialPosts[5] || featuredPost;
+  const spotlightSide = pagedEditorialPosts.slice(6, 10);
 
   const handlePageChange = (nextPage) => {
-    const clampedPage = Math.min(totalPages, Math.max(1, nextPage))
+    const clampedPage = Math.min(totalPages, Math.max(1, nextPage));
     setSearchParams((prev) => {
-      const next = new URLSearchParams(prev)
-      next.set('page', String(clampedPage))
-      return next
-    })
-  }
+      const next = new URLSearchParams(prev);
+      next.set("page", String(clampedPage));
+      return next;
+    });
+  };
 
-  const prefetchDetail = (slug, imageUrl) => {
-    if (!slug) return
-
-    prefetchRoute('/berita-detail')
-
-    if (!prefetchedDetailRef.current.has(slug)) {
-      prefetchBlogPostBySlugFromWordPress(slug)
-      prefetchedDetailRef.current.add(slug)
-    }
-
-    if (typeof window !== 'undefined' && imageUrl && !prefetchedImagesRef.current.has(imageUrl)) {
-      const image = new window.Image()
-      image.decoding = 'async'
-      image.src = imageUrl
-      prefetchedImagesRef.current.add(imageUrl)
-    }
-  }
+  const handleTypeChange = (type) => {
+    const nextType = CONTENT_TYPES.includes(type) ? type : "all";
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (nextType === "all") {
+        next.delete("type");
+      } else {
+        next.set("type", nextType);
+      }
+      next.set("page", "1");
+      return next;
+    });
+  };
 
   const pageItems = useMemo(
     () => buildPageItems(currentPage, totalPages),
     [currentPage, totalPages],
-  )
+  );
+  const showViewAllLinks = activeType === "all";
 
-  useEffect(() => {
-    if (typeof window === 'undefined' || currentPage >= totalPages) return
+  const prefetchDetail = (slug, imageUrl) => {
+    if (!slug) return;
 
-    const nextPageStart = currentPage * ITEMS_PER_PAGE
-    const nextPagePosts = filteredPosts.slice(nextPageStart, nextPageStart + ITEMS_PER_PAGE)
+    prefetchRoute("/berita-detail");
 
-    nextPagePosts.forEach((post) => {
-      if (!post?.image || prefetchedImagesRef.current.has(post.image)) return
-      const image = new window.Image()
-      image.decoding = 'async'
-      image.src = post.image
-      prefetchedImagesRef.current.add(post.image)
-    })
-  }, [currentPage, filteredPosts, totalPages])
+    if (!prefetchedDetailRef.current.has(slug)) {
+      prefetchBlogPostBySlugFromWordPress(slug);
+      prefetchedDetailRef.current.add(slug);
+    }
+
+    if (
+      typeof window !== "undefined" &&
+      imageUrl &&
+      !prefetchedImagesRef.current.has(imageUrl)
+    ) {
+      const image = new window.Image();
+      image.decoding = "async";
+      image.src = imageUrl;
+      prefetchedImagesRef.current.add(imageUrl);
+    }
+  };
 
   return (
-    <div className="berita-page-redesign">
-      <section className="berita-hero-clean" data-nav-hero>
-        <div className="container berita-hero-clean-shell">
-          <motion.p
-            className="berita-crumb"
-            initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
-            animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-            transition={{ duration: 0.36, delay: 0.1 }}
-          >
-            BERANDA &nbsp;›&nbsp; BERITA
-          </motion.p>
-          <motion.span
-            className="berita-hero-pill"
-            initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
-            animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-            transition={{ duration: 0.36, delay: 0.2 }}
-          >
-            JURNAL & INSIGHT
-          </motion.span>
-          <motion.h1
-            className="berita-hero-title"
-            initial={false}
-            animate={{ opacity: 1 }}
-          >
-            {heroLines.map((line, index) => (
-              <span className="berita-hero-line-wrap" key={line}>
-                <motion.span
-                  className="berita-hero-line"
-                  initial={prefersReducedMotion ? false : { opacity: 0, y: 34 }}
-                  animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                  transition={{ duration: 0.42, delay: 0.3 + index * 0.12, ease: [0.22, 1, 0.36, 1] }}
-                >
-                  {line}
-                </motion.span>
-              </span>
-            ))}
-          </motion.h1>
-          <motion.div
-            className="berita-hero-accent"
-            initial={prefersReducedMotion ? false : { opacity: 0, width: 0 }}
-            animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, width: 48 }}
-            transition={{ duration: 0.38, delay: 0.56, ease: [0.22, 1, 0.36, 1] }}
-          />
-          <motion.p
-            className="berita-hero-subtitle"
-            initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
-            animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-            transition={{ duration: 0.36, delay: 0.5 }}
-          >
-            Insight terbaru dari aktivitas dan industri Trimitra
-          </motion.p>
-        </div>
-      </section>
-
-      <section className="section blog-news-page berita-content-clean">
-        <div className="container blog-shell berita-shell-clean">
-          <section className="berita-featured-clean">
-            <p className="berita-featured-label">FEATURED</p>
-            <div className="berita-featured-grid">
-              <motion.div
-                className="berita-featured-media"
-                initial={prefersReducedMotion ? false : { opacity: 0, x: -26 }}
-                animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
-                transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <Link
-                  to={`/berita/${featuredPost.slug}`}
-                  aria-label={`Buka detail berita ${featuredPost.title}`}
-                  onMouseEnter={() => prefetchDetail(featuredPost.slug, featuredPost.image)}
-                  onFocus={() => prefetchDetail(featuredPost.slug, featuredPost.image)}
-                >
-                  <LazyImage
-                    src={featuredPost.image}
-                    alt={featuredPost.title}
-                    wrapperClassName="berita-featured-image-wrap"
-                    className="berita-featured-image"
-                  />
-                </Link>
-              </motion.div>
-
-              <motion.article
-                className="berita-featured-copy"
-                initial={prefersReducedMotion ? false : { opacity: 0, x: 26 }}
-                animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
-                transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <div className="berita-featured-meta">
-                  <span className="berita-featured-category">{featuredPost.category}</span>
-                  <span className="berita-featured-date">{featuredPost.date}</span>
-                </div>
-                <h2>{featuredPost.title}</h2>
-                <p>{featuredPost.excerpt}</p>
-                <Link
-                  className="berita-featured-cta"
-                  to={`/berita/${featuredPost.slug}`}
-                  onMouseEnter={() => prefetchDetail(featuredPost.slug, featuredPost.image)}
-                  onFocus={() => prefetchDetail(featuredPost.slug, featuredPost.image)}
-                >
-                  Baca Selengkapnya
-                </Link>
-              </motion.article>
+    <div className="berita-editorial-page">
+      <section className="section blog-news-page berita-editorial-wrap">
+        <div className="container">
+          {isLoadingWp && editorialPosts.length === 0 ? (
+            <div className="berita-editorial-loading">
+              Memuat berita terbaru...
             </div>
-          </section>
-
-          <section className="berita-latest-clean">
-            <div className="blog-recent-head">
-              <h2>Artikel Terbaru</h2>
-            </div>
-
-            <div className="blog-category-tabs berita-filter-stick" role="tablist" aria-label="Filter kategori berita">
-              {postCategories.map((category) => {
-                const isActive = activeCategory === category
-                return (
-                  <button
-                    key={category}
-                    type="button"
-                    role="tab"
-                    aria-selected={isActive}
-                    className={isActive ? 'active' : ''}
-                    onClick={() => handleCategoryChange(category)}
-                  >
-                    {category}
-                  </button>
-                )
-              })}
-            </div>
-
-            {isLoadingWp && posts.length === 0 ? (
-              <div className="blog-post-grid" aria-label="Memuat daftar berita">
-                {Array.from({ length: ITEMS_PER_PAGE }, (_, index) => (
-                  <article key={`blog-skeleton-${index}`} className="blog-card blog-skeleton-card" aria-hidden="true">
-                    <div className="blog-card-media blog-skeleton-block blog-skeleton-image" />
-                    <div className="blog-card-body">
-                      <div className="blog-skeleton-block blog-skeleton-title" />
-                      <div className="blog-skeleton-block blog-skeleton-kicker" />
-                      <div className="blog-skeleton-block blog-skeleton-text" />
-                      <div className="blog-skeleton-block blog-skeleton-text short" />
-                    </div>
-                  </article>
-                ))}
+          ) : (
+            <>
+              <div className="berita-type-filter" id="berita-list">
+                {CONTENT_TYPES.map((type) => {
+                  const active = activeType === type;
+                  const label = type === "all" ? "Semua" : type.toUpperCase();
+                  return (
+                    <button
+                      key={type}
+                      type="button"
+                      className={`berita-type-pill ${active ? "is-active" : ""}`}
+                      onClick={() => handleTypeChange(type)}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
               </div>
-            ) : (
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={`${activeCategory}-${currentPage}`}
-                  className="blog-post-grid"
-                  initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
-                  animate={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
-                  exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -10 }}
-                  transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-                >
-                  {pagedPosts.map((item, index) => {
-                    const zigzagDelay = index * 0.045 + (index % 2 === 0 ? 0.02 : 0.08)
-                    return (
-                      <motion.article
-                        key={item.slug || item.title}
-                        className="blog-card"
-                        initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
-                        animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                        transition={{ duration: 0.34, delay: zigzagDelay, ease: [0.22, 1, 0.36, 1] }}
+
+              <section className="berita-editorial-hero">
+                <div className="berita-editorial-left">
+                  {sideHeroPosts.map((item) => (
+                    <article key={item.slug} className="berita-mini-card">
+                      <Link
+                        to={`/berita/${item.slug}`}
+                        className="berita-image-link"
+                        data-chip={getContentChipLabel(item.category)}
+                        onMouseEnter={() =>
+                          prefetchDetail(item.slug, item.image)
+                        }
+                        onFocus={() => prefetchDetail(item.slug, item.image)}
                       >
+                        <LazyImage
+                          src={item.image}
+                          alt={item.title}
+                          wrapperClassName="berita-mini-media"
+                          className="berita-mini-image"
+                        />
+                      </Link>
+                      <div className="berita-mini-copy">
+                        <p className="berita-kicker">{item.category}</p>
                         <Link
                           to={`/berita/${item.slug}`}
-                          className="blog-card-media-link"
-                          aria-label={`Buka detail berita ${item.title}`}
-                          onMouseEnter={() => prefetchDetail(item.slug, item.image)}
+                          className="berita-mini-title"
+                        >
+                          {item.title}
+                        </Link>
+                        <p className="berita-date">{item.date}</p>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+
+                <article className="berita-editorial-main">
+                  <Link
+                    to={`/berita/${featuredPost.slug}`}
+                    className="berita-image-link"
+                    data-chip={getContentChipLabel(featuredPost.category)}
+                    onMouseEnter={() =>
+                      prefetchDetail(featuredPost.slug, featuredPost.image)
+                    }
+                    onFocus={() =>
+                      prefetchDetail(featuredPost.slug, featuredPost.image)
+                    }
+                  >
+                    <LazyImage
+                      src={featuredPost.image}
+                      alt={featuredPost.title}
+                      wrapperClassName="berita-main-media"
+                      className="berita-main-image"
+                    />
+                  </Link>
+                  <div className="berita-main-copy">
+                    <p className="berita-kicker">{featuredPost.category}</p>
+                    <h1>{featuredPost.title}</h1>
+                    <p>{featuredPost.excerpt}</p>
+                    <p className="berita-date">{featuredPost.date}</p>
+                  </div>
+                </article>
+
+                <aside className="berita-editorial-latest">
+                  <div className="berita-latest-head">LATEST</div>
+                  {latestPosts.map((item) => (
+                    <article key={item.slug} className="berita-latest-item">
+                      <div className="berita-latest-copy">
+                        <Link
+                          to={`/berita/${item.slug}`}
+                          className="berita-latest-title"
+                          onMouseEnter={() =>
+                            prefetchDetail(item.slug, item.image)
+                          }
+                          onFocus={() => prefetchDetail(item.slug, item.image)}
+                        >
+                          {item.title}
+                        </Link>
+                        <p className="berita-date">{item.date}</p>
+                      </div>
+                      <Link
+                        to={`/berita/${item.slug}`}
+                        className="berita-latest-thumb"
+                      >
+                        <LazyImage
+                          src={item.image}
+                          alt={item.title}
+                          wrapperClassName="berita-latest-thumb-wrap"
+                          className="berita-latest-thumb-img"
+                        />
+                      </Link>
+                    </article>
+                  ))}
+                </aside>
+              </section>
+
+              {sectionGroups.map((section) => (
+                <section
+                  key={section.slug}
+                  className="berita-editorial-section"
+                >
+                  <div className="berita-section-head">
+                    <h2>{section.name}</h2>
+                    {showViewAllLinks ? (
+                      <Link
+                        to={`/berita?type=${inferContentTypeFromText(section.name)}&page=1#berita-list`}
+                        className="berita-section-more"
+                      >
+                        View all »
+                      </Link>
+                    ) : null}
+                  </div>
+                  <div className="berita-editorial-grid4">
+                    {section.items.slice(0, 4).map((item) => (
+                      <article key={item.slug} className="berita-grid-card">
+                        <Link
+                          to={`/berita/${item.slug}`}
+                          className="berita-image-link"
+                          data-chip={getContentChipLabel(item.category)}
+                          onMouseEnter={() =>
+                            prefetchDetail(item.slug, item.image)
+                          }
                           onFocus={() => prefetchDetail(item.slug, item.image)}
                         >
                           <LazyImage
                             src={item.image}
                             alt={item.title}
-                            wrapperClassName="blog-card-media"
-                            className="blog-card-image"
+                            wrapperClassName="berita-grid-media"
+                            className="berita-grid-image"
                           />
                         </Link>
-                        <div className="blog-card-body">
-                          <div className="berita-card-row">
-                            <p className="blog-card-category">{item.category}</p>
-                            <p className="blog-card-date">{item.date}</p>
-                          </div>
-                          <h3>{item.title}</h3>
+                        <div className="berita-grid-copy">
+                          <p className="berita-kicker">{item.category}</p>
+                          <Link
+                            to={`/berita/${item.slug}`}
+                            className="berita-grid-title"
+                          >
+                            {item.title}
+                          </Link>
+                          <p className="berita-date">{item.date}</p>
                           <p>{item.excerpt}</p>
                         </div>
-                      </motion.article>
-                    )
-                  })}
-                </motion.div>
-              </AnimatePresence>
-            )}
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              ))}
 
-            {totalPages > 1 && (
-              <div className="gallery-pagination blog-pagination" aria-label="Navigasi halaman berita">
-                <button
-                  type="button"
-                  className="gallery-page-btn"
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                >
-                  Prev
-                </button>
-
-                <div className="gallery-page-number-wrap">
-                  {pageItems.map((item, index) => {
-                    if (typeof item === 'string') {
-                      return (
-                        <span key={`${item}-${index}`} className="gallery-page-ellipsis" aria-hidden="true">
-                          ...
-                        </span>
-                      )
-                    }
-
-                    return (
-                      <button
-                        key={item}
-                        type="button"
-                        className={`gallery-page-btn ${item === currentPage ? 'is-active' : ''}`}
-                        onClick={() => handlePageChange(item)}
-                        aria-current={item === currentPage ? 'page' : undefined}
+              {spotlightMain ? (
+                <section className="berita-editorial-spotlight">
+                  <div className="berita-section-head">
+                    <h2>{spotlightMain.category || "Sorotan"}</h2>
+                    {showViewAllLinks ? (
+                      <Link
+                        to={`/berita?type=${inferContentTypeFromText(spotlightMain.category)}&page=1#berita-list`}
+                        className="berita-section-more"
                       >
-                        {item}
-                      </button>
-                    )
-                  })}
-                </div>
+                        View all »
+                      </Link>
+                    ) : null}
+                  </div>
+                  <div className="berita-spotlight-grid">
+                    <article className="berita-spotlight-main">
+                      <Link
+                        to={`/berita/${spotlightMain.slug}`}
+                        className="berita-image-link"
+                        data-chip={getContentChipLabel(spotlightMain.category)}
+                        onMouseEnter={() =>
+                          prefetchDetail(
+                            spotlightMain.slug,
+                            spotlightMain.image,
+                          )
+                        }
+                        onFocus={() =>
+                          prefetchDetail(
+                            spotlightMain.slug,
+                            spotlightMain.image,
+                          )
+                        }
+                      >
+                        <LazyImage
+                          src={spotlightMain.image}
+                          alt={spotlightMain.title}
+                          wrapperClassName="berita-spotlight-main-media"
+                          className="berita-spotlight-main-img"
+                        />
+                      </Link>
+                      <div className="berita-spotlight-main-copy">
+                        <p className="berita-kicker">
+                          {spotlightMain.category}
+                        </p>
+                        <Link
+                          to={`/berita/${spotlightMain.slug}`}
+                          className="berita-spotlight-main-title"
+                        >
+                          {spotlightMain.title}
+                        </Link>
+                        <p>{spotlightMain.excerpt}</p>
+                        <p className="berita-date">{spotlightMain.date}</p>
+                      </div>
+                    </article>
 
-                <button
-                  type="button"
-                  className="gallery-page-btn"
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
+                    <div className="berita-spotlight-side">
+                      {spotlightSide.map((item) => (
+                        <article
+                          key={item.slug}
+                          className="berita-spotlight-small"
+                        >
+                          <Link
+                            to={`/berita/${item.slug}`}
+                            className="berita-image-link"
+                            data-chip={getContentChipLabel(item.category)}
+                            onMouseEnter={() =>
+                              prefetchDetail(item.slug, item.image)
+                            }
+                            onFocus={() =>
+                              prefetchDetail(item.slug, item.image)
+                            }
+                          >
+                            <LazyImage
+                              src={item.image}
+                              alt={item.title}
+                              wrapperClassName="berita-spotlight-small-media"
+                              className="berita-spotlight-small-img"
+                            />
+                          </Link>
+                          <div className="berita-spotlight-small-copy">
+                            <p className="berita-kicker">{item.category}</p>
+                            <Link
+                              to={`/berita/${item.slug}`}
+                              className="berita-spotlight-small-title"
+                            >
+                              {item.title}
+                            </Link>
+                            <p className="berita-date">{item.date}</p>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  </div>
+                </section>
+              ) : null}
+
+              {filteredPosts.length > 0 && (
+                <div
+                  className="gallery-pagination blog-pagination"
+                  aria-label="Navigasi halaman berita"
                 >
-                  Next
-                </button>
-              </div>
-            )}
-          </section>
+                  <button
+                    type="button"
+                    className="gallery-page-btn"
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                  >
+                    Prev
+                  </button>
+
+                  <div className="gallery-page-number-wrap">
+                    {pageItems.map((item, index) => {
+                      if (typeof item === "string") {
+                        return (
+                          <span
+                            key={`${item}-${index}`}
+                            className="gallery-page-ellipsis"
+                            aria-hidden="true"
+                          >
+                            ...
+                          </span>
+                        );
+                      }
+
+                      return (
+                        <button
+                          key={item}
+                          type="button"
+                          className={`gallery-page-btn ${item === currentPage ? "is-active" : ""}`}
+                          onClick={() => handlePageChange(item)}
+                          aria-current={
+                            item === currentPage ? "page" : undefined
+                          }
+                        >
+                          {item}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <button
+                    type="button"
+                    className="gallery-page-btn"
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </section>
     </div>
-  )
+  );
 }
 
-export default BeritaPage
+export default BeritaPage;
