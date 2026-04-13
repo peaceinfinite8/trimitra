@@ -51,3 +51,76 @@ a {
 .image-placeholder {
   @apply bg-gradient-to-br from-slate-200 via-slate-100 to-slate-200;
 }
+
+.news-photo-shell {
+  position: relative;
+  isolation: isolate;
+  transform: translateZ(0);
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+}
+
+.news-photo-shell::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 12px;
+  background: linear-gradient(
+    180deg,
+    rgba(15, 23, 42, 0.2) 0%,
+    rgba(15, 23, 42, 0.08) 36%,
+    rgba(15, 23, 42, 0) 100%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+.news-photo-shell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0) 28%,
+    rgba(2, 132, 199, 0.05) 100%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+.news-photo-img {
+  top: -2px !important;
+  height: calc(100% + 4px) !important;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+.news-hover-chip {
+  transform: translateY(-6px);
+}
+
+@media (max-width: 768px) {
+  .news-hover-chip {
+    transform: translateY(-4px);
+  }
+}
+
+@media (max-width: 640px) {
+  .news-latest-item {
+    padding-left: 0.6rem;
+    padding-right: 0.6rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .news-photo-shell,
+  .news-hover-chip,
+  .group\/article,
+  .group\/hero,
+  .group\/latest {
+    transition: none !important;
+    animation: none !important;
+  }
+}

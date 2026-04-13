@@ -31,14 +31,15 @@ export default function FeaturedCategorySection({
       <div className="grid gap-6 lg:grid-cols-[2.15fr_1fr] sm:grid-cols-1">
         <article className="space-y-4">
           <Link href={`/berita/${featured.slug}`} className="block">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-[2px] bg-slate-100 shadow-editorial">
+            <div className="news-photo-shell relative aspect-[5/4] overflow-hidden rounded-[2.4rem_1rem_2.6rem_1rem] bg-slate-100 ring-1 ring-slate-900/10 shadow-[0_28px_48px_-30px_rgba(14,116,144,0.5)]">
               <Image
                 src={featured.featuredImage}
                 alt={featured.title}
                 fill
                 sizes="55vw"
-                className="object-cover"
+                className="news-photo-img object-cover transition-transform duration-700 ease-out hover:scale-[1.06]"
               />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/55 via-slate-900/0 to-cyan-100/25" />
             </div>
           </Link>
 
@@ -80,19 +81,20 @@ export default function FeaturedCategorySection({
           </div>
         </article>
 
-        <div className="grid grid-cols-2 gap-4">
-          {rightPosts.map((post) => (
-            <ArticleCard
-              key={post.id ?? post.slug}
-              href={`/berita/${post.slug}`}
-              image={post.featuredImage}
-              imageAlt={post.title}
-              categoryName={post.primaryCategory?.name ?? categoryName}
-              categorySlug={post.primaryCategory?.slug ?? categorySlug}
-              title={post.title}
-              date={post.date}
-              variant="small"
-            />
+        <div className="grid grid-cols-1 gap-4 sm:auto-rows-fr sm:grid-cols-2">
+          {rightPosts.map((post, idx) => (
+            <div key={post.id ?? post.slug} className="h-full">
+              <ArticleCard
+                href={`/berita/${post.slug}`}
+                image={post.featuredImage}
+                imageAlt={post.title}
+                categoryName={post.primaryCategory?.name ?? categoryName}
+                categorySlug={post.primaryCategory?.slug ?? categorySlug}
+                title={post.title}
+                date={post.date}
+                variant={idx === 0 ? "feature" : "small"}
+              />
+            </div>
           ))}
         </div>
       </div>
