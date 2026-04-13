@@ -1,0 +1,92 @@
+{
+  "title": "Trimitra Page UI Fields (Template)",
+  "instructions": "Template key ACF untuk mengontrol teks section dan CTA di frontend. Buat field group di ACF lalu salin key berikut per page.",
+  "required_pages": [
+    "home",
+    "tentang-kami",
+    "produk-jasa",
+    "kontak-kami"
+  ],
+  "field_keys": [
+    {
+      "name": "page_kicker",
+      "type": "text",
+      "description": "Label kecil di atas judul section/page"
+    },
+    {
+      "name": "cta_title",
+      "type": "text",
+      "description": "Judul blok CTA"
+    },
+    {
+      "name": "cta_copy",
+      "type": "textarea",
+      "description": "Deskripsi blok CTA"
+    },
+    {
+      "name": "cta_primary_label",
+      "type": "text",
+      "description": "Teks tombol utama"
+    },
+    {
+      "name": "cta_primary_link",
+      "type": "text",
+      "description": "Link tombol utama (contoh: /kontak-kami)"
+    },
+    {
+      "name": "cta_secondary_label",
+      "type": "text",
+      "description": "Teks tombol kedua"
+    },
+    {
+      "name": "cta_secondary_link",
+      "type": "text",
+      "description": "Link tombol kedua"
+    },
+    {
+      "name": "journal_kicker",
+      "type": "text",
+      "description": "(Home) kicker section jurnal"
+    },
+    {
+      "name": "journal_title",
+      "type": "text",
+      "description": "(Home) judul section jurnal"
+    },
+    {
+      "name": "journal_button_label",
+      "type": "text",
+      "description": "(Home) label tombol lihat semua"
+    },
+    {
+      "name": "portfolio_kicker",
+      "type": "text",
+      "description": "(Home) kicker section portfolio"
+    },
+    {
+      "name": "portfolio_title",
+      "type": "text",
+      "description": "(Home) judul section portfolio"
+    },
+    {
+      "name": "contact_title",
+      "type": "text",
+      "description": "(Kontak) judul utama"
+    },
+    {
+      "name": "contact_title_highlight",
+      "type": "text",
+      "description": "(Kontak) kata highlight pada judul"
+    },
+    {
+      "name": "contact_subtitle",
+      "type": "textarea",
+      "description": "(Kontak) subjudul/deskripsi"
+    },
+    {
+      "name": "contact_submit_label",
+      "type": "text",
+      "description": "(Kontak) label tombol submit"
+    }
+  ]
+}

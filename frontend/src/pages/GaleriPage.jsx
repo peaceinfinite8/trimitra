@@ -1,0 +1,477 @@
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import LazyImage from '../components/ui/LazyImage'
+import {
+  getWordPressGalleryFromPageBySlugs,
+  isWordPressConfiguredForPages,
+} from '../data/wordpressPages'
+
+const galleryFilters = ['Semua', 'Booth Pameran', 'Event', 'Billboard']
+const filterToQuery = {
+  Semua: 'semua',
+  'Booth Pameran': 'booth-pameran',
+  Event: 'event',
+  Billboard: 'billboard',
+}
+
+const queryToFilter = Object.fromEntries(
+  Object.entries(filterToQuery).map(([filter, query]) => [query, filter]),
+)
+
+const ITEMS_PER_PAGE = 18
+const MAX_PAGINATION_NUMBERS = 10
+
+function buildPageItems(currentPage, totalPages) {
+  if (totalPages <= MAX_PAGINATION_NUMBERS) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1)
+  }
+
+  if (currentPage <= 5) {
+    return [1, 2, 3, 4, 5, 6, 7, 8, 9, 'ellipsis-right', totalPages]
+  }
+
+  if (currentPage >= totalPages - 4) {
+    return [
+      1,
+      'ellipsis-left',
+      totalPages - 8,
+      totalPages - 7,
+      totalPages - 6,
+      totalPages - 5,
+      totalPages - 4,
+      totalPages - 3,
+      totalPages - 2,
+      totalPages - 1,
+      totalPages,
+    ]
+  }
+
+  return [
+    1,
+    'ellipsis-left',
+    currentPage - 3,
+    currentPage - 2,
+    currentPage - 1,
+    currentPage,
+    currentPage + 1,
+    currentPage + 2,
+    currentPage + 3,
+    currentPage + 4,
+    'ellipsis-right',
+    totalPages,
+  ]
+}
+
+const fallbackGallery = [
+  {
+    type: 'square',
+    category: 'Booth Pameran',
+    src: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=900&q=80',
+    alt: 'Booth pameran brand dengan struktur modern dan pencahayaan fokus.',
+  },
+  {
+    type: 'tall',
+    category: 'Booth Pameran',
+    src: 'https://images.unsplash.com/photo-1467810563316-b5476525c0f9?auto=format&fit=crop&w=900&q=80',
+    alt: 'Detail area booth exhibition dengan alur pengunjung yang terarah.',
+  },
+  {
+    type: 'square',
+    category: 'Billboard',
+    src: 'https://images.unsplash.com/photo-1526498460520-4c246339dccb?auto=format&fit=crop&w=900&q=80',
+    alt: 'Media billboard outdoor di koridor jalan utama perkotaan.',
+  },
+  {
+    type: 'square',
+    category: 'Event',
+    src: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=900&q=80',
+    alt: 'Suasana event korporat dengan panggung dan audiens aktif.',
+  },
+  {
+    type: 'square',
+    category: 'Event',
+    src: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=900&q=80',
+    alt: 'Momen event activation dengan tata cahaya dan crowd engagement.',
+  },
+  {
+    type: 'tall',
+    category: 'Booth Pameran',
+    src: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=900&q=80',
+    alt: 'Elevasi vertikal booth pameran untuk meningkatkan visibilitas brand.',
+  },
+  {
+    type: 'tall',
+    category: 'Billboard',
+    src: 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1f?auto=format&fit=crop&w=900&q=80',
+    alt: 'Penempatan billboard di titik traffic padat dengan exposure tinggi.',
+  },
+  {
+    type: 'wide',
+    category: 'Booth Pameran',
+    src: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1400&q=80',
+    alt: 'Tampilan lebar area booth exhibition untuk kebutuhan showcase brand.',
+  },
+]
+
+function GaleriPage() {
+  const prefersReducedMotion = useReducedMotion()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [activeIndex, setActiveIndex] = useState(null)
+  const [galleryItems, setGalleryItems] = useState(fallbackGallery)
+  const [isLoadingWp, setIsLoadingWp] = useState(isWordPressConfiguredForPages())
+  const prefetchedImagesRef = useRef(new Set())
+
+  const activeFilter =
+    queryToFilter[searchParams.get('kategori') ?? 'semua'] ?? 'Semua'
+
+  const rawPage = Number(searchParams.get('page') ?? '1')
+  const currentPage = Number.isFinite(rawPage) && rawPage > 0 ? Math.floor(rawPage) : 1
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadGalleryFromWordPress() {
+      if (!isWordPressConfiguredForPages()) return
+      try {
+        const media = await getWordPressGalleryFromPageBySlugs(['galeri'])
+        if (!cancelled && media.length > 0) {
+          setGalleryItems(media)
+        }
+      } catch {
+        // Keep fallback gallery when WordPress media is unreachable.
+      } finally {
+        if (!cancelled) {
+          setIsLoadingWp(false)
+        }
+      }
+    }
+
+    loadGalleryFromWordPress()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const visibleGallery = useMemo(() => {
+    if (activeFilter === 'Semua') return galleryItems
+    return galleryItems.filter((item) => item.category === activeFilter)
+  }, [activeFilter, galleryItems])
+
+  const totalPages = Math.max(1, Math.ceil(visibleGallery.length / ITEMS_PER_PAGE))
+  const pageStart = (currentPage - 1) * ITEMS_PER_PAGE
+  const pagedGallery = useMemo(
+    () => visibleGallery.slice(pageStart, pageStart + ITEMS_PER_PAGE),
+    [visibleGallery, pageStart],
+  )
+  const pageItems = useMemo(
+    () => buildPageItems(currentPage, totalPages),
+    [currentPage, totalPages],
+  )
+  const activeFilterTransitionKey = `${activeFilter}-${currentPage}`
+  const heroImage = galleryItems[0]?.src || fallbackGallery[0].src
+
+  useEffect(() => {
+    if (currentPage <= totalPages) return
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.set('kategori', filterToQuery[activeFilter])
+      next.set('page', String(totalPages))
+      return next
+    })
+  }, [activeFilter, currentPage, setSearchParams, totalPages])
+
+  useEffect(() => {
+    if (activeIndex === null) return
+    if (activeIndex > pagedGallery.length - 1) {
+      setActiveIndex(0)
+    }
+  }, [activeIndex, pagedGallery.length])
+
+  useEffect(() => {
+    if (activeIndex === null) return undefined
+    if (pagedGallery.length === 0) return undefined
+
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setActiveIndex(null)
+        return
+      }
+
+      if (event.key === 'ArrowRight') {
+        setActiveIndex((prev) => {
+          if (prev === null) return 0
+          return (prev + 1) % pagedGallery.length
+        })
+      }
+
+      if (event.key === 'ArrowLeft') {
+        setActiveIndex((prev) => {
+          if (prev === null) return 0
+          return (prev - 1 + pagedGallery.length) % pagedGallery.length
+        })
+      }
+    }
+
+    document.body.classList.add('lightbox-open')
+    window.addEventListener('keydown', onKeyDown)
+
+    return () => {
+      document.body.classList.remove('lightbox-open')
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [activeIndex, pagedGallery.length])
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || currentPage >= totalPages) return
+
+    const nextPageStart = currentPage * ITEMS_PER_PAGE
+    const nextPageItems = visibleGallery.slice(nextPageStart, nextPageStart + ITEMS_PER_PAGE)
+
+    nextPageItems.forEach((item) => {
+      if (!item?.src || prefetchedImagesRef.current.has(item.src)) return
+      const image = new window.Image()
+      image.decoding = 'async'
+      image.src = item.src
+      prefetchedImagesRef.current.add(item.src)
+    })
+  }, [currentPage, totalPages, visibleGallery])
+
+  useEffect(() => {
+    setActiveIndex(null)
+  }, [currentPage, activeFilter])
+
+  const handleFilterChange = (filter) => {
+    const queryValue = filterToQuery[filter]
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.set('kategori', queryValue)
+      next.set('page', '1')
+      return next
+    })
+  }
+
+  const handlePageChange = (page) => {
+    const nextPage = Math.min(totalPages, Math.max(1, page))
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.set('kategori', filterToQuery[activeFilter])
+      next.set('page', String(nextPage))
+      return next
+    })
+  }
+
+  return (
+    <div className="galeri-page-fix">
+      <section className="gallery-hero gallery-hero-redesign" data-nav-hero>
+        <LazyImage
+          className="home-hero-bg"
+          src={heroImage}
+          alt="Galeri karya Trimitra"
+          data-gsap-parallax
+        />
+        <div className="container">
+          <p className="kicker" style={{ color: '#ccb278' }}>
+            Beranda &nbsp;›&nbsp; Galeri
+          </p>
+          <h1 className="section-title">Galeri Karya Kami</h1>
+          <p className="gallery-hero-tagline">Dokumentasi karya terbaik kami</p>
+        </div>
+      </section>
+
+      <section className="gallery-filter gallery-filter-sticky">
+        <div className="container filter-pills">
+          {galleryFilters.map((filter) => (
+            <button
+              key={filter}
+              className={filter === activeFilter ? 'pill active' : 'pill'}
+              onClick={() => handleFilterChange(filter)}
+              type="button"
+            >
+              {filter}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="gallery-grid-section">
+        {isLoadingWp ? (
+          <div className="container gallery-grid" aria-label="Memuat galeri">
+            {Array.from({ length: ITEMS_PER_PAGE }, (_, index) => (
+              <article
+                key={`gallery-skeleton-${index}`}
+                className="gallery-grid-item square gallery-card card gallery-skeleton-card"
+                aria-hidden="true"
+              >
+                <div className="gallery-skeleton-block" />
+              </article>
+            ))}
+          </div>
+        ) : (
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={activeFilterTransitionKey}
+              className="container gallery-grid"
+              initial={prefersReducedMotion ? false : { opacity: 0, scale: 1.05 }}
+              animate={prefersReducedMotion ? { opacity: 1, scale: 1 } : { opacity: 1, scale: 1 }}
+              exit={prefersReducedMotion ? undefined : { opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {pagedGallery.map((item, idx) => (
+                <motion.article
+                  key={item.id || item.src}
+                  className={`gallery-grid-item gallery-card group card ${item.type}`}
+                  initial={
+                    prefersReducedMotion
+                      ? false
+                      : {
+                        opacity: 0,
+                        x: idx % 3 === 0 ? -20 : idx % 3 === 2 ? 20 : 0,
+                        y: idx % 3 === 1 ? 20 : 0,
+                      }
+                  }
+                  animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, x: 0, y: 0 }}
+                  transition={{ duration: 0.36, delay: idx * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <button
+                    type="button"
+                    className="gallery-lightbox-trigger"
+                    onClick={() => setActiveIndex(idx)}
+                    aria-label={`Buka gambar galeri ${pageStart + idx + 1}`}
+                  >
+                    <LazyImage
+                      src={item.src}
+                      alt={item.alt || `Gallery ${idx + 1}`}
+                      className="gallery-image"
+                    />
+                    <span className="gallery-card-overlay" aria-hidden="true">
+                      <span className="gallery-card-title">{item.alt || `Karya ${pageStart + idx + 1}`}</span>
+                      <span className="gallery-card-badge">{item.category || 'Galeri'}</span>
+                    </span>
+                  </button>
+                </motion.article>
+              ))}
+            </motion.div>
+          </AnimatePresence>
+        )}
+
+        {totalPages > 1 && (
+          <div className="container gallery-pagination" aria-label="Navigasi halaman galeri">
+            <button
+              type="button"
+              className="gallery-page-btn"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              Prev
+            </button>
+
+            <div className="gallery-page-number-wrap">
+              {pageItems.map((item, index) => {
+                if (typeof item === 'string') {
+                  return (
+                    <span key={`${item}-${index}`} className="gallery-page-ellipsis" aria-hidden="true">
+                      ...
+                    </span>
+                  )
+                }
+
+                return (
+                  <button
+                    key={item}
+                    type="button"
+                    className={`gallery-page-btn ${item === currentPage ? 'is-active' : ''}`}
+                    onClick={() => handlePageChange(item)}
+                    aria-current={item === currentPage ? 'page' : undefined}
+                  >
+                    {item}
+                  </button>
+                )
+              })}
+            </div>
+
+            <button
+              type="button"
+              className="gallery-page-btn"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+          </div>
+        )}
+      </section>
+
+      {activeIndex !== null && pagedGallery[activeIndex] && (
+        <div
+          className="gallery-lightbox"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Lightbox galeri"
+          onClick={() => setActiveIndex(null)}
+        >
+          <button
+            type="button"
+            className="gallery-lightbox-close"
+            aria-label="Tutup lightbox"
+            onClick={() => setActiveIndex(null)}
+          >
+            ×
+          </button>
+
+          <button
+            type="button"
+            className="gallery-lightbox-nav prev"
+            aria-label="Gambar sebelumnya"
+            onClick={(event) => {
+              event.stopPropagation()
+              setActiveIndex((prev) => (prev - 1 + pagedGallery.length) % pagedGallery.length)
+            }}
+          >
+            ‹
+          </button>
+
+          <figure className="gallery-lightbox-figure" onClick={(event) => event.stopPropagation()}>
+            <img
+              src={pagedGallery[activeIndex].src}
+              alt={`Gallery ${activeIndex + 1}`}
+              className="gallery-lightbox-image"
+            />
+            <figcaption>
+              {pagedGallery[activeIndex].category} · {pageStart + activeIndex + 1}/{visibleGallery.length}
+            </figcaption>
+          </figure>
+
+          <button
+            type="button"
+            className="gallery-lightbox-nav next"
+            aria-label="Gambar berikutnya"
+            onClick={(event) => {
+              event.stopPropagation()
+              setActiveIndex((prev) => (prev + 1) % pagedGallery.length)
+            }}
+          >
+            ›
+          </button>
+        </div>
+      )}
+
+      <section className="section gallery-premium-cta" style={{ textAlign: 'center' }}>
+        <div className="container gallery-premium-cta-shell">
+          <p className="kicker">Mulai Proyek Anda</p>
+          <h2 style={{ fontSize: 'clamp(38px, 7vw, 64px)', lineHeight: 0.95, maxWidth: 760, margin: '0 auto' }}>
+            Wujudkan Visi Arsitektural Anda Bersama Kami.
+          </h2>
+          <Link className="btn" style={{ marginTop: 22 }} to="/kontak-kami">Konsultasi Gratis</Link>
+          <div style={{ marginTop: 14 }}>
+            <Link className="muted" to="/kontak-kami">
+              Atau langsung kirim brief proyek Anda
+            </Link>
+          </div>
+        </div>
+      </section>
+    </div>
+  )
+}
+
+export default GaleriPage
