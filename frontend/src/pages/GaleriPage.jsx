@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import LazyImage from '../components/ui/LazyImage'
 import {
@@ -121,6 +121,7 @@ function GaleriPage() {
   const [galleryItems, setGalleryItems] = useState(fallbackGallery)
   const [isLoadingWp, setIsLoadingWp] = useState(isWordPressConfiguredForPages())
   const prefetchedImagesRef = useRef(new Set())
+  const gridSectionRef = useRef(null)
 
   const activeFilter =
     queryToFilter[searchParams.get('kategori') ?? 'semua'] ?? 'Semua'
@@ -170,6 +171,22 @@ function GaleriPage() {
   )
   const activeFilterTransitionKey = `${activeFilter}-${currentPage}`
   const heroImage = galleryItems[0]?.src || fallbackGallery[0].src
+  const heroFeatureTitle = galleryItems[0]?.alt || fallbackGallery[0].alt
+  const categoryCounts = useMemo(() => {
+    return galleryFilters.reduce((counts, filter) => {
+      counts[filter] = filter === 'Semua'
+        ? galleryItems.length
+        : galleryItems.filter((item) => item.category === filter).length
+      return counts
+    }, {})
+  }, [galleryItems])
+
+  useEffect(() => {
+    document.body.classList.add('route-gallery')
+    return () => {
+      document.body.classList.remove('route-gallery')
+    }
+  }, [])
 
   useEffect(() => {
     if (currentPage <= totalPages) return
@@ -261,26 +278,117 @@ function GaleriPage() {
     })
   }
 
+  const scrollToGrid = () => {
+    gridSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   return (
-    <div className="galeri-page-fix">
-      <section className="gallery-hero gallery-hero-redesign" data-nav-hero>
-        <LazyImage
-          className="home-hero-bg"
-          src={heroImage}
-          alt="Galeri karya Trimitra"
-          data-gsap-parallax
-        />
+    <div className="galeri-page-fix gallery-page-simple">
+      <section className="gallery-hero gallery-hero-redesign">
         <div className="container">
-          <p className="kicker" style={{ color: '#ccb278' }}>
-            Beranda &nbsp;›&nbsp; Galeri
-          </p>
-          <h1 className="section-title">Galeri Karya Kami</h1>
-          <p className="gallery-hero-tagline">Dokumentasi karya terbaik kami</p>
+          <div className="gallery-hero-grid">
+            <div className="gallery-hero-copy">
+              <p className="kicker">Beranda &nbsp;›&nbsp; Galeri</p>
+              <h1 className="section-title">Galeri Karya Kami</h1>
+              <p className="gallery-hero-tagline">
+                Portofolio visual Trimitra yang dirancang ringkas, jelas, dan nyaman dilihat.
+              </p>
+              <p className="gallery-hero-summary">
+                Setiap karya di sini disusun untuk memperlihatkan hasil akhir secara bersih, agar
+                Anda bisa cepat menilai kualitas, skala, dan karakter eksekusi kami.
+              </p>
+
+              <div className="gallery-hero-actions">
+                <button type="button" className="btn btn-primary" onClick={scrollToGrid}>
+                  Lihat koleksi
+                </button>
+                <a href="/kontak-kami" className="btn btn-secondary">
+                  Konsultasi proyek
+                </a>
+              </div>
+            </div>
+
+            <motion.article
+              className="gallery-hero-feature card"
+              initial={prefersReducedMotion ? false : { opacity: 0, y: 14 }}
+              animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+              transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <button
+                type="button"
+                className="gallery-lightbox-trigger gallery-hero-feature-trigger"
+                onClick={() => setActiveIndex(0)}
+                aria-label="Buka karya unggulan galeri"
+              >
+                <LazyImage
+                  src={heroImage}
+                  alt="Galeri karya Trimitra"
+                  className="gallery-image gallery-hero-feature-image"
+                />
+                <span className="gallery-card-overlay gallery-hero-feature-overlay" aria-hidden="true">
+                  <span className="gallery-card-badge">Highlight Galeri</span>
+                  <span className="gallery-card-title">{heroFeatureTitle}</span>
+                  <span className="gallery-hero-feature-meta">Visual pembuka koleksi</span>
+                </span>
+              </button>
+            </motion.article>
+          </div>
+        </div>
+      </section>
+
+      <section className="gallery-narrative-strip">
+        <div className="container gallery-narrative-grid">
+          <motion.article
+            className="gallery-narrative-card"
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
+            whileInView={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <p className="gallery-narrative-eyebrow">Kurikulum visual</p>
+            <h2>Terstruktur, tidak berisik</h2>
+            <p>
+              Koleksi ditampilkan dengan ritme yang bersih supaya visual utama tetap jadi pusat
+              perhatian.
+            </p>
+          </motion.article>
+
+          <motion.article
+            className="gallery-narrative-card"
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
+            whileInView={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.45, delay: 0.04, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <p className="gallery-narrative-eyebrow">Kurasi kategori</p>
+            <h2>Filter cepat, hasil jelas</h2>
+            <p>
+              Anda bisa menelusuri Booth, Event, atau Billboard tanpa kehilangan konteks visual.
+            </p>
+          </motion.article>
+
+          <motion.article
+            className="gallery-narrative-card"
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
+            whileInView={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.45, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <p className="gallery-narrative-eyebrow">Respons interaktif</p>
+            <h2>Scroll, hover, dan buka detail</h2>
+            <p>
+              Motion dibuat halus supaya pengalaman menjelajah terasa modern, bukan sekadar statis.
+            </p>
+          </motion.article>
         </div>
       </section>
 
       <section className="gallery-filter gallery-filter-sticky">
-        <div className="container filter-pills">
+        <div className="container filter-pills gallery-filter-shell">
+          <div className="gallery-filter-intro">
+            <p className="gallery-filter-eyebrow">Kategori koleksi</p>
+            <h2>Temukan karya paling relevan</h2>
+          </div>
           {galleryFilters.map((filter) => (
             <button
               key={filter}
@@ -288,13 +396,14 @@ function GaleriPage() {
               onClick={() => handleFilterChange(filter)}
               type="button"
             >
-              {filter}
+              <span>{filter}</span>
+              <strong>{String(categoryCounts[filter] ?? 0).padStart(2, '0')}</strong>
             </button>
           ))}
         </div>
       </section>
 
-      <section className="gallery-grid-section">
+      <section className="gallery-grid-section" ref={gridSectionRef}>
         {isLoadingWp ? (
           <div className="container gallery-grid" aria-label="Memuat galeri">
             {Array.from({ length: ITEMS_PER_PAGE }, (_, index) => (
@@ -311,7 +420,7 @@ function GaleriPage() {
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={activeFilterTransitionKey}
-              className="container gallery-grid"
+              className="container gallery-grid gallery-grid-premium"
               initial={prefersReducedMotion ? false : { opacity: 0, scale: 1.05 }}
               animate={prefersReducedMotion ? { opacity: 1, scale: 1 } : { opacity: 1, scale: 1 }}
               exit={prefersReducedMotion ? undefined : { opacity: 0, scale: 0.95 }}
@@ -326,12 +435,13 @@ function GaleriPage() {
                       ? false
                       : {
                         opacity: 0,
-                        x: idx % 3 === 0 ? -20 : idx % 3 === 2 ? 20 : 0,
-                        y: idx % 3 === 1 ? 20 : 0,
+                        y: 26,
+                        scale: 0.985,
                       }
                   }
-                  animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, x: 0, y: 0 }}
-                  transition={{ duration: 0.36, delay: idx * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                  whileInView={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.42, delay: (idx % 6) * 0.04, ease: [0.22, 1, 0.36, 1] }}
                 >
                   <button
                     type="button"
@@ -456,20 +566,6 @@ function GaleriPage() {
         </div>
       )}
 
-      <section className="section gallery-premium-cta" style={{ textAlign: 'center' }}>
-        <div className="container gallery-premium-cta-shell">
-          <p className="kicker">Mulai Proyek Anda</p>
-          <h2 style={{ fontSize: 'clamp(38px, 7vw, 64px)', lineHeight: 0.95, maxWidth: 760, margin: '0 auto' }}>
-            Wujudkan Visi Arsitektural Anda Bersama Kami.
-          </h2>
-          <Link className="btn" style={{ marginTop: 22 }} to="/kontak-kami">Konsultasi Gratis</Link>
-          <div style={{ marginTop: 14 }}>
-            <Link className="muted" to="/kontak-kami">
-              Atau langsung kirim brief proyek Anda
-            </Link>
-          </div>
-        </div>
-      </section>
     </div>
   )
 }

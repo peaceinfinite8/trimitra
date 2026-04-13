@@ -1,0 +1,11 @@
+{
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/berita/[slug]/page": "/berita/[slug]",
+  "/berita/page": "/berita",
+  "/category/[slug]/page": "/category/[slug]",
+  "/news/[slug]/page": "/news/[slug]",
+  "/news/page": "/news",
+  "/page": "/",
+  "/posts/[slug]/page": "/posts/[slug]"
+}
