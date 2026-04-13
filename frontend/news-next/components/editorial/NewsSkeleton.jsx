@@ -1,7 +1,7 @@
 export default function NewsSkeleton() {
   return (
     <main className="editorial-container space-y-10 py-6 lg:py-8">
-      <section className="grid gap-6 lg:grid-cols-[1fr_3fr_1fr] md:grid-cols-2 sm:grid-cols-1">
+      <section className="grid gap-6 lg:grid-cols-[0.95fr_minmax(0,2.45fr)_1fr] md:grid-cols-2 sm:grid-cols-1">
         <div className="space-y-6">
           <div className="h-56 animate-pulse rounded-sm bg-slate-200" />
           <div className="h-56 animate-pulse rounded-sm bg-slate-200" />
@@ -15,7 +15,10 @@ export default function NewsSkeleton() {
         <div className="space-y-4">
           <div className="h-5 w-24 animate-pulse rounded bg-slate-200" />
           {Array.from({ length: 5 }).map((_, index) => (
-            <div key={index} className="flex gap-3 border-t border-slate-200 pt-4 first:border-t-0 first:pt-0">
+            <div
+              key={index}
+              className="flex gap-3 border-t border-slate-200 pt-4 first:border-t-0 first:pt-0"
+            >
               <div className="flex-1 space-y-2">
                 <div className="h-4 animate-pulse rounded bg-slate-200" />
                 <div className="h-3 w-24 animate-pulse rounded bg-slate-200" />
@@ -27,8 +30,11 @@ export default function NewsSkeleton() {
       </section>
 
       {Array.from({ length: 3 }).map((_, sectionIndex) => (
-        <section key={sectionIndex} className="space-y-5">
-          <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+        <section
+          key={sectionIndex}
+          className="space-y-5 border-b border-slate-200 pb-8"
+        >
+          <div className="news-section-divider flex items-center justify-between border-b border-slate-200/80 pb-3">
             <div className="h-4 w-36 animate-pulse rounded bg-slate-200" />
             <div className="h-4 w-20 animate-pulse rounded bg-slate-200" />
           </div>
@@ -50,8 +56,8 @@ export default function NewsSkeleton() {
         </section>
       ))}
 
-      <section className="space-y-5">
-        <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+      <section className="space-y-5 pb-6">
+        <div className="news-section-divider flex items-center justify-between border-b border-slate-200/80 pb-3">
           <div className="h-4 w-44 animate-pulse rounded bg-slate-200" />
           <div className="h-4 w-20 animate-pulse rounded bg-slate-200" />
         </div>
@@ -79,5 +85,5 @@ export default function NewsSkeleton() {
         </div>
       </section>
     </main>
-  )
+  );
 }

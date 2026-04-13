@@ -481,37 +481,53 @@ function BeritaPage() {
                     ) : null}
                   </div>
                   <div className="berita-editorial-grid4">
-                    {section.items.slice(0, 4).map((item) => (
-                      <article key={item.slug} className="berita-grid-card">
-                        <Link
-                          to={`/berita/${item.slug}`}
-                          className="berita-image-link"
-                          data-chip={getContentChipLabel(item.category)}
-                          onMouseEnter={() =>
-                            prefetchDetail(item.slug, item.image)
-                          }
-                          onFocus={() => prefetchDetail(item.slug, item.image)}
+                    {section.items.slice(0, 4).map((item, index) => {
+                      const gridVariantClass =
+                        index === 0
+                          ? "is-lead"
+                          : index === 1
+                            ? "is-tall"
+                            : index === 2
+                              ? "is-regular"
+                              : "is-wide";
+
+                      return (
+                        <article
+                          key={item.slug}
+                          className={`berita-grid-card ${gridVariantClass}`}
                         >
-                          <LazyImage
-                            src={item.image}
-                            alt={item.title}
-                            wrapperClassName="berita-grid-media"
-                            className="berita-grid-image"
-                          />
-                        </Link>
-                        <div className="berita-grid-copy">
-                          <p className="berita-kicker">{item.category}</p>
                           <Link
                             to={`/berita/${item.slug}`}
-                            className="berita-grid-title"
+                            className="berita-image-link"
+                            data-chip={getContentChipLabel(item.category)}
+                            onMouseEnter={() =>
+                              prefetchDetail(item.slug, item.image)
+                            }
+                            onFocus={() =>
+                              prefetchDetail(item.slug, item.image)
+                            }
                           >
-                            {item.title}
+                            <LazyImage
+                              src={item.image}
+                              alt={item.title}
+                              wrapperClassName="berita-grid-media"
+                              className="berita-grid-image"
+                            />
                           </Link>
-                          <p className="berita-date">{item.date}</p>
-                          <p>{item.excerpt}</p>
-                        </div>
-                      </article>
-                    ))}
+                          <div className="berita-grid-copy">
+                            <p className="berita-kicker">{item.category}</p>
+                            <Link
+                              to={`/berita/${item.slug}`}
+                              className="berita-grid-title"
+                            >
+                              {item.title}
+                            </Link>
+                            <p className="berita-date">{item.date}</p>
+                            <p>{item.excerpt}</p>
+                          </div>
+                        </article>
+                      );
+                    })}
                   </div>
                 </section>
               ))}

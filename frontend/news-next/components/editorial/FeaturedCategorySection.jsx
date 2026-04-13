@@ -1,28 +1,37 @@
-import ArticleCard from './ArticleCard'
-import CategoryTag from './CategoryTag'
-import Link from 'next/link'
-import { formatDate, truncateText } from '../../lib/utils'
-import Image from 'next/image'
+import ArticleCard from "./ArticleCard";
+import CategoryTag from "./CategoryTag";
+import Link from "next/link";
+import { formatDate, truncateText } from "../../lib/utils";
+import Image from "next/image";
 
-export default function FeaturedCategorySection({ categoryName, categorySlug, posts = [] }) {
-  const [featured, ...rest] = posts
-  const rightPosts = rest.slice(0, 4)
+export default function FeaturedCategorySection({
+  categoryName,
+  categorySlug,
+  posts = [],
+}) {
+  const [featured, ...rest] = posts;
+  const rightPosts = rest.slice(0, 4);
 
-  if (!featured) return null
+  if (!featured) return null;
 
   return (
-    <section className="space-y-6">
-      <div className="flex items-center justify-between border-b border-slate-200 pb-4">
-        <h2 className="text-xs font-bold uppercase tracking-[0.25em] text-gray-800">{categoryName}</h2>
-        <Link href={`/category/${categorySlug}`} className="text-xs font-semibold text-blue-600 transition-colors hover:text-blue-700">
+    <section className="space-y-5 pb-6">
+      <div className="news-section-divider flex items-center justify-between border-b border-slate-200 pb-3">
+        <h2 className="news-section-title text-xs font-bold uppercase tracking-[0.22em] text-slate-900">
+          {categoryName}
+        </h2>
+        <Link
+          href={`/category/${categorySlug}`}
+          className="news-section-link text-sm font-medium text-sky-700 transition-colors hover:text-sky-800"
+        >
           Lihat Semua →
         </Link>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[3fr_2fr] sm:grid-cols-1">
+      <div className="grid gap-6 lg:grid-cols-[2.15fr_1fr] sm:grid-cols-1">
         <article className="space-y-4">
           <Link href={`/berita/${featured.slug}`} className="block">
-            <div className="relative aspect-[4/3] overflow-hidden bg-slate-100 shadow-editorial">
+            <div className="relative aspect-[4/3] overflow-hidden rounded-[2px] bg-slate-100 shadow-editorial">
               <Image
                 src={featured.featuredImage}
                 alt={featured.title}
@@ -46,7 +55,7 @@ export default function FeaturedCategorySection({ categoryName, categorySlug, po
             </div>
 
             <Link href={`/berita/${featured.slug}`} className="block">
-              <h2 className="text-3xl font-bold leading-[1.08] text-gray-900 lg:text-4xl">
+              <h2 className="text-3xl font-black leading-[1.05] text-slate-900 lg:text-4xl">
                 {featured.title}
               </h2>
             </Link>
@@ -55,7 +64,7 @@ export default function FeaturedCategorySection({ categoryName, categorySlug, po
               {truncateText(featured.excerpt, 180)}
             </p>
 
-            <div className="flex items-center gap-3 text-xs text-gray-400">
+            <div className="flex items-center gap-3 text-xs text-slate-500">
               <span>{formatDate(featured.date)}</span>
               <span className="flex items-center gap-2">
                 <Image
@@ -88,5 +97,5 @@ export default function FeaturedCategorySection({ categoryName, categorySlug, po
         </div>
       </div>
     </section>
-  )
+  );
 }
