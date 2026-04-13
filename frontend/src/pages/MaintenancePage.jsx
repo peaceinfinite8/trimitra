@@ -22,7 +22,7 @@ const BuildingIcon = () => (
 );
 
 const TimerIcon = () => (
-    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ width: '60px', height: '60px' }}>
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ width: '50px', height: '50px' }}>
         <defs>
             <linearGradient id="timerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#4F46E5" />
@@ -36,7 +36,7 @@ const TimerIcon = () => (
 );
 
 const EmailIcon = () => (
-    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ width: '50px', height: '50px' }}>
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ width: '40px', height: '40px' }}>
         <defs>
             <linearGradient id="emailGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#60A5FA" />
@@ -49,7 +49,7 @@ const EmailIcon = () => (
 );
 
 const WhatsAppIcon = () => (
-    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ width: '50px', height: '50px' }}>
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ width: '40px', height: '40px' }}>
         <defs>
             <linearGradient id="waGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#10B981" />
@@ -70,13 +70,20 @@ export default function MaintenancePage() {
     const mouseRef = useRef({ x: 0, y: 0 });
 
     useEffect(() => {
-        setIsMobile(window.innerWidth < 768);
+        setIsMobile(window.innerWidth < 640);
+
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 640);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
     }, []);
 
     // Timer Effect
     useEffect(() => {
         const MAINTENANCE_END = new Date(2026, 3, 14, 23, 0, 0).getTime();
-        
+
         const updateTimer = () => {
             const now = new Date().getTime();
             const distance = MAINTENANCE_END - now;
@@ -99,7 +106,6 @@ export default function MaintenancePage() {
     useEffect(() => {
         if (!containerRef.current || !titleRef.current) return;
 
-        // Title entrance
         gsap.from(titleRef.current, {
             opacity: 0,
             y: 100,
@@ -107,10 +113,8 @@ export default function MaintenancePage() {
             ease: 'cubic.out',
         });
 
-        // Floating shapes with parallax
         floatingShapesRef.current.forEach((el, index) => {
             if (el) {
-                // Floating animation
                 gsap.to(el, {
                     y: -40 + index * 10,
                     duration: 4 + index * 0.5,
@@ -120,7 +124,6 @@ export default function MaintenancePage() {
                     delay: index * 0.3,
                 });
 
-                // Rotation
                 gsap.to(el, {
                     rotation: 360,
                     duration: 20 + index * 3,
@@ -130,15 +133,14 @@ export default function MaintenancePage() {
             }
         });
 
-        // Parallax on mouse move
         const handleMouseMove = (e) => {
             mouseRef.current = { x: e.clientX, y: e.clientY };
-            
+
             floatingShapesRef.current.forEach((el, index) => {
                 if (el) {
                     const moveX = (mouseRef.current.x - window.innerWidth / 2) * 0.02 * (index + 1);
                     const moveY = (mouseRef.current.y - window.innerHeight / 2) * 0.02 * (index + 1);
-                    
+
                     gsap.to(el, {
                         x: moveX,
                         y: moveY,
@@ -160,7 +162,7 @@ export default function MaintenancePage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: isMobile ? '16px' : '20px',
+            padding: isMobile ? '12px' : '20px',
             position: 'relative',
             overflow: 'hidden',
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
@@ -193,14 +195,14 @@ export default function MaintenancePage() {
             </div>
 
             {/* Content */}
-            <div style={{ position: 'relative', zIndex: 20, maxWidth: '1024px', width: '100%', textAlign: 'center' }}>
+            <div style={{ position: 'relative', zIndex: 20, maxWidth: isMobile ? '100%' : '1024px', width: '100%', textAlign: 'center' }}>
                 {/* Main Icon with Pulse Animation */}
-                <div style={{ marginBottom: isMobile ? '24px' : '40px', display: 'flex', justifyContent: 'center' }}>
+                <div style={{ marginBottom: isMobile ? '16px' : '40px', display: 'flex', justifyContent: 'center' }}>
                     <div style={{
                         background: 'linear-gradient(135deg, #FF6B6B, #FF8E72)',
                         borderRadius: '50%',
-                        width: isMobile ? '70px' : '100px',
-                        height: isMobile ? '70px' : '100px',
+                        width: isMobile ? '55px' : '100px',
+                        height: isMobile ? '55px' : '100px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -213,7 +215,7 @@ export default function MaintenancePage() {
 
                 {/* Title */}
                 <h1 ref={titleRef} style={{
-                    fontSize: isMobile ? '1.75rem' : '3.5rem',
+                    fontSize: isMobile ? '1.4rem' : '3.5rem',
                     fontWeight: '900',
                     background: 'linear-gradient(135deg, #FF6B6B, #FF8E72, #4F46E5, #10B981)',
                     backgroundSize: '300% 300%',
@@ -221,7 +223,7 @@ export default function MaintenancePage() {
                     WebkitTextFillColor: 'transparent',
                     backgroundClip: 'text',
                     margin: 0,
-                    lineHeight: '1.2',
+                    lineHeight: '1.15',
                     letterSpacing: '-0.02em',
                     animation: 'gradientShift 8s ease infinite',
                 }}>
@@ -230,13 +232,13 @@ export default function MaintenancePage() {
 
                 {/* Subtitle */}
                 <p style={{
-                    fontSize: isMobile ? '1rem' : '1.25rem',
+                    fontSize: isMobile ? '0.9rem' : '1.25rem',
                     color: '#CBD5E1',
                     fontWeight: '500',
-                    margin: isMobile ? '12px 0 32px 0' : '16px 0 48px 0',
-                    lineHeight: '1.6',
+                    margin: isMobile ? '6px 0 20px 0' : '16px 0 48px 0',
+                    lineHeight: '1.5',
                 }}>
-                    Kami sedang membangun pengalaman yang luar biasa untuk Anda
+                    Kami sedang membangun pengalaman untuk Anda
                 </p>
 
                 {/* Timer Section */}
@@ -244,19 +246,19 @@ export default function MaintenancePage() {
                     background: 'rgba(15, 23, 42, 0.6)',
                     backdropFilter: 'blur(20px)',
                     border: '1px solid rgba(148, 163, 184, 0.2)',
-                    borderRadius: '20px',
-                    padding: isMobile ? '24px 16px' : '40px 32px',
-                    marginBottom: isMobile ? '32px' : '48px',
+                    borderRadius: isMobile ? '12px' : '20px',
+                    padding: isMobile ? '12px' : '40px 32px',
+                    marginBottom: isMobile ? '16px' : '48px',
                     boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', gap: '12px' }}>
+                    <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: 'center', justifyContent: 'center', marginBottom: isMobile ? '12px' : '24px', gap: '6px' }}>
                         <TimerIcon />
-                        <h2 style={{ color: '#E2E8F0', fontSize: isMobile ? '1.125rem' : '1.5rem', fontWeight: 'bold', margin: 0 }}>
+                        <h2 style={{ color: '#E2E8F0', fontSize: isMobile ? '0.95rem' : '1.5rem', fontWeight: 'bold', margin: 0 }}>
                             Waktu Tersisa
                         </h2>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: isMobile ? '12px' : '20px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: isMobile ? '8px' : '20px' }}>
                         {[
                             { value: timeLeft.hours, label: 'JAM' },
                             { value: timeLeft.minutes, label: 'MENIT' },
@@ -265,11 +267,11 @@ export default function MaintenancePage() {
                             <div key={i} style={{
                                 background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.8))',
                                 border: '1px solid rgba(148, 163, 184, 0.2)',
-                                borderRadius: '12px',
-                                padding: isMobile ? '16px' : '24px',
+                                borderRadius: '8px',
+                                padding: isMobile ? '10px' : '24px',
                             }}>
                                 <div style={{
-                                    fontSize: isMobile ? '2rem' : '3.5rem',
+                                    fontSize: isMobile ? '1.3rem' : '3.5rem',
                                     fontWeight: 'bold',
                                     background: 'linear-gradient(135deg, #FF6B6B, #FF8E72, #4F46E5, #10B981)',
                                     backgroundSize: '300% 300%',
@@ -278,10 +280,11 @@ export default function MaintenancePage() {
                                     backgroundClip: 'text',
                                     animation: 'gradientShift 8s ease infinite',
                                     fontVariantNumeric: 'tabular-nums',
+                                    lineHeight: '1',
                                 }}>
                                     {String(item.value).padStart(2, '0')}
                                 </div>
-                                <div style={{ fontSize: isMobile ? '0.75rem' : '0.875rem', color: '#94A3B8', marginTop: '8px', fontWeight: '600' }}>
+                                <div style={{ fontSize: isMobile ? '0.65rem' : '0.875rem', color: '#94A3B8', marginTop: isMobile ? '4px' : '8px', fontWeight: '600' }}>
                                     {item.label}
                                 </div>
                             </div>
@@ -294,28 +297,28 @@ export default function MaintenancePage() {
                     background: 'rgba(15, 23, 42, 0.6)',
                     backdropFilter: 'blur(20px)',
                     border: '1px solid rgba(148, 163, 184, 0.2)',
-                    borderRadius: '20px',
-                    padding: isMobile ? '24px 16px' : '40px 32px',
-                    marginBottom: isMobile ? '32px' : '48px',
+                    borderRadius: isMobile ? '12px' : '20px',
+                    padding: isMobile ? '12px' : '40px 32px',
+                    marginBottom: isMobile ? '16px' : '48px',
                 }}>
-                    <h3 style={{ color: '#E2E8F0', fontSize: isMobile ? '1.25rem' : '1.5rem', fontWeight: 'bold', margin: '0 0 24px 0' }}>
-                        🎯 Fitur yang Sedang Dikerjakan
+                    <h3 style={{ color: '#E2E8F0', fontSize: isMobile ? '1rem' : '1.5rem', fontWeight: 'bold', margin: '0 0 12px 0' }}>
+                        🎯 Fitur yang Dikerjakan
                     </h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: isMobile ? '12px' : '16px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: isMobile ? '8px' : '16px' }}>
                         {[
                             { icon: '⚙️', label: 'Performa', color: '#059669' },
-                            { icon: '🎨', label: 'Desain UI', color: '#0369a1' },
+                            { icon: '🎨', label: 'Desain', color: '#0369a1' },
                             { icon: '📊', label: 'Analytics', color: '#6d28d9' },
                             { icon: '🚀', label: 'Kecepatan', color: '#dc2626' },
                         ].map((f, i) => (
                             <div key={i} style={{
                                 background: `linear-gradient(135deg, ${f.color}dd, ${f.color})`,
-                                borderRadius: '12px',
-                                padding: '16px',
+                                borderRadius: '8px',
+                                padding: isMobile ? '10px' : '16px',
                                 transition: 'transform 0.3s ease',
                             }}>
-                                <div style={{ fontSize: '2rem', marginBottom: '8px' }}>{f.icon}</div>
-                                <p style={{ color: '#fff', fontWeight: 'bold', margin: 0, fontSize: isMobile ? '0.875rem' : '0.95rem' }}>{f.label}</p>
+                                <div style={{ fontSize: isMobile ? '1.3rem' : '2rem', marginBottom: '4px' }}>{f.icon}</div>
+                                <p style={{ color: '#fff', fontWeight: 'bold', margin: 0, fontSize: isMobile ? '0.75rem' : '0.95rem' }}>{f.label}</p>
                             </div>
                         ))}
                     </div>
@@ -326,57 +329,57 @@ export default function MaintenancePage() {
                     background: 'rgba(15, 23, 42, 0.6)',
                     backdropFilter: 'blur(20px)',
                     border: '1px solid rgba(148, 163, 184, 0.2)',
-                    borderRadius: '20px',
-                    padding: isMobile ? '24px 16px' : '40px 32px',
+                    borderRadius: isMobile ? '12px' : '20px',
+                    padding: isMobile ? '12px' : '40px 32px',
                 }}>
-                    <h3 style={{ color: '#E2E8F0', fontSize: isMobile ? '1.25rem' : '1.5rem', fontWeight: 'bold', margin: '0 0 24px 0' }}>
+                    <h3 style={{ color: '#E2E8F0', fontSize: isMobile ? '1rem' : '1.5rem', fontWeight: 'bold', margin: '0 0 12px 0' }}>
                         📞 Hubungi Kami
                     </h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: isMobile ? '16px' : '24px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: isMobile ? '10px' : '24px' }}>
                         <a href="mailto:haikallatief0@gmail.com" style={{
                             background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.8))',
                             border: '1px solid rgba(148, 163, 184, 0.2)',
-                            borderRadius: '12px',
-                            padding: isMobile ? '20px' : '24px',
+                            borderRadius: '8px',
+                            padding: isMobile ? '12px' : '24px',
                             textDecoration: 'none',
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
-                            gap: '12px',
+                            gap: '8px',
                             transition: 'all 0.3s ease',
                             cursor: 'pointer',
                         }}>
                             <EmailIcon />
-                            <p style={{ color: '#E2E8F0', fontWeight: 'bold', margin: 0, fontSize: isMobile ? '0.95rem' : '1rem' }}>Email</p>
-                            <p style={{ color: '#94A3B8', fontSize: '0.875rem', margin: 0 }}>haikallatief0@gmail.com</p>
+                            <p style={{ color: '#E2E8F0', fontWeight: 'bold', margin: 0, fontSize: isMobile ? '0.85rem' : '1rem' }}>Email</p>
+                            <p style={{ color: '#94A3B8', fontSize: isMobile ? '0.7rem' : '0.875rem', margin: 0, wordBreak: 'break-word' }}>haikallatief0@gmail.com</p>
                         </a>
                         <a href="https://wa.me/6285185318501" target="_blank" rel="noopener noreferrer" style={{
                             background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.8))',
                             border: '1px solid rgba(148, 163, 184, 0.2)',
-                            borderRadius: '12px',
-                            padding: isMobile ? '20px' : '24px',
+                            borderRadius: '8px',
+                            padding: isMobile ? '12px' : '24px',
                             textDecoration: 'none',
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
-                            gap: '12px',
+                            gap: '8px',
                             transition: 'all 0.3s ease',
                             cursor: 'pointer',
                         }}>
                             <WhatsAppIcon />
-                            <p style={{ color: '#E2E8F0', fontWeight: 'bold', margin: 0, fontSize: isMobile ? '0.95rem' : '1rem' }}>WhatsApp</p>
-                            <p style={{ color: '#94A3B8', fontSize: '0.875rem', margin: 0 }}>+62 851 8531 8501</p>
+                            <p style={{ color: '#E2E8F0', fontWeight: 'bold', margin: 0, fontSize: isMobile ? '0.85rem' : '1rem' }}>WhatsApp</p>
+                            <p style={{ color: '#94A3B8', fontSize: isMobile ? '0.7rem' : '0.875rem', margin: 0 }}>+62 851 8531 8501</p>
                         </a>
                     </div>
                 </div>
 
                 {/* Footer */}
-                <div style={{ marginTop: isMobile ? '32px' : '48px' }}>
-                    <p style={{ color: '#E2E8F0', fontWeight: '600', margin: '0 0 8px 0', fontSize: isMobile ? '0.95rem' : '1rem' }}>
+                <div style={{ marginTop: isMobile ? '16px' : '48px' }}>
+                    <p style={{ color: '#E2E8F0', fontWeight: '600', margin: '0 0 3px 0', fontSize: isMobile ? '0.8rem' : '1rem' }}>
                         Terima kasih atas kesabaran Anda
                     </p>
-                    <p style={{ color: '#94A3B8', fontSize: '0.875rem', margin: 0 }}>
-                        Kami akan segera menghadirkan sesuatu yang istimewa
+                    <p style={{ color: '#94A3B8', fontSize: isMobile ? '0.7rem' : '0.875rem', margin: 0 }}>
+                        Kami akan segera menghadirkan sesuatu istimewa
                     </p>
                 </div>
             </div>
