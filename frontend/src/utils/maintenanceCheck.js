@@ -5,18 +5,36 @@
  * @returns {boolean} true if in maintenance window
  */
 export function isInMaintenanceWindow() {
-  const now = new Date();
-  
-  // Get current time in Indonesian timezone (UTC+7)
-  const indonesiaOffset = 7 * 60; // UTC+7 in minutes
-  const utcTime = new Date(now.getTime() + (now.getTimezoneOffset() * 60000));
-  const indonesiaTime = new Date(utcTime.getTime() + (indonesiaOffset * 60000));
-  
-  // Maintenance date: 14 April 2026
-  const maintenanceStart = new Date(2026, 3, 14, 0, 0, 0); // April 14, 00:00
-  const maintenanceEnd = new Date(2026, 3, 14, 23, 0, 0);   // April 14, 23:00
-  
-  return indonesiaTime >= maintenanceStart && indonesiaTime < maintenanceEnd;
+    const now = new Date();
+    
+    // Get current date/time in Indonesia timezone
+    const formatter = new Intl.DateTimeFormat('id-ID', {
+        timeZone: 'Asia/Jakarta',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+    });
+    
+    const parts = formatter.formatToParts(now);
+    const dateMap = {};
+    parts.forEach(({ type, value }) => {
+        dateMap[type] = value;
+    });
+    
+    const year = parseInt(dateMap.year);
+    const month = parseInt(dateMap.month) - 1; // 0-based
+    const day = parseInt(dateMap.day);
+    const hour = parseInt(dateMap.hour);
+    
+    // Maintenance: April 14, 2026 from 00:00 to 23:00
+    const isOnMaintenanceDate = year === 2026 && month === 3 && day === 14;
+    const isBeforeMaintenanceEnd = hour < 23;
+    
+    return isOnMaintenanceDate && isBeforeMaintenanceEnd;
 }
 
 /**
@@ -24,20 +42,41 @@ export function isInMaintenanceWindow() {
  * @returns {object} maintenance info with status and time remaining
  */
 export function getMaintenanceInfo() {
-  const now = new Date();
-  
-  // Get current time in Indonesian timezone (UTC+7)
-  const indonesiaOffset = 7 * 60;
-  const utcTime = new Date(now.getTime() + (now.getTimezoneOffset() * 60000));
-  const indonesiaTime = new Date(utcTime.getTime() + (indonesiaOffset * 60000));
-  
-  const maintenanceEnd = new Date(2026, 3, 14, 23, 0, 0);
-  
-  const timeRemaining = maintenanceEnd - indonesiaTime;
-  
-  return {
-    isActive: isInMaintenanceWindow(),
-    endTime: maintenanceEnd,
-    timeRemaining: timeRemaining > 0 ? timeRemaining : 0,
-  };
+    const now = new Date();
+    
+    const formatter = new Intl.DateTimeFormat('id-ID', {
+        timeZone: 'Asia/Jakarta',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+    });
+    
+    const parts = formatter.formatToParts(now);
+    const dateMap = {};
+    parts.forEach(({ type, value }) => {
+        dateMap[type] = value;
+    });
+    
+    const year = parseInt(dateMap.year);
+    const month = parseInt(dateMap.month) - 1;
+    const day = parseInt(dateMap.day);
+    const hour = parseInt(dateMap.hour);
+    const minute = parseInt(dateMap.minute);
+    const second = parseInt(dateMap.second);
+    
+    // Calculate time remaining until 23:00 on April 14
+    const maintenanceEnd = new Date();
+    maintenanceEnd.setHours(23, 0, 0, 0);
+    
+    const timeRemaining = maintenanceEnd - now;
+    
+    return {
+        isActive: isInMaintenanceWindow(),
+        endTime: maintenanceEnd,
+        timeRemaining: timeRemaining > 0 ? timeRemaining : 0,
+    };
 }
