@@ -96,6 +96,18 @@ function firstTextMatch(candidates, matcher) {
   return ''
 }
 
+function fetchMediaBySearchTerm(term, perPage) {
+  return fetchWp('media', {
+    media_type: 'image',
+    search: term,
+    per_page: String(perPage),
+    page: '1',
+    orderby: 'date',
+    order: 'desc',
+    _fields: 'id,source_url,alt_text,title.rendered,caption.rendered,media_details.width,media_details.height',
+  })
+}
+
 export function extractContactInfoFromHtml(html) {
   const fallback = {
     address: '',
@@ -240,40 +252,45 @@ export async function getWordPressPageBySlugs(slugs = []) {
 export async function getWordPressGalleryMedia({ perPage = 100, allPages = true } = {}) {
   if (!isWordPressConfiguredForPages()) return []
 
-  const clampedPerPage = Math.min(100, Math.max(1, perPage))
-  const firstPage = await fetchWp('media', {
-    media_type: 'image',
-    per_page: String(clampedPerPage),
-    page: '1',
-    orderby: 'date',
-    order: 'desc',
-    _fields: 'id,source_url,alt_text,title.rendered,caption.rendered,media_details.width,media_details.height',
-  })
+  const clampedPerPage = Math.min(25, Math.max(1, perPage))
+  const searchTerms = ['booth', 'pameran', 'event', 'billboard', 'reklame', 'exhibition']
 
-  let items = Array.isArray(firstPage.data) ? firstPage.data : []
+  const queries = await Promise.all(
+    searchTerms.map(async (term) => {
+      const result = await fetchMediaBySearchTerm(term, clampedPerPage)
 
-  if (allPages && firstPage.totalPages > 1) {
-    const requests = []
-    for (let page = 2; page <= firstPage.totalPages; page += 1) {
-      requests.push(
-        fetchWp('media', {
-          media_type: 'image',
-          per_page: String(clampedPerPage),
-          page: String(page),
-          orderby: 'date',
-          order: 'desc',
-          _fields: 'id,source_url,alt_text,title.rendered,caption.rendered,media_details.width,media_details.height',
-        }),
-      )
-    }
-
-    const results = await Promise.all(requests)
-    results.forEach((result) => {
-      if (Array.isArray(result.data)) {
-        items = items.concat(result.data)
+      if (!allPages || result.totalPages <= 1) {
+        return Array.isArray(result.data) ? result.data : []
       }
-    })
-  }
+
+      const pages = Array.isArray(result.data) ? result.data : []
+      const requests = []
+      for (let page = 2; page <= result.totalPages; page += 1) {
+        requests.push(
+          fetchWp('media', {
+            media_type: 'image',
+            search: term,
+            per_page: String(clampedPerPage),
+            page: String(page),
+            orderby: 'date',
+            order: 'desc',
+            _fields: 'id,source_url,alt_text,title.rendered,caption.rendered,media_details.width,media_details.height',
+          }),
+        )
+      }
+
+      const rest = await Promise.all(requests)
+      rest.forEach((item) => {
+        if (Array.isArray(item.data)) {
+          pages.push(...item.data)
+        }
+      })
+
+      return pages
+    }),
+  )
+
+  const items = queries.flat()
 
   return items
     .map((item) => {
