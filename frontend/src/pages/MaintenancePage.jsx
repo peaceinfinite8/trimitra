@@ -401,31 +401,54 @@ export default function MaintenancePage() {
 
                 {/* Features Section */}
                 <div style={{
-                    background: 'rgba(15, 23, 42, 0.6)',
+                    background: 'linear-gradient(140deg, rgba(15, 23, 42, 0.82), rgba(30, 41, 59, 0.62))',
                     backdropFilter: 'blur(20px)',
                     border: '1px solid rgba(148, 163, 184, 0.2)',
-                    borderRadius: isMobile ? '12px' : '20px',
-                    padding: isMobile ? '12px' : '40px 32px',
+                    borderRadius: isMobile ? '14px' : '24px',
+                    padding: isMobile ? '14px' : '38px 30px',
                     marginBottom: isMobile ? '16px' : '48px',
+                    boxShadow: '0 18px 45px rgba(2, 6, 23, 0.45), inset 0 1px 0 rgba(255,255,255,0.05)',
                 }}>
-                    <h3 style={{ color: '#E2E8F0', fontSize: isMobile ? '1rem' : '1.5rem', fontWeight: 'bold', margin: '0 0 12px 0' }}>
-                        🎯 Fitur yang Dikerjakan
+                    <h3 style={{ color: '#E2E8F0', fontSize: isMobile ? '1rem' : '1.5rem', fontWeight: '700', letterSpacing: '0.01em', margin: '0 0 16px 0' }}>
+                        Fitur yang Dikerjakan
                     </h3>
                     <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: isMobile ? '8px' : '16px' }}>
                         {[
-                            { icon: PerformanceIcon, label: 'Performa', color: '#059669' },
-                            { icon: DesignIcon, label: 'Desain', color: '#0369a1' },
-                            { icon: AnalyticsIcon, label: 'Analytics', color: '#6d28d9' },
-                            { icon: SpeedIcon, label: 'Kecepatan', color: '#dc2626' },
+                            { icon: PerformanceIcon, label: 'Performa', sub: 'Fast Core', colorA: '#10B981', colorB: '#047857' },
+                            { icon: DesignIcon, label: 'Desain', sub: 'Visual 2.0', colorA: '#0EA5E9', colorB: '#1D4ED8' },
+                            { icon: AnalyticsIcon, label: 'Analytics', sub: 'Insight Live', colorA: '#8B5CF6', colorB: '#6D28D9' },
+                            { icon: SpeedIcon, label: 'Kecepatan', sub: 'Turbo Ops', colorA: '#F43F5E', colorB: '#DC2626' },
                         ].map((f, i) => (
                             <div key={i} style={{
-                                background: `linear-gradient(135deg, ${f.color}dd, ${f.color})`,
-                                borderRadius: '8px',
-                                padding: isMobile ? '10px' : '16px',
-                                transition: 'transform 0.3s ease',
+                                position: 'relative',
+                                overflow: 'hidden',
+                                background: `linear-gradient(140deg, ${f.colorA}, ${f.colorB})`,
+                                borderRadius: '12px',
+                                padding: isMobile ? '11px' : '18px',
+                                border: '1px solid rgba(255,255,255,0.2)',
+                                boxShadow: '0 10px 24px rgba(2,6,23,0.35)',
+                                transform: 'translateZ(0)',
                             }}>
-                                <div style={{ marginBottom: '4px' }}><f.icon /></div>
-                                <p style={{ color: '#fff', fontWeight: 'bold', margin: 0, fontSize: isMobile ? '0.75rem' : '0.95rem' }}>{f.label}</p>
+                                <div style={{
+                                    position: 'absolute',
+                                    top: '-40%',
+                                    left: '-25%',
+                                    width: '80%',
+                                    height: '180%',
+                                    background: 'linear-gradient(120deg, rgba(255,255,255,0.35), rgba(255,255,255,0))',
+                                    transform: 'rotate(18deg)',
+                                    animation: `cardShine 4.2s ease-in-out ${i * 0.25}s infinite`,
+                                }} />
+                                <div style={{
+                                    position: 'absolute',
+                                    inset: '0',
+                                    borderRadius: '12px',
+                                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.35), inset 0 -12px 24px rgba(2,6,23,0.18)',
+                                    pointerEvents: 'none',
+                                }} />
+                                <div style={{ position: 'relative', zIndex: 2, marginBottom: '6px', display: 'flex', justifyContent: 'center' }}><f.icon /></div>
+                                <p style={{ position: 'relative', zIndex: 2, color: '#fff', fontWeight: '700', margin: 0, fontSize: isMobile ? '0.78rem' : '0.98rem' }}>{f.label}</p>
+                                <p style={{ position: 'relative', zIndex: 2, color: 'rgba(255,255,255,0.78)', margin: '2px 0 0 0', fontSize: isMobile ? '0.64rem' : '0.72rem', letterSpacing: '0.04em', textTransform: 'uppercase' }}>{f.sub}</p>
                             </div>
                         ))}
                     </div>
@@ -548,6 +571,10 @@ export default function MaintenancePage() {
                 @keyframes boltPulse {
                     0%, 100% { transform: scale(0.95); filter: drop-shadow(0 0 0px rgba(254, 226, 226, 0)); }
                     50% { transform: scale(1.06); filter: drop-shadow(0 0 7px rgba(254, 226, 226, 0.9)); }
+                }
+                @keyframes cardShine {
+                    0%, 100% { transform: translateX(-35%) rotate(18deg); opacity: 0.18; }
+                    50% { transform: translateX(55%) rotate(18deg); opacity: 0.42; }
                 }
                 @keyframes gradientShift {
                     0% { background-position: 0% 50%; }
