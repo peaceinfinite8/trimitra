@@ -11218,7 +11218,8 @@ body.route-home .site-footer::before {
 /* Berita editorial clean layout */
 
 .berita-editorial-page {
-  background: linear-gradient(135deg, #0b1628 0%, #0f2044 60%, #1a1040 100%);
+  background: linear-gradient(135deg, #0b1628 0%, #0f2044 60%, #1a1040 100%) !important;
+  min-height: 100vh;
 }
 
 .berita-editorial-wrap {
@@ -11243,9 +11244,9 @@ body.route-home .site-footer::before {
 }
 
 .berita-type-pill {
-  border: 1px solid #1a2e50;
+  border: 1px solid #38bdf8;
   background: transparent;
-  color: #a0b0c8;
+  color: #ffffff;
   border-radius: 999px;
   padding: 8px 12px;
   font:
@@ -11259,8 +11260,8 @@ body.route-home .site-footer::before {
 
 .berita-type-pill.is-active {
   border-color: #38bdf8;
-  background: rgba(56, 189, 248, 0.15);
-  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.2);
+  color: #ffffff;
 }
 
 .berita-editorial-hero {
@@ -11317,7 +11318,7 @@ body.route-home .site-footer::before {
 }
 
 .berita-mini-title {
-  color: #e0e8f8;
+  color: #ffffff;
   font:
     700 clamp(17px, 1.7vw, 29px)/1.05 "Epilogue",
     sans-serif;
@@ -11331,13 +11332,13 @@ body.route-home .site-footer::before {
 .berita-main-copy p,
 .berita-grid-copy p,
 .berita-spotlight-main-copy p {
-  color: #a0b0c8;
+  color: #e8e8e8;
   font-size: 13px;
   line-height: 1.55;
 }
 
 .berita-date {
-  color: #7a8aa0 !important;
+  color: #b0b8c8 !important;
   font-size: 12px !important;
   line-height: 1.4 !important;
 }
@@ -11380,7 +11381,7 @@ body.route-home .site-footer::before {
 
 .berita-main-copy h1 {
   margin: 0;
-  color: #f0f4fa;
+  color: #ffffff;
   font:
     700 clamp(38px, 5.2vw, 64px)/1.02 "Epilogue",
     sans-serif;
@@ -11398,7 +11399,7 @@ body.route-home .site-footer::before {
 
 .berita-latest-head {
   margin-bottom: 10px;
-  color: #e0e8f8;
+  color: #ffffff;
   font:
     700 11px/1 "Epilogue",
     sans-serif;
@@ -11421,7 +11422,7 @@ body.route-home .site-footer::before {
 }
 
 .berita-latest-title {
-  color: #e0e8f8;
+  color: #ffffff;
   font:
     700 15px/1.24 "Epilogue",
     sans-serif;
@@ -11470,7 +11471,7 @@ body.route-home .site-footer::before {
 
 .berita-section-head h2 {
   margin: 0;
-  color: #e0e8f8;
+  color: #ffffff;
   font:
     700 12px/1 "Epilogue",
     sans-serif;
@@ -11498,11 +11499,11 @@ body.route-home .site-footer::before {
   display: grid;
   gap: 0;
   min-width: 0;
-  border: 1px solid #1a2e50;
+  border: 1px solid rgba(56, 189, 248, 0.3);
   border-radius: 20px;
-  background: rgba(13, 30, 53, 0.5);
+  background: rgba(13, 30, 53, 0.7);
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   transition: all 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -11569,7 +11570,7 @@ body.route-home .site-footer::before {
 }
 
 .berita-grid-title {
-  color: #e0e8f8;
+  color: #ffffff;
   font:
     700 18px/1.12 "Epilogue",
     sans-serif;
@@ -11636,7 +11637,7 @@ body.route-home .site-footer::before {
 }
 
 .berita-spotlight-main-title {
-  color: #f0f4fa;
+  color: #ffffff;
   font:
     700 clamp(28px, 3.7vw, 44px)/1.05 "Epilogue",
     sans-serif;
@@ -11676,7 +11677,7 @@ body.route-home .site-footer::before {
 }
 
 .berita-spotlight-small-title {
-  color: #e0e8f8;
+  color: #ffffff;
   font:
     700 15px/1.22 "Epilogue",
     sans-serif;
