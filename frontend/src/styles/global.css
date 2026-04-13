@@ -4611,7 +4611,9 @@ body.nav-over-hero .hero-single {
 .blog-detail-side-title {
   margin: 0 0 10px;
   color: #111827;
-  font: 700 24px/1.05 "Epilogue", sans-serif;
+  font:
+    700 24px/1.05 "Epilogue",
+    sans-serif;
   letter-spacing: -0.02em;
 }
 
@@ -4688,7 +4690,9 @@ body.nav-over-hero .hero-single {
 
 .blog-detail-popular-rank {
   color: #94a3b8;
-  font: 700 12px/1 "Epilogue", sans-serif;
+  font:
+    700 12px/1 "Epilogue",
+    sans-serif;
   letter-spacing: 0.08em;
 }
 
