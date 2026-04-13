@@ -1,0 +1,11 @@
+{
+  "/_global-error/page": "app/_global-error/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/berita/[slug]/page": "app/berita/[slug]/page.js",
+  "/berita/page": "app/berita/page.js",
+  "/category/[slug]/page": "app/category/[slug]/page.js",
+  "/news/[slug]/page": "app/news/[slug]/page.js",
+  "/news/page": "app/news/page.js",
+  "/page": "app/page.js",
+  "/posts/[slug]/page": "app/posts/[slug]/page.js"
+}
