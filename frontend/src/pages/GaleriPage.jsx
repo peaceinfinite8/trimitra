@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import LazyImage from '../components/ui/LazyImage'
 import {
@@ -262,25 +262,48 @@ function GaleriPage() {
   }
 
   return (
-    <div className="galeri-page-fix">
+    <div className="galeri-page-fix gallery-page-simple">
       <section className="gallery-hero gallery-hero-redesign" data-nav-hero>
-        <LazyImage
-          className="home-hero-bg"
-          src={heroImage}
-          alt="Galeri karya Trimitra"
-          data-gsap-parallax
-        />
         <div className="container">
-          <p className="kicker" style={{ color: '#ccb278' }}>
-            Beranda &nbsp;›&nbsp; Galeri
-          </p>
-          <h1 className="section-title">Galeri Karya Kami</h1>
-          <p className="gallery-hero-tagline">Dokumentasi karya terbaik kami</p>
+          <div className="gallery-hero-grid">
+            <div className="gallery-hero-copy">
+              <p className="kicker">Beranda &nbsp;›&nbsp; Galeri</p>
+              <h1 className="section-title">Galeri Karya Kami</h1>
+              <p className="gallery-hero-tagline">
+                Kumpulan visual proyek yang ditampilkan simpel, padat, dan fokus ke hasil kerja.
+              </p>
+            </div>
+
+            <motion.article
+              className="gallery-hero-feature card"
+              initial={prefersReducedMotion ? false : { opacity: 0, y: 14 }}
+              animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+              transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <button
+                type="button"
+                className="gallery-lightbox-trigger gallery-hero-feature-trigger"
+                onClick={() => setActiveIndex(0)}
+                aria-label="Buka karya unggulan galeri"
+              >
+                <LazyImage
+                  src={heroImage}
+                  alt="Galeri karya Trimitra"
+                  className="gallery-image gallery-hero-feature-image"
+                />
+                <span className="gallery-card-overlay gallery-hero-feature-overlay" aria-hidden="true">
+                  <span className="gallery-card-badge">Karya Unggulan</span>
+                  <span className="gallery-card-title">Booth pameran brand dengan struktur modern dan pencahayaan fokus.</span>
+                  <span className="gallery-hero-feature-meta">Galeri · visual pilihan</span>
+                </span>
+              </button>
+            </motion.article>
+          </div>
         </div>
       </section>
 
       <section className="gallery-filter gallery-filter-sticky">
-        <div className="container filter-pills">
+        <div className="container filter-pills gallery-filter-shell">
           {galleryFilters.map((filter) => (
             <button
               key={filter}
@@ -288,7 +311,10 @@ function GaleriPage() {
               onClick={() => handleFilterChange(filter)}
               type="button"
             >
-              {filter}
+              <span>{filter}</span>
+              <strong>
+                {String(filter === 'Semua' ? galleryItems.length : galleryItems.filter((item) => item.category === filter).length).padStart(2, '0')}
+              </strong>
             </button>
           ))}
         </div>
@@ -311,7 +337,7 @@ function GaleriPage() {
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={activeFilterTransitionKey}
-              className="container gallery-grid"
+              className="container gallery-grid gallery-grid-premium"
               initial={prefersReducedMotion ? false : { opacity: 0, scale: 1.05 }}
               animate={prefersReducedMotion ? { opacity: 1, scale: 1 } : { opacity: 1, scale: 1 }}
               exit={prefersReducedMotion ? undefined : { opacity: 0, scale: 0.95 }}
@@ -456,20 +482,6 @@ function GaleriPage() {
         </div>
       )}
 
-      <section className="section gallery-premium-cta" style={{ textAlign: 'center' }}>
-        <div className="container gallery-premium-cta-shell">
-          <p className="kicker">Mulai Proyek Anda</p>
-          <h2 style={{ fontSize: 'clamp(38px, 7vw, 64px)', lineHeight: 0.95, maxWidth: 760, margin: '0 auto' }}>
-            Wujudkan Visi Arsitektural Anda Bersama Kami.
-          </h2>
-          <Link className="btn" style={{ marginTop: 22 }} to="/kontak-kami">Konsultasi Gratis</Link>
-          <div style={{ marginTop: 14 }}>
-            <Link className="muted" to="/kontak-kami">
-              Atau langsung kirim brief proyek Anda
-            </Link>
-          </div>
-        </div>
-      </section>
     </div>
   )
 }
