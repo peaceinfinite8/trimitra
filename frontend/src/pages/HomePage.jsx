@@ -175,7 +175,7 @@ function HomeJournalSection({
 
           <div className="home-journal-side-stack">
             {sideJournals.map((item) => (
-              <Link key={item.title} className="journal-card-link" to={`/berita/${item.slug}`}>
+              <Link key={item.slug || item.title} className="journal-card-link" to={`/berita/${item.slug}`}>
                 <article className="home-journal-side-card card">
                   <LazyImage src={item.image} alt={item.title} />
                   <div className="journal-overlay home-journal-side-overlay">
@@ -492,7 +492,7 @@ function HomePage() {
         <div className="container home-lumen-intro-grid">
           <div className="home-lumen-intro-copy">
             <p className="kicker">Studio Trimitra</p>
-            <h2 className="home-lumen-title">Membangun Pengalaman Brand dengan Standar Eksekusi yang Lebih Tinggi</h2>
+            <h1 className="home-lumen-title">Membangun Pengalaman Brand dengan Standar Eksekusi yang Lebih Tinggi</h1>
             <p className="muted home-lumen-copy">
               Layout home kami fokus pada keseimbangan visual premium dan kenyamanan baca, sehingga setiap section terasa hidup,
               terang, dan tetap jelas untuk calon klien.
