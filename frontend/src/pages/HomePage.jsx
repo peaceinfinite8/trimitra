@@ -73,7 +73,7 @@ function PortfolioShowcase({ kicker, title, images }) {
   const prefersReducedMotion = useReducedMotion()
 
   return (
-    <SectionReveal className="section">
+    <SectionReveal className="section home-portfolio-section">
       <div className="container">
         <p className="kicker">{kicker}</p>
         <h2 className="home-portfolio-title text-shimmer">{title}</h2>
@@ -141,7 +141,7 @@ function HomeJournalSection({
   sideJournals,
 }) {
   return (
-    <SectionReveal className="section" id="home-journal">
+    <SectionReveal className="section home-journal-section" id="home-journal">
       <div className="container">
         <div className="journal-row">
           <div>
@@ -466,7 +466,7 @@ function HomePage() {
           sideJournals={sideJournals}
         />
 
-        <SectionReveal className="dark-cta">
+        <SectionReveal className="dark-cta home-cta-section">
           <div className="container home-dark-cta-shell">
             <h2 className="home-dark-cta-title">{ctaTitle}</h2>
             <p className="muted home-dark-cta-copy">
@@ -529,7 +529,7 @@ function HomePage() {
         sideJournals={sideJournals}
       />
 
-      <SectionReveal className="dark-cta">
+      <SectionReveal className="dark-cta home-cta-section">
         <div className="container home-dark-cta-shell">
           <h2 className="home-dark-cta-title">Siap Wujudkan Aktivasi Brand yang Lebih Berdampak?</h2>
           <p className="muted home-dark-cta-copy">
