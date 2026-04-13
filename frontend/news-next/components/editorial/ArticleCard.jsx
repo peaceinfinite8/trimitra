@@ -123,13 +123,13 @@ export default function ArticleCard({
             <h2
               className={[
                 "font-bold text-slate-900 transition-colors group-hover/article:text-sky-700",
-                isHero ? "mt-3 text-4xl leading-[1.02] lg:text-5xl" : "",
-                isFeature ? "mt-2.5 text-2xl leading-[1.08] lg:text-3xl" : "",
+                isHero ? "mt-3 text-4xl leading-[1.02] line-clamp-3 lg:text-5xl" : "",
+                isFeature ? "mt-2.5 text-xl leading-[1.1] line-clamp-3 lg:text-2xl" : "",
                 isSmall
                   ? "mt-1.5 line-clamp-3 text-sm leading-snug lg:text-base"
                   : "",
                 !isHero && !isFeature && !isSmall
-                  ? "mt-2 text-base leading-snug line-clamp-2"
+                  ? "mt-2 text-base leading-snug line-clamp-3"
                   : "",
               ].join(" ")}
             >
