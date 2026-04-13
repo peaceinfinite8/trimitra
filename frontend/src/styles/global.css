@@ -736,6 +736,7 @@ body.nav-over-hero .page-main {
   width: 100%;
   height: 100%;
   display: block;
+  overflow: hidden;
   background: #2a241f;
 }
 
@@ -744,6 +745,7 @@ body.nav-over-hero .page-main {
   height: 100%;
   display: block;
   object-fit: cover;
+  border-radius: inherit;
   opacity: 0;
   filter: blur(18px);
   transform: scale(1.02);
@@ -11298,6 +11300,7 @@ body.route-home .site-footer::before {
   border-radius: 18px 28px 16px 24px;
   overflow: hidden;
   background: #dfe6ee;
+  transform: translateZ(0);
 }
 
 .berita-mini-image {
@@ -11356,6 +11359,7 @@ body.route-home .site-footer::before {
   border-radius: 28px 34px 20px 30px;
   overflow: hidden;
   background: #dfe6ee;
+  transform: translateZ(0);
 }
 
 .berita-main-image {
@@ -11440,6 +11444,7 @@ body.route-home .site-footer::before {
   border-radius: 12px 18px 12px 16px;
   overflow: hidden;
   background: #dfe6ee;
+  transform: translateZ(0);
 }
 
 .berita-latest-thumb-img {
@@ -11512,6 +11517,7 @@ body.route-home .site-footer::before {
   border-radius: 16px 24px 14px 20px;
   overflow: hidden;
   background: #dfe6ee;
+  transform: translateZ(0);
 }
 
 .berita-grid-card.is-lead .berita-grid-media {
@@ -11595,11 +11601,16 @@ body.route-home .site-footer::before {
   border-radius: 24px 32px 20px 30px;
   overflow: hidden;
   background: #dfe6ee;
+  transform: translateZ(0);
+  transform: translateZ(0);
 }
 
 .berita-spotlight-main-img {
   width: 100%;
   height: 100%;
+  display: block;
+  overflow: hidden;
+  border-radius: inherit;
   object-fit: cover;
 }
 
