@@ -9486,6 +9486,17 @@ body::after {
   color: #55708b;
 }
 
+.home-page-lumen .home-journal-feature-content .home-journal-card-title,
+.home-page-lumen .home-journal-side-overlay .home-journal-card-title {
+  color: #f4f9ff;
+  text-shadow: 0 2px 8px rgba(5, 16, 30, 0.55);
+}
+
+.home-page-lumen .home-journal-feature-content p,
+.home-page-lumen .home-journal-side-overlay p {
+  color: rgba(220, 236, 252, 0.84);
+}
+
 .home-page-lumen .values-media-meta {
   padding: 18px 18px 16px;
   border-radius: 18px;
