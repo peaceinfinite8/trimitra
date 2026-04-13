@@ -2,6 +2,7 @@ import { Suspense, lazy } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import MainLayout from '../layouts/MainLayout'
 import { pageImporters } from './routePrefetch'
+import MaintenancePage from '../pages/MaintenancePage'
 
 const HomePage = lazy(pageImporters['/'])
 const TentangKamiPage = lazy(pageImporters['/tentang-kami'])
@@ -18,6 +19,17 @@ function RouteFallback() {
 }
 
 function AppRouter() {
+  // Set VITE_MAINTENANCE_MODE=true dalam .env untuk mengaktifkan maintenance page
+  const isMaintenanceMode = import.meta.env.VITE_MAINTENANCE_MODE === 'true'
+
+  if (isMaintenanceMode) {
+    return (
+      <Routes>
+        <Route path="*" element={<MaintenancePage />} />
+      </Routes>
+    )
+  }
+
   return (
     <Routes>
       <Route element={<MainLayout />}>
@@ -30,6 +42,7 @@ function AppRouter() {
         <Route path="/kontak-kami" element={<Suspense fallback={<RouteFallback />}><KontakKamiPage /></Suspense>} />
         <Route path="/kebijakan-privasi" element={<Suspense fallback={<RouteFallback />}><KebijakanPrivasiPage /></Suspense>} />
         <Route path="/syarat-layanan" element={<Suspense fallback={<RouteFallback />}><SyaratLayananPage /></Suspense>} />
+        <Route path="/maintenance" element={<MaintenancePage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
