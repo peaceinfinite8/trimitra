@@ -11319,7 +11319,7 @@ body.route-home .site-footer::before {
   letter-spacing: -0.02em;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
   overflow: hidden;
 }
 
@@ -11421,7 +11421,7 @@ body.route-home .site-footer::before {
   letter-spacing: -0.01em;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
   overflow: hidden;
   word-break: break-word;
 }
@@ -11555,7 +11555,7 @@ body.route-home .site-footer::before {
   letter-spacing: -0.015em;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
   overflow: hidden;
 }
 
@@ -11656,7 +11656,7 @@ body.route-home .site-footer::before {
   letter-spacing: -0.01em;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
   overflow: hidden;
 }
 
