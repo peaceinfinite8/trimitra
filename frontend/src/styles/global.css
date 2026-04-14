@@ -12458,6 +12458,16 @@ body.route-services .site-footer::before {
   border-radius: 18px;
 }
 
+.services-page-sky .services-redesign-trust-marquee-fallback {
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  gap: 0;
+  padding-bottom: 4px;
+}
+
 .services-page-sky .services-redesign-trust-marquee .rfm-marquee,
 .services-page-sky .services-redesign-trust-marquee .rfm-initial-child-container {
   align-items: center;
