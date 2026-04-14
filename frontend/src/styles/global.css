@@ -12293,6 +12293,7 @@ body.route-home .site-footer::before {
   -webkit-backdrop-filter: blur(10px);
 }
 
+.berita-editorial-page .gallery-pagination .gallery-page-btn,
 .berita-editorial-page .blog-pagination .gallery-page-btn {
   border-color: rgba(137, 191, 235, 0.18);
   background: linear-gradient(
@@ -12302,8 +12303,20 @@ body.route-home .site-footer::before {
   );
   color: #cfe4f7;
   box-shadow: 0 8px 18px rgba(4, 13, 27, 0.16);
+  border-width: 1px !important;
+  border-style: solid !important;
+  border-color: rgba(137, 191, 235, 0.18) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(20, 38, 65, 0.86) 0%,
+    rgba(13, 24, 44, 0.84) 100%
+  ) !important;
+  color: #cfe4f7 !important;
+  box-shadow: 0 8px 18px rgba(4, 13, 27, 0.16) !important;
 }
 
+.berita-editorial-page .gallery-pagination .gallery-page-btn:hover:not(:disabled),
+.berita-editorial-page .gallery-pagination .gallery-page-btn:focus-visible:not(:disabled),
 .berita-editorial-page .blog-pagination .gallery-page-btn:hover:not(:disabled),
 .berita-editorial-page
   .blog-pagination
@@ -12316,15 +12329,29 @@ body.route-home .site-footer::before {
   );
   color: #f0f7fd;
   box-shadow: 0 10px 22px rgba(7, 20, 38, 0.18);
+  border-color: rgba(125, 211, 252, 0.38) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(27, 51, 86, 0.92) 0%,
+    rgba(18, 35, 63, 0.92) 100%
+  ) !important;
+  color: #f0f7fd !important;
+  box-shadow: 0 10px 22px rgba(7, 20, 38, 0.18) !important;
 }
 
+.berita-editorial-page .gallery-pagination .gallery-page-btn.is-active,
 .berita-editorial-page .blog-pagination .gallery-page-btn.is-active {
   background: linear-gradient(140deg, #173954 0%, #24558c 100%);
   border-color: rgba(145, 217, 255, 0.42);
   color: #ffffff;
   box-shadow: 0 12px 24px rgba(13, 73, 122, 0.2);
+  background: linear-gradient(140deg, #173954 0%, #24558c 100%) !important;
+  border-color: rgba(145, 217, 255, 0.42) !important;
+  color: #ffffff !important;
+  box-shadow: 0 12px 24px rgba(13, 73, 122, 0.2) !important;
 }
 
+.berita-editorial-page .gallery-pagination .gallery-page-btn:disabled,
 .berita-editorial-page .blog-pagination .gallery-page-btn:disabled {
   border-color: rgba(157, 199, 226, 0.12);
   background: linear-gradient(
@@ -12333,6 +12360,13 @@ body.route-home .site-footer::before {
     rgba(20, 35, 54, 0.28) 100%
   );
   color: rgba(217, 235, 255, 0.3);
+  border-color: rgba(157, 199, 226, 0.12) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(28, 46, 70, 0.36) 0%,
+    rgba(20, 35, 54, 0.28) 100%
+  ) !important;
+  color: rgba(217, 235, 255, 0.3) !important;
 }
 
 .berita-editorial-page .blog-pagination .gallery-page-ellipsis {
