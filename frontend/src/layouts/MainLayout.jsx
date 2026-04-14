@@ -49,7 +49,8 @@ function RoutePageLoader({ prefersReducedMotion }) {
 function MainLayout() {
   const location = useLocation()
   const prefersReducedMotion = useReducedMotion()
-  const routeLoaderKey = `${location.key}-${location.pathname}${location.search}`
+  const routeLoaderKey = `${location.pathname}${location.search}`
+  const disableRouteLoader = location.pathname.startsWith('/layanan')
 
   useGsapEnhance(routeLoaderKey)
   useSexyScroll(location.key, 'balanced')
@@ -74,14 +75,16 @@ function MainLayout() {
 
   return (
     <div className="app-shell">
-      <RoutePageLoader key={routeLoaderKey} prefersReducedMotion={prefersReducedMotion} />
+      {disableRouteLoader ? null : (
+        <RoutePageLoader key={routeLoaderKey} prefersReducedMotion={prefersReducedMotion} />
+      )}
 
       <a className="skip-link" href="#main-content">Lewati ke konten utama</a>
       <Navbar />
       <main className="page-main" id="main-content" tabIndex="-1">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
-            key={`${location.pathname}${location.search}`}
+            key={routeLoaderKey}
             className="route-transition-shell"
             initial={prefersReducedMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
