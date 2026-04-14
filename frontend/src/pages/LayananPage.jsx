@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { SectionReveal, StaggerGroup, StaggerItem } from '../components/animation/Reveal'
 import LazyImage from '../components/ui/LazyImage'
-import ClientMarquee from '../components/ui/ClientMarquee'
+import ClientMarquee from '../components/ClientMarquee'
 import { getWordPressPageBySlugs, isWordPressConfiguredForPages } from '../data/wordpressPages'
 import { pickLinkField, pickTextField } from '../data/wpUiFields'
 
