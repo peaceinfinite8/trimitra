@@ -13,7 +13,6 @@ const LIVE_REFRESH_INTERVAL_MS = 20000;
 const WP_NEWS_SNAPSHOT_KEY = "berita:wp-posts:v1";
 const ITEMS_PER_PAGE = 12;
 const MAX_PAGINATION_NUMBERS = 10;
-const CONTENT_TYPES = ["all", "blog", "news", "event"];
 
 function readWordPressPostsSnapshot() {
   if (typeof window === "undefined") return null;
@@ -124,7 +123,6 @@ function BeritaPage() {
   }
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [activeType, setActiveType] = useState("all");
   const [posts, setPosts] = useState(initialDataRef.current.posts);
   const [isLoadingWp, setIsLoadingWp] = useState(() => isWordPressConfigured());
   const prefetchedImagesRef = useRef(new Set());
@@ -137,9 +135,6 @@ function BeritaPage() {
     const parsedPage =
       Number.isFinite(rawPage) && rawPage > 0 ? Math.floor(rawPage) : 1;
     setCurrentPage(parsedPage);
-
-    const rawType = (searchParams.get("type") ?? "all").toLowerCase();
-    setActiveType(CONTENT_TYPES.includes(rawType) ? rawType : "all");
   }, [searchParams]);
 
   useEffect(() => {
@@ -235,12 +230,7 @@ function BeritaPage() {
     return posts;
   }, [posts]);
 
-  const filteredPosts = useMemo(() => {
-    if (activeType === "all") return editorialPosts;
-    return editorialPosts.filter(
-      (post) => inferContentTypeFromText(post?.category) === activeType,
-    );
-  }, [activeType, editorialPosts]);
+  const filteredPosts = editorialPosts;
 
   const totalPages = Math.max(
     1,
@@ -301,25 +291,11 @@ function BeritaPage() {
     });
   };
 
-  const handleTypeChange = (type) => {
-    const nextType = CONTENT_TYPES.includes(type) ? type : "all";
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      if (nextType === "all") {
-        next.delete("type");
-      } else {
-        next.set("type", nextType);
-      }
-      next.set("page", "1");
-      return next;
-    });
-  };
-
   const pageItems = useMemo(
     () => buildPageItems(currentPage, totalPages),
     [currentPage, totalPages],
   );
-  const showViewAllLinks = activeType === "all";
+  const showViewAllLinks = true;
 
   const prefetchDetail = (slug, imageUrl) => {
     if (!slug) return;
@@ -353,22 +329,7 @@ function BeritaPage() {
             </div>
           ) : (
             <>
-              <div className="berita-type-filter" id="berita-list">
-                {CONTENT_TYPES.map((type) => {
-                  const active = activeType === type;
-                  const label = type === "all" ? "Semua" : type.toUpperCase();
-                  return (
-                    <button
-                      key={type}
-                      type="button"
-                      className={`berita-type-pill ${active ? "is-active" : ""}`}
-                      onClick={() => handleTypeChange(type)}
-                    >
-                      {label}
-                    </button>
-                  );
-                })}
-              </div>
+              <div id="berita-list" />
 
               <section className="berita-editorial-hero">
                 <div className="berita-editorial-left">
