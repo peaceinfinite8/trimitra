@@ -1975,7 +1975,9 @@ body.nav-over-hero .hero-single {
   align-items: center;
   gap: 8px;
   color: rgba(31, 88, 130, 0.5);
-  font: 700 12px/1 "Epilogue", sans-serif;
+  font:
+    700 12px/1 "Epilogue",
+    sans-serif;
   letter-spacing: 0.08em;
   transition: color 0.28s ease;
 }
@@ -2055,7 +2057,8 @@ body.nav-over-hero .hero-single {
   display: flex;
   flex-direction: column;
   gap: 7px;
-  padding: clamp(1.15rem, 1.8vw, 1.55rem) clamp(0.8rem, 1.2vw, 1rem) clamp(1.25rem, 2vw, 1.6rem);
+  padding: clamp(1.15rem, 1.8vw, 1.55rem) clamp(0.8rem, 1.2vw, 1rem)
+    clamp(1.25rem, 2vw, 1.6rem);
   position: relative;
 }
 
@@ -2067,7 +2070,9 @@ body.nav-over-hero .hero-single {
 
 .service-sticky-progress-value {
   color: #0a6798;
-  font: 800 clamp(22px, 2.4vw, 34px)/0.9 "Epilogue", sans-serif;
+  font:
+    800 clamp(22px, 2.4vw, 34px)/0.9 "Epilogue",
+    sans-serif;
   opacity: 0.08;
 }
 
@@ -2089,7 +2094,9 @@ body.nav-over-hero .hero-single {
 .service-sticky-kicker {
   margin: 0;
   color: #0677b2;
-  font: 700 11px/1 "Epilogue", sans-serif;
+  font:
+    700 11px/1 "Epilogue",
+    sans-serif;
   letter-spacing: 0.13em;
   text-transform: uppercase;
 }
@@ -2097,7 +2104,9 @@ body.nav-over-hero .hero-single {
 .service-sticky-service {
   margin: 0;
   color: #8098ab;
-  font: 700 14px/1.3 "Epilogue", sans-serif;
+  font:
+    700 14px/1.3 "Epilogue",
+    sans-serif;
 }
 
 .service-sticky-heading {
@@ -2128,7 +2137,11 @@ body.nav-over-hero .hero-single {
   padding: 9px 9px 9px 8px;
   border-left: 3px solid #14b8a6;
   border-radius: 0 14px 14px 0;
-  background: linear-gradient(145deg, rgba(244, 251, 255, 0.95), rgba(223, 241, 252, 0.88));
+  background: linear-gradient(
+    145deg,
+    rgba(244, 251, 255, 0.95),
+    rgba(223, 241, 252, 0.88)
+  );
   box-shadow: 0 8px 20px rgba(64, 121, 163, 0.1);
 }
 
@@ -2151,7 +2164,9 @@ body.nav-over-hero .hero-single {
 .service-sticky-feature h4 {
   margin: 0 0 3px;
   color: #153a59;
-  font: 700 12px/1.25 "Epilogue", sans-serif;
+  font:
+    700 12px/1.25 "Epilogue",
+    sans-serif;
 }
 
 .service-sticky-feature p {
@@ -2209,7 +2224,8 @@ body.nav-over-hero .hero-single {
 
   .service-sticky-content {
     gap: 6px;
-    padding: clamp(1rem, 1.6vw, 1.35rem) clamp(0.72rem, 1.05vw, 0.95rem) clamp(1.1rem, 1.8vw, 1.4rem);
+    padding: clamp(1rem, 1.6vw, 1.35rem) clamp(0.72rem, 1.05vw, 0.95rem)
+      clamp(1.1rem, 1.8vw, 1.4rem);
   }
 
   .service-sticky-heading {
@@ -2280,7 +2296,9 @@ body.nav-over-hero .hero-single {
     color: #0f7bb6;
     display: inline-grid;
     place-items: center;
-    font: 700 12px/1 "Epilogue", sans-serif;
+    font:
+      700 12px/1 "Epilogue",
+      sans-serif;
   }
 
   .service-mobile-card .service-sticky-heading {
@@ -12287,7 +12305,9 @@ body.route-home .site-footer::before {
 }
 
 .berita-editorial-page .blog-pagination .gallery-page-btn:hover:not(:disabled),
-.berita-editorial-page .blog-pagination .gallery-page-btn:focus-visible:not(:disabled) {
+.berita-editorial-page
+  .blog-pagination
+  .gallery-page-btn:focus-visible:not(:disabled) {
   border-color: rgba(125, 211, 252, 0.38);
   background: linear-gradient(
     135deg,
@@ -12922,7 +12942,9 @@ body.route-services .site-footer::before {
 }
 
 .services-page-sky .services-redesign-trust-marquee .rfm-marquee,
-.services-page-sky .services-redesign-trust-marquee .rfm-initial-child-container {
+.services-page-sky
+  .services-redesign-trust-marquee
+  .rfm-initial-child-container {
   align-items: center;
 }
 
