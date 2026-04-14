@@ -1,5 +1,7 @@
-const WHATSAPP_LINK =
-  'https://wa.me/62215550192?text=Halo%20Tim%20Trimitra,%20saya%20ingin%20konsultasi%20gratis%20terkait%20proyek%20saya.'
+const WHATSAPP_NUMBER = '62811109842'
+const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+  'Halo Tim Trimitra, saya ingin konsultasi gratis terkait kebutuhan proyek saya.',
+)}`
 
 function WhatsAppIcon() {
   return (

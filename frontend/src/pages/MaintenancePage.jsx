@@ -2,6 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { animate, svg, stagger } from 'animejs';
 
+const WHATSAPP_NUMBER = '62811109842';
+const MAINTENANCE_WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Halo Tim Trimitra, saya melihat halaman maintenance dan ingin menghubungi tim untuk kebutuhan saya.')}`;
+
 // Animated SVG Icon Components
 const BuildingIcon = () => (
     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ width: '76px', height: '76px' }}>
@@ -483,7 +486,7 @@ export default function MaintenancePage() {
                             <p style={{ color: '#E2E8F0', fontWeight: 'bold', margin: 0, fontSize: isMobile ? '0.85rem' : '1rem' }}>Email</p>
                             <p style={{ color: '#94A3B8', fontSize: isMobile ? '0.7rem' : '0.875rem', margin: 0, wordBreak: 'break-word' }}>haikallatief0@gmail.com</p>
                         </a>
-                        <a href="https://wa.me/6285185318501" target="_blank" rel="noopener noreferrer" style={{
+                        <a href={MAINTENANCE_WHATSAPP_URL} target="_blank" rel="noopener noreferrer" style={{
                             background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.8))',
                             border: '1px solid rgba(148, 163, 184, 0.2)',
                             borderRadius: '8px',
@@ -498,7 +501,7 @@ export default function MaintenancePage() {
                         }}>
                             <WhatsAppIcon />
                             <p style={{ color: '#E2E8F0', fontWeight: 'bold', margin: 0, fontSize: isMobile ? '0.85rem' : '1rem' }}>WhatsApp</p>
-                            <p style={{ color: '#94A3B8', fontSize: isMobile ? '0.7rem' : '0.875rem', margin: 0 }}>+62 851 8531 8501</p>
+                            <p style={{ color: '#94A3B8', fontSize: isMobile ? '0.7rem' : '0.875rem', margin: 0 }}>+62 811 109 842</p>
                         </a>
                     </div>
                 </div>

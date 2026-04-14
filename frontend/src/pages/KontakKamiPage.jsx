@@ -9,6 +9,8 @@ import {
 import { pickTextField } from '../data/wpUiFields'
 
 const CONTACT_DRAFT_KEY = 'trimitra-contact-draft-v1'
+const WHATSAPP_NUMBER = '62811109842'
+const WHATSAPP_BASE_URL = `https://wa.me/${WHATSAPP_NUMBER}`
 const EMPTY_FORM_DATA = {
   name: '',
   email: '',
@@ -54,7 +56,12 @@ function KontakKamiPage() {
   const primaryEmail = contactInfo.emails[0] || 'inquire@trimitra.id'
   const secondaryEmail = contactInfo.emails[1] || 'press@trimitra.id'
   const primaryPhone = contactInfo.phones[0] || '+62 21 555 0192'
-  const whatsappUrl = contactInfo.whatsapp || 'https://wa.me/62215550192'
+  const whatsappChatDirectUrl = `${WHATSAPP_BASE_URL}?text=${encodeURIComponent(
+    'Halo Tim Trimitra, saya ingin obrolan langsung terkait layanan Anda.',
+  )}`
+  const whatsappFastResponseUrl = `${WHATSAPP_BASE_URL}?text=${encodeURIComponent(
+    'Halo Tim Trimitra, saya butuh respon cepat untuk kebutuhan booth/event saya.',
+  )}`
 
   useEffect(() => {
     let cancelled = false
@@ -212,7 +219,7 @@ function KontakKamiPage() {
                 <div>
                   <h3>Hubungi Langsung</h3>
                   <p className="muted"><a href={`tel:${primaryPhone.replace(/\s+/g, '')}`}>{primaryPhone}</a></p>
-                  <p className="kicker"><a href={whatsappUrl} target="_blank" rel="noreferrer">Obrolan WhatsApp</a></p>
+                  <p className="kicker"><a href={whatsappChatDirectUrl} target="_blank" rel="noreferrer">Obrolan WhatsApp</a></p>
                 </div>
               </article>
 
@@ -233,7 +240,7 @@ function KontakKamiPage() {
                 <p className="kicker">Fast Response</p>
                 <h3>Butuh Respon Cepat via WhatsApp?</h3>
                 <span className="contact-wa-icon" aria-hidden="true">WA</span>
-                <a className="btn" href={whatsappUrl} target="_blank" rel="noreferrer">Chat WhatsApp</a>
+                <a className="btn" href={whatsappFastResponseUrl} target="_blank" rel="noreferrer">Chat WhatsApp</a>
               </article>
             </div>
           </StaggerGroup>

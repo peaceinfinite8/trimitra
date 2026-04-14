@@ -15,9 +15,12 @@ function getReadingTime(content = "") {
   return `${minutes} min read`;
 }
 
+const WHATSAPP_NUMBER = "62811109842";
+
 export default async function ArticleDetailPage({ slug }) {
-  const whatsappUrl =
-    "https://wa.me/62215550192?text=Halo%20Tim%20Trimitra,%20saya%20ingin%20konsultasi%20gratis%20terkait%20booth%20event%20saya.";
+  const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+    "Halo Tim Trimitra, saya baru membaca artikel Anda dan ingin konsultasi terkait kebutuhan booth/event saya.",
+  )}`;
   const post = await getPostBySlug(slug);
 
   if (!post) {
