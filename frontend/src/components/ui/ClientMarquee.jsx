@@ -1,4 +1,4 @@
-import Marquee from 'react-fast-marquee'
+import { useEffect, useMemo, useState } from 'react'
 
 const CLIENT_PARTNERS = [
     {
@@ -29,8 +29,6 @@ const CLIENT_PARTNERS = [
 
 const MARQUEE_PARTNERS = [...CLIENT_PARTNERS, ...CLIENT_PARTNERS]
 
-const marqueeSupported = typeof window !== 'undefined' && typeof window.ResizeObserver !== 'undefined'
-
 function ClientPartnerCard({ partner }) {
     return (
         <article className="services-redesign-trust-marquee-card">
@@ -50,10 +48,41 @@ function ClientPartnerCard({ partner }) {
 }
 
 function ClientMarquee() {
-    if (!marqueeSupported) {
+    const [MarqueeComponent, setMarqueeComponent] = useState(null)
+    const [canUseMarquee, setCanUseMarquee] = useState(false)
+
+    const partners = useMemo(() => MARQUEE_PARTNERS, [])
+
+    useEffect(() => {
+        setCanUseMarquee(typeof window !== 'undefined' && typeof window.ResizeObserver !== 'undefined')
+    }, [])
+
+    useEffect(() => {
+        if (!canUseMarquee) return
+
+        let isActive = true
+
+        import('react-fast-marquee')
+            .then((module) => {
+                if (isActive) {
+                    setMarqueeComponent(() => module.default)
+                }
+            })
+            .catch(() => {
+                if (isActive) {
+                    setMarqueeComponent(null)
+                }
+            })
+
+        return () => {
+            isActive = false
+        }
+    }, [canUseMarquee])
+
+    if (!canUseMarquee || !MarqueeComponent) {
         return (
             <div className="services-redesign-trust-marquee-fallback" aria-label="Daftar partner layanan Trimitra">
-                {MARQUEE_PARTNERS.map((partner, index) => (
+                {partners.map((partner, index) => (
                     <ClientPartnerCard key={`${partner.name}-${index}`} partner={partner} />
                 ))}
             </div>
@@ -62,17 +91,17 @@ function ClientMarquee() {
 
     return (
         <div className="services-redesign-trust-marquee" aria-label="Daftar partner layanan Trimitra">
-            <Marquee
+            <MarqueeComponent
                 speed={40}
                 gradient
                 gradientColor="#0f2a4a"
                 gradientWidth={80}
                 pauseOnHover
             >
-                {MARQUEE_PARTNERS.map((partner, index) => (
+                {partners.map((partner, index) => (
                     <ClientPartnerCard key={`${partner.name}-${index}`} partner={partner} />
                 ))}
-            </Marquee>
+            </MarqueeComponent>
         </div>
     )
 }
