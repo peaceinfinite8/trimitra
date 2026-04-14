@@ -88,10 +88,10 @@ export default function ClientMarquee({ theme = "dark" }: ClientMarqueeProps) {
           will-change: transform;
         }
         .marquee-track-left {
-                    animation: marquee-scroll-left 42s linear infinite;
+                    animation: marquee-scroll-left 62s linear infinite;
         }
         .marquee-track-right {
-                    animation: marquee-scroll-right 46s linear infinite;
+                    animation: marquee-scroll-right 68s linear infinite;
         }
         .marquee-root:hover .marquee-track {
           animation-play-state: paused;
