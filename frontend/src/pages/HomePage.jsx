@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from 'framer-motion'
 import { SectionReveal } from '../components/animation/Reveal'
 import LazyImage from '../components/ui/LazyImage'
 import AccordionHero from '../components/ui/AccordionHero'
+import ClientMarquee from '../components/ClientMarquee'
 import ServiceShowcaseSection from '../components/ui/ServiceShowcaseSection'
 import ValueNarrativeSection from '../components/ui/ValueNarrativeSection'
 import { blogPosts } from '../data/blogPosts'
@@ -14,31 +15,6 @@ import {
   isWordPressConfiguredForPages,
 } from '../data/wordpressPages'
 import { pickLinkField, pickTextField } from '../data/wpUiFields'
-
-function createClientLogoDataUri(name, accent, base = '#0b1f35') {
-  const initials = name
-    .split(' ')
-    .map((part) => part[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase()
-
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="${name}">
-      <defs>
-        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="${base}" />
-          <stop offset="100%" stop-color="${accent}" />
-        </linearGradient>
-      </defs>
-      <rect x="4" y="4" width="88" height="88" rx="24" fill="url(#bg)" />
-      <circle cx="70" cy="26" r="12" fill="#ffffff" fill-opacity="0.14" />
-      <text x="48" y="55" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="26" font-weight="700">${initials}</text>
-    </svg>
-  `
-
-  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`
-}
 
 const portfolioContainerVariants = {
   hidden: {},
@@ -193,30 +169,6 @@ function HomeJournalSection({
 }
 
 function HomePartnershipSection() {
-  const prefersReducedMotion = useReducedMotion()
-  const partners = [
-    {
-      label: 'Atlas Group',
-      note: 'Brand activation dan gathering',
-      logo: createClientLogoDataUri('Atlas Group', '#38bdf8'),
-    },
-    {
-      label: 'Summit Retail',
-      note: 'Booth, POP, dan launch campaign',
-      logo: createClientLogoDataUri('Summit Retail', '#818cf8'),
-    },
-    {
-      label: 'Nusa Kreatif',
-      note: 'Event, edukasi, dan sosialisasi',
-      logo: createClientLogoDataUri('Nusa Kreatif', '#0ea5e9'),
-    },
-    {
-      label: 'Metro Events',
-      note: 'Media luar ruang dan exposure',
-      logo: createClientLogoDataUri('Metro Events', '#22c55e'),
-    },
-  ]
-
   return (
     <SectionReveal className="section home-partnership-section">
       <div className="container home-partnership-shell">
@@ -228,25 +180,8 @@ function HomePartnershipSection() {
           </p>
         </div>
 
-        <div className="home-partnership-grid">
-          {partners.map((partner, index) => (
-            <motion.article
-              key={partner.label}
-              className="home-partnership-card"
-              initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
-              whileInView={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.32 }}
-              transition={{ duration: 0.42, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <div className="home-partnership-logo-wrap" aria-hidden="true">
-                <img className="home-partnership-logo" src={partner.logo} alt="" loading="lazy" decoding="async" />
-              </div>
-              <div className="home-partnership-copy-block">
-                <h3>{partner.label}</h3>
-                <p>{partner.note}</p>
-              </div>
-            </motion.article>
-          ))}
+        <div className="home-partnership-marquee">
+          <ClientMarquee />
         </div>
       </div>
     </SectionReveal>

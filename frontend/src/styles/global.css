@@ -9788,6 +9788,11 @@ body::after {
   gap: 14px;
 }
 
+.home-partnership-marquee {
+  margin-top: 22px;
+  overflow: hidden;
+}
+
 .home-partnership-card {
   display: grid;
   gap: 14px;
