@@ -11,7 +11,19 @@ const topRowClients = [...clients, ...clients, ...clients];
 const bottomRowClients = [...clients].reverse();
 const allBottomRowClients = [...bottomRowClients, ...bottomRowClients, ...bottomRowClients];
 
-export default function ClientMarquee() {
+type ClientMarqueeTheme = "light" | "dark";
+
+type ClientMarqueeProps = {
+    theme?: ClientMarqueeTheme;
+};
+
+export default function ClientMarquee({ theme = "dark" }: ClientMarqueeProps) {
+        const isLight = theme === "light";
+        const cardBackground = isLight ? "rgba(255,255,255,0.78)" : "rgba(255,255,255,0.08)";
+        const cardBorder = isLight ? "1px solid rgba(133,182,219,0.62)" : "1px solid rgba(255,255,255,0.15)";
+        const titleColor = isLight ? "#163855" : "white";
+        const taglineColor = isLight ? "rgba(34,74,107,0.75)" : "rgba(255,255,255,0.55)";
+
     return (
         <>
             <style>{`
@@ -59,9 +71,9 @@ export default function ClientMarquee() {
                                     display: "flex",
                                     alignItems: "center",
                                     gap: "12px",
-                                    background: "rgba(255,255,255,0.08)",
+                                    background: cardBackground,
                                     backdropFilter: "blur(8px)",
-                                    border: "1px solid rgba(255,255,255,0.15)",
+                                    border: cardBorder,
                                     borderRadius: "14px",
                                     padding: "12px 20px",
                                     marginRight: "16px",
@@ -88,10 +100,10 @@ export default function ClientMarquee() {
                                     {client.initials}
                                 </div>
                                 <div style={{ overflow: "hidden" }}>
-                                    <p style={{ fontWeight: "600", fontSize: "13px", color: "white", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                    <p style={{ fontWeight: "600", fontSize: "13px", color: titleColor, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                                         {client.name}
                                     </p>
-                                    <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.55)", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                    <p style={{ fontSize: "11px", color: taglineColor, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                                         {client.tagline}
                                     </p>
                                 </div>
@@ -109,9 +121,9 @@ export default function ClientMarquee() {
                                     display: "flex",
                                     alignItems: "center",
                                     gap: "12px",
-                                    background: "rgba(255,255,255,0.08)",
+                                    background: cardBackground,
                                     backdropFilter: "blur(8px)",
-                                    border: "1px solid rgba(255,255,255,0.15)",
+                                    border: cardBorder,
                                     borderRadius: "14px",
                                     padding: "12px 20px",
                                     marginRight: "16px",
@@ -138,10 +150,10 @@ export default function ClientMarquee() {
                                     {client.initials}
                                 </div>
                                 <div style={{ overflow: "hidden" }}>
-                                    <p style={{ fontWeight: "600", fontSize: "13px", color: "white", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                    <p style={{ fontWeight: "600", fontSize: "13px", color: titleColor, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                                         {client.name}
                                     </p>
-                                    <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.55)", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                    <p style={{ fontSize: "11px", color: taglineColor, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                                         {client.tagline}
                                     </p>
                                 </div>

@@ -181,7 +181,7 @@ function HomePartnershipSection() {
         </div>
 
         <div className="home-partnership-marquee">
-          <ClientMarquee />
+          <ClientMarquee theme="light" />
         </div>
       </div>
     </SectionReveal>
