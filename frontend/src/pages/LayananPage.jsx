@@ -279,6 +279,14 @@ const SERVICE_FAQ_ITEMS = [
   },
 ]
 
+const ENABLE_LAYANAN_WP_ENHANCEMENT = false
+
+function safeText(value, fallback) {
+  if (typeof value !== 'string') return fallback
+  const trimmed = value.trim()
+  return trimmed || fallback
+}
+
 function CountUpNumber({ value, suffix = '', duration = 1300 }) {
   const prefersReducedMotion = useReducedMotion()
   const rafRef = useRef(0)
@@ -325,6 +333,8 @@ function LayananPage() {
   }, [])
 
   useEffect(() => {
+    if (!ENABLE_LAYANAN_WP_ENHANCEMENT) return undefined
+
     let cancelled = false
 
     async function loadPageFromWordPress() {
@@ -345,10 +355,13 @@ function LayananPage() {
     }
   }, [])
 
-  const uiFields = wpPage ? { ...(wpPage.meta || {}), ...(wpPage.acf || {}) } : {}
+  const uiFields = ENABLE_LAYANAN_WP_ENHANCEMENT && wpPage ? { ...(wpPage.meta || {}), ...(wpPage.acf || {}) } : {}
 
   const pageKicker = pickTextField(uiFields, ['page_kicker', 'services_kicker'], 'Produk & Jasa')
-  const pageTitle = pickTextField(uiFields, ['hero_title', 'services_title'], wpPage?.title || 'Solusi Produk & Jasa Trimitra')
+  const pageTitle = safeText(
+    pickTextField(uiFields, ['hero_title', 'services_title'], wpPage?.title || 'Solusi Produk & Jasa Trimitra'),
+    'Solusi Produk & Jasa Trimitra',
+  )
   const pageCopy = pickTextField(
     uiFields,
     ['hero_copy', 'services_copy'],
@@ -366,7 +379,7 @@ function LayananPage() {
   const ctaSecondaryLink = pickLinkField(uiFields, ['cta_secondary_link'], '/galeri')
   const activeService =
     PRIMARY_SERVICE_PACKAGES.find((item) => item.id === activeServiceId) || PRIMARY_SERVICE_PACKAGES[0]
-  const titleWords = pageTitle.split(' ')
+  const titleWords = safeText(pageTitle, 'Solusi Produk & Jasa Trimitra').split(' ')
   const splitPoint = Math.max(1, Math.ceil(titleWords.length / 2))
   const titleLineOne = titleWords.slice(0, splitPoint).join(' ')
   const titleLineTwo = titleWords.slice(splitPoint).join(' ')
@@ -719,7 +732,7 @@ function LayananPage() {
         </div>
       </SectionReveal>
 
-      {wpPage?.contentHtml ? (
+      {ENABLE_LAYANAN_WP_ENHANCEMENT && wpPage?.contentHtml ? (
         <SectionReveal className="section cms-page-shell">
           <div className="container">
             <article className="blog-detail-content cms-page-content" dangerouslySetInnerHTML={{ __html: wpPage.contentHtml }} />
