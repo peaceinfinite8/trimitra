@@ -1,6 +1,7 @@
 ﻿import { withCache } from './wpCache'
 
 const WP_SITE_URL = (import.meta.env.VITE_WP_SITE_URL || '').trim().replace(/\/$/, '')
+const WP_CLIENTS_ENDPOINT = (import.meta.env.VITE_WP_CLIENTS_ENDPOINT || '').trim()
 const WP_CACHE_TTL_MS = 5 * 60 * 1000
 const WP_FETCH_TIMEOUT_MS = 6500
 
@@ -253,6 +254,26 @@ async function fetchWp(endpoint, params = {}) {
   })
 }
 
+async function fetchWpAbsolute(url) {
+  return withCache(`wp:${url}`, WP_CACHE_TTL_MS, async () => {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), WP_FETCH_TIMEOUT_MS)
+
+    let response
+    try {
+      response = await fetch(url, { signal: controller.signal })
+    } finally {
+      clearTimeout(timeoutId)
+    }
+
+    if (!response.ok) {
+      throw new Error(`WordPress request failed: ${response.status}`)
+    }
+
+    return response.json()
+  })
+}
+
 async function getMediaSourceById(mediaId) {
   if (!mediaId) return ''
   const result = await fetchWp(`media/${mediaId}`, {
@@ -316,6 +337,65 @@ export async function getWordPressClients({ perPage = 40 } = {}) {
 
   const palette = ['#1877F2', '#E4405F', '#0A66C2', '#FF6B35', '#16A34A', '#7C3AED', '#0EA5E9']
   const endpoints = ['client', 'clients']
+
+  if (WP_CLIENTS_ENDPOINT) {
+    try {
+      const customUrl = WP_CLIENTS_ENDPOINT.startsWith('http')
+        ? WP_CLIENTS_ENDPOINT
+        : `${WP_SITE_URL}${WP_CLIENTS_ENDPOINT.startsWith('/') ? '' : '/'}${WP_CLIENTS_ENDPOINT}`
+
+      const response = await fetchWpAbsolute(customUrl)
+      const records = Array.isArray(response)
+        ? response
+        : Array.isArray(response?.data)
+          ? response.data
+          : []
+
+      const mappedCustom = records.map((item, index) => {
+        const name = stripHtml(
+          item?.name ||
+            item?.title ||
+            item?.title?.rendered ||
+            item?.post_title ||
+            '',
+        ) || `Client ${index + 1}`
+
+        const tagline = stripHtml(
+          item?.tagline ||
+            item?.excerpt ||
+            item?.excerpt?.rendered ||
+            item?.description ||
+            item?.content ||
+            item?.content?.rendered ||
+            '',
+        ) || 'Partner layanan Trimitra'
+
+        const logo =
+          item?.logo ||
+          item?.image ||
+          item?.source_url ||
+          item?.featured_image ||
+          item?.featured_media_url ||
+          ''
+
+        return {
+          id: item?.id || `custom-${index}`,
+          initials: getInitialsFromName(name),
+          name,
+          tagline,
+          color: palette[index % palette.length],
+          logo,
+        }
+      })
+
+      const usableCustom = mappedCustom.filter((item) => item.name)
+      if (usableCustom.length > 0) {
+        return usableCustom
+      }
+    } catch {
+      // Continue to default endpoint probing.
+    }
+  }
 
   for (const endpoint of endpoints) {
     try {
