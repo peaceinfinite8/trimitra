@@ -330,7 +330,6 @@ function BeritaPage() {
           ) : (
             <>
               <div id="berita-list" />
-
               <section className="berita-editorial-hero">
                 <div className="berita-editorial-left">
                   {sideHeroPosts.map((item) => (
