@@ -1,137 +1,68 @@
-import { Component, useEffect, useMemo, useState } from 'react'
+"use client";
+import Marquee from "react-fast-marquee";
 
-const CLIENT_PARTNERS = [
-    {
-        name: 'PT Kota Advertise',
-        tagline: 'Billboard advertising dan media outdoor',
-        initials: 'PK',
-        avatarColor: '#2f9ed5',
-    },
-    {
-        name: 'Nexus Event Indonesia',
-        tagline: 'Event organizer dan aktivasi brand',
-        initials: 'NE',
-        avatarColor: '#2f74dd',
-    },
-    {
-        name: 'Prestige Booth Design',
-        tagline: 'Booth exhibition dan pameran',
-        initials: 'PB',
-        avatarColor: '#5078e2',
-    },
-    {
-        name: 'Metro Activation',
-        tagline: 'Campaign activation lintas kota',
-        initials: 'MA',
-        avatarColor: '#248ebf',
-    },
-]
+const clients = [
+  { initials: "PK", name: "PT Kota Advertise", tagline: "Billboard & media outdoor", color: "#1877F2" },
+  { initials: "NE", name: "Nexus Event Indonesia", tagline: "Event organizer & aktivasi brand", color: "#E4405F" },
+  { initials: "PB", name: "Prestige Booth Design", tagline: "Booth exhibition & pameran", color: "#0A66C2" },
+  { initials: "MA", name: "Metro Activation", tagline: "Campaign activation lintas kota", color: "#FF6B35" },
+];
 
-const MARQUEE_PARTNERS = [...CLIENT_PARTNERS, ...CLIENT_PARTNERS]
-
-const marqueeMaskStyle = {
-    maskImage: 'linear-gradient(to right, transparent, black 80px, black calc(100% - 80px), transparent)',
-    WebkitMaskImage: 'linear-gradient(to right, transparent, black 80px, black calc(100% - 80px), transparent)',
-}
-
-class ClientMarqueeErrorBoundary extends Component {
-    constructor(props) {
-        super(props)
-        this.state = { hasError: false }
-    }
-
-    static getDerivedStateFromError() {
-        return { hasError: true }
-    }
-
-    componentDidCatch(error) {
-        console.error('ClientMarquee crashed:', error)
-    }
-
-    render() {
-        if (this.state.hasError) {
-            return this.props.fallback
-        }
-        return this.props.children
-    }
-}
-
-function ClientPartnerCard({ partner }) {
-    return (
-        <article className="services-redesign-trust-marquee-card">
+export default function ClientMarquee() {
+  return (
+    <div
+      style={{
+        maskImage: "linear-gradient(to right, transparent, black 100px, black calc(100% - 100px), transparent)",
+        WebkitMaskImage: "linear-gradient(to right, transparent, black 100px, black calc(100% - 100px), transparent)",
+        overflow: "hidden",
+      }}
+    >
+      <Marquee speed={40} pauseOnHover={true} gradient={false} autoFill={true}>
+        {clients.map((client, i) => (
+          <div
+            key={i}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              background: "rgba(255,255,255,0.08)",
+              backdropFilter: "blur(8px)",
+              border: "1px solid rgba(255,255,255,0.15)",
+              borderRadius: "14px",
+              padding: "12px 20px",
+              marginRight: "16px",
+              minWidth: "220px",
+              maxWidth: "220px",
+            }}
+          >
             <div
-                className="services-redesign-trust-marquee-avatar"
-                style={{ background: `linear-gradient(145deg, ${partner.avatarColor}, #0f2a4a)` }}
-                aria-hidden="true"
+              style={{
+                width: "40px",
+                height: "40px",
+                borderRadius: "10px",
+                background: client.color,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontWeight: "700",
+                fontSize: "13px",
+                color: "white",
+                flexShrink: 0,
+              }}
             >
-                {partner.initials}
+              {client.initials}
             </div>
-            <div>
-                <h3>{partner.name}</h3>
-                <p>{partner.tagline}</p>
+            <div style={{ overflow: "hidden" }}>
+              <p style={{ fontWeight: "600", fontSize: "13px", color: "white", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                {client.name}
+              </p>
+              <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.55)", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                {client.tagline}
+              </p>
             </div>
-        </article>
-    )
+          </div>
+        ))}
+      </Marquee>
+    </div>
+  );
 }
-
-function ClientMarquee() {
-    const [MarqueeComponent, setMarqueeComponent] = useState(null)
-    const [canUseMarquee, setCanUseMarquee] = useState(false)
-
-    const partners = useMemo(() => MARQUEE_PARTNERS, [])
-
-    useEffect(() => {
-        setCanUseMarquee(typeof window !== 'undefined' && typeof window.ResizeObserver !== 'undefined')
-    }, [])
-
-    useEffect(() => {
-        if (!canUseMarquee) return
-
-        let isActive = true
-
-        import('react-fast-marquee')
-            .then((module) => {
-                if (isActive) {
-                    setMarqueeComponent(() => module.default)
-                }
-            })
-            .catch(() => {
-                if (isActive) {
-                    setMarqueeComponent(null)
-                }
-            })
-
-        return () => {
-            isActive = false
-        }
-    }, [canUseMarquee])
-
-    const fallbackContent = (
-        <div className="services-redesign-trust-marquee-fallback" aria-label="Daftar partner layanan Trimitra" style={marqueeMaskStyle}>
-            {partners.map((partner, index) => (
-                <ClientPartnerCard key={`${partner.name}-${index}`} partner={partner} />
-            ))}
-        </div>
-    )
-
-    if (!canUseMarquee || !MarqueeComponent) {
-        return fallbackContent
-    }
-
-    return (
-        <ClientMarqueeErrorBoundary fallback={fallbackContent}>
-            <div className="services-redesign-trust-marquee" aria-label="Daftar partner layanan Trimitra" style={marqueeMaskStyle}>
-                <MarqueeComponent
-                    speed={40}
-                    pauseOnHover
-                >
-                    {partners.map((partner, index) => (
-                        <ClientPartnerCard key={`${partner.name}-${index}`} partner={partner} />
-                    ))}
-                </MarqueeComponent>
-            </div>
-        </ClientMarqueeErrorBoundary>
-    )
-}
-
-export default ClientMarquee

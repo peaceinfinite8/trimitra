@@ -12447,6 +12447,7 @@ body.route-services .site-footer::before {
 .services-redesign-trust-shell {
   display: grid;
   gap: 18px;
+  overflow: hidden;
 }
 
 .services-page-sky .services-redesign-trust-head {
