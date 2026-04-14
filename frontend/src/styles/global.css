@@ -11257,10 +11257,7 @@ body.route-home .site-footer::before {
 }
 
 .berita-type-filter {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 14px;
+  display: none !important;
 }
 
 .berita-type-pill {
