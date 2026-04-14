@@ -124,7 +124,7 @@ export function useGsapEnhance(triggerKey = '') {
       const layeredParallaxTargets = gsap.utils.toArray('[data-gsap-parallax-layer]')
       const floatTargets = gsap.utils.toArray('[data-gsap-float]')
       const pageSections = gsap.utils.toArray(
-        'main .section, main .about-hero, main .gallery-hero, main .berita-hero, main .services-redesign-hero, main .contact-hero, main .dark-cta',
+        'main .section, main .about-hero, main .gallery-hero, main .berita-hero, main .services-redesign-hero, main .contact-hero, main .contact-hero-premium, main .dark-cta',
       )
 
       const tweens = []
