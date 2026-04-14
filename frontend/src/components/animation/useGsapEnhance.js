@@ -98,6 +98,9 @@ function getMotionProfile(kind) {
 
 export function useGsapEnhance(triggerKey = '') {
   useLayoutEffect(() => {
+    const pathname = window.location.pathname || ''
+    if (pathname.startsWith('/layanan')) return undefined
+
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
     if (mediaQuery.matches) return undefined
 
