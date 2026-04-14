@@ -3,33 +3,9 @@ import { Link } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { SectionReveal, StaggerGroup, StaggerItem } from '../components/animation/Reveal'
 import LazyImage from '../components/ui/LazyImage'
+import ClientMarquee from '../components/ui/ClientMarquee'
 import { getWordPressPageBySlugs, isWordPressConfiguredForPages } from '../data/wordpressPages'
 import { pickLinkField, pickTextField } from '../data/wpUiFields'
-
-function createPartnerLogoDataUri(name, accent, base = '#0f3555') {
-  const initials = name
-    .split(' ')
-    .map((part) => part[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase()
-
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="${name}">
-      <defs>
-        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="${base}" />
-          <stop offset="100%" stop-color="${accent}" />
-        </linearGradient>
-      </defs>
-      <rect x="4" y="4" width="88" height="88" rx="26" fill="url(#g)" />
-      <circle cx="73" cy="22" r="11" fill="#ffffff" fill-opacity="0.2" />
-      <text x="48" y="54" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="26" font-weight="700">${initials}</text>
-    </svg>
-  `
-
-  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`
-}
 
 function ServiceCardIcon({ type = 'strategy', accent = '#0ea5e9' }) {
   const icons = {
@@ -208,29 +184,6 @@ const SERVICE_CATEGORY_OVERVIEW = [
     description: 'Rancang booth premium dari konsep 3D, produksi quality, hingga instalasi sempurna untuk menonjol di pameran.',
     benefit: 'Meningkatkan traffic booth dan menciptakan brand impression yang mendalam pada pengunjung pameran.',
     usage: 'Ideal untuk expo, trade show, product showcase, dan B2B event di venue pameran internasional.',
-  },
-]
-
-const SERVICE_TRUST_PARTNERS = [
-  {
-    name: 'PT Kota Advertise',
-    note: 'Billboard advertising dan media outdoor',
-    logo: createPartnerLogoDataUri('PT Kota Advertise', '#30a7e0'),
-  },
-  {
-    name: 'Nexus Event Indonesia',
-    note: 'Event organizer dan aktivasi brand',
-    logo: createPartnerLogoDataUri('Nexus Event Indonesia', '#2a7de0'),
-  },
-  {
-    name: 'Prestige Booth Design',
-    note: 'Booth exhibition dan pameran',
-    logo: createPartnerLogoDataUri('Prestige Booth Design', '#4b86f1'),
-  },
-  {
-    name: 'Metro Activation',
-    note: 'Campaign activation lintas kota',
-    logo: createPartnerLogoDataUri('Metro Activation', '#2393c7'),
   },
 ]
 
@@ -706,24 +659,7 @@ function LayananPage() {
             </p>
           </div>
 
-          <div className="services-redesign-trust-grid" aria-label="Daftar partner layanan Trimitra">
-            {SERVICE_TRUST_PARTNERS.map((partner, index) => (
-              <motion.article
-                key={partner.name}
-                className="services-redesign-trust-card"
-                initial={prefersReducedMotion ? false : { opacity: 0, y: 14 }}
-                whileInView={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.32 }}
-                transition={{ duration: 0.36, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <img src={partner.logo} alt={partner.name} loading="lazy" decoding="async" />
-                <div>
-                  <h3>{partner.name}</h3>
-                  <p>{partner.note}</p>
-                </div>
-              </motion.article>
-            ))}
-          </div>
+          <ClientMarquee />
         </div>
       </SectionReveal>
 
