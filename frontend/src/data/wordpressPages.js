@@ -135,6 +135,22 @@ function dedupe(values = []) {
   return Array.from(new Set(values.filter(Boolean)))
 }
 
+function stripHtml(value) {
+  if (!value) return ''
+  return decodeHtml(String(value).replace(/<[^>]*>/g, ' ')).replace(/\s+/g, ' ').trim()
+}
+
+function getInitialsFromName(name) {
+  return String(name || '')
+    .split(' ')
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase() || 'CL'
+}
+
 function firstTextMatch(candidates, matcher) {
   for (const value of candidates) {
     if (matcher(value)) return value
@@ -293,6 +309,88 @@ export async function getWordPressPageBySlugs(slugs = []) {
   }
 
   return null
+}
+
+export async function getWordPressClients({ perPage = 40 } = {}) {
+  if (!isWordPressConfiguredForPages()) return []
+
+  const palette = ['#1877F2', '#E4405F', '#0A66C2', '#FF6B35', '#16A34A', '#7C3AED', '#0EA5E9']
+  const endpoints = ['client', 'clients']
+
+  for (const endpoint of endpoints) {
+    try {
+      const first = await fetchWp(endpoint, {
+        status: 'publish',
+        per_page: String(Math.min(100, Math.max(1, perPage))),
+        page: '1',
+        orderby: 'menu_order',
+        order: 'asc',
+        _embed: '1',
+        _fields: 'id,title.rendered,excerpt.rendered,content.rendered,featured_media,_embedded',
+      })
+
+      let posts = Array.isArray(first.data) ? [...first.data] : []
+
+      if (Number(first.totalPages || 1) > 1) {
+        const requests = []
+        for (let page = 2; page <= first.totalPages; page += 1) {
+          requests.push(
+            fetchWp(endpoint, {
+              status: 'publish',
+              per_page: String(Math.min(100, Math.max(1, perPage))),
+              page: String(page),
+              orderby: 'menu_order',
+              order: 'asc',
+              _embed: '1',
+              _fields: 'id,title.rendered,excerpt.rendered,content.rendered,featured_media,_embedded',
+            }),
+          )
+        }
+
+        const rest = await Promise.all(requests)
+        rest.forEach((result) => {
+          if (Array.isArray(result.data)) {
+            posts = posts.concat(result.data)
+          }
+        })
+      }
+
+      const mapped = await Promise.all(
+        posts.map(async (post, index) => {
+          const name = stripHtml(post?.title?.rendered || '') || `Client ${index + 1}`
+          const excerpt = stripHtml(post?.excerpt?.rendered || '')
+          const content = stripHtml(post?.content?.rendered || '')
+          const tagline = excerpt || content || 'Partner layanan Trimitra'
+
+          let logo = ''
+          const embedded = post?._embedded?.['wp:featuredmedia']
+          if (Array.isArray(embedded) && embedded[0]?.source_url) {
+            logo = embedded[0].source_url
+          } else if (post?.featured_media) {
+            logo = await getMediaSourceById(post.featured_media)
+          }
+
+          return {
+            id: post?.id || `${endpoint}-${index}`,
+            initials: getInitialsFromName(name),
+            name,
+            tagline,
+            color: palette[index % palette.length],
+            logo,
+          }
+        }),
+      )
+
+      const usable = mapped.filter((item) => item.name)
+      if (usable.length > 0) {
+        return usable
+      }
+    } catch {
+      // Try next endpoint variant.
+    }
+  }
+
+  return []
 }
 
 export async function getWordPressGalleryMedia({ perPage = 100, allPages = true } = {}) {

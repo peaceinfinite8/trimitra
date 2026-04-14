@@ -1,15 +1,22 @@
 "use client";
+import { useEffect, useMemo, useState } from "react";
+import { getWordPressClients, isWordPressConfiguredForPages } from "../data/wordpressPages";
 
-const clients = [
+type MarqueeClient = {
+    id?: string | number;
+    initials: string;
+    name: string;
+    tagline: string;
+    color: string;
+    logo?: string;
+};
+
+const fallbackClients: MarqueeClient[] = [
     { initials: "PK", name: "PT Kota Advertise", tagline: "Billboard & media outdoor", color: "#1877F2" },
     { initials: "NE", name: "Nexus Event Indonesia", tagline: "Event organizer & aktivasi brand", color: "#E4405F" },
     { initials: "PB", name: "Prestige Booth Design", tagline: "Booth exhibition & pameran", color: "#0A66C2" },
     { initials: "MA", name: "Metro Activation", tagline: "Campaign activation lintas kota", color: "#FF6B35" },
 ];
-
-const topRowClients = [...clients, ...clients, ...clients];
-const bottomRowClients = [...clients].reverse();
-const allBottomRowClients = [...bottomRowClients, ...bottomRowClients, ...bottomRowClients];
 
 type ClientMarqueeTheme = "light" | "dark";
 
@@ -18,11 +25,41 @@ type ClientMarqueeProps = {
 };
 
 export default function ClientMarquee({ theme = "dark" }: ClientMarqueeProps) {
-        const isLight = theme === "light";
-        const cardBackground = isLight ? "rgba(255,255,255,0.78)" : "rgba(255,255,255,0.08)";
-        const cardBorder = isLight ? "1px solid rgba(133,182,219,0.62)" : "1px solid rgba(255,255,255,0.15)";
-        const titleColor = isLight ? "#163855" : "white";
-        const taglineColor = isLight ? "rgba(34,74,107,0.75)" : "rgba(255,255,255,0.55)";
+    const [clients, setClients] = useState<MarqueeClient[]>(fallbackClients);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        async function loadWordPressClients() {
+            if (!isWordPressConfiguredForPages()) return;
+
+            const wpClients = await getWordPressClients({ perPage: 40 });
+            if (!cancelled && Array.isArray(wpClients) && wpClients.length > 0) {
+                setClients(wpClients as MarqueeClient[]);
+            }
+        }
+
+        loadWordPressClients().catch(() => {
+            // Keep static fallback clients if WordPress fetch fails.
+        });
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    const topRowClients = useMemo(() => [...clients, ...clients, ...clients], [clients]);
+    const bottomRowClients = useMemo(() => [...clients].reverse(), [clients]);
+    const allBottomRowClients = useMemo(
+        () => [...bottomRowClients, ...bottomRowClients, ...bottomRowClients],
+        [bottomRowClients],
+    );
+
+    const isLight = theme === "light";
+    const cardBackground = isLight ? "rgba(255,255,255,0.78)" : "rgba(255,255,255,0.08)";
+    const cardBorder = isLight ? "1px solid rgba(133,182,219,0.62)" : "1px solid rgba(255,255,255,0.15)";
+    const titleColor = isLight ? "#163855" : "white";
+    const taglineColor = isLight ? "rgba(34,74,107,0.75)" : "rgba(255,255,255,0.55)";
 
     return (
         <>
@@ -95,9 +132,20 @@ export default function ClientMarquee({ theme = "dark" }: ClientMarqueeProps) {
                                         fontSize: "13px",
                                         color: "white",
                                         flexShrink: 0,
+                                        overflow: "hidden",
                                     }}
                                 >
-                                    {client.initials}
+                                    {client.logo ? (
+                                        <img
+                                            src={client.logo}
+                                            alt={client.name}
+                                            style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "10px" }}
+                                            loading="lazy"
+                                            decoding="async"
+                                        />
+                                    ) : (
+                                        client.initials
+                                    )}
                                 </div>
                                 <div style={{ overflow: "hidden" }}>
                                     <p style={{ fontWeight: "600", fontSize: "13px", color: titleColor, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
@@ -145,9 +193,20 @@ export default function ClientMarquee({ theme = "dark" }: ClientMarqueeProps) {
                                         fontSize: "13px",
                                         color: "white",
                                         flexShrink: 0,
+                                        overflow: "hidden",
                                     }}
                                 >
-                                    {client.initials}
+                                    {client.logo ? (
+                                        <img
+                                            src={client.logo}
+                                            alt={client.name}
+                                            style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "10px" }}
+                                            loading="lazy"
+                                            decoding="async"
+                                        />
+                                    ) : (
+                                        client.initials
+                                    )}
                                 </div>
                                 <div style={{ overflow: "hidden" }}>
                                     <p style={{ fontWeight: "600", fontSize: "13px", color: titleColor, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
