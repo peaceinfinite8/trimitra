@@ -274,6 +274,28 @@ async function fetchWpAbsolute(url) {
   })
 }
 
+async function fetchWpAbsoluteNoStore(url) {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), WP_FETCH_TIMEOUT_MS)
+
+  let response
+  try {
+    response = await fetch(url, {
+      signal: controller.signal,
+      cache: 'no-store',
+      credentials: 'omit',
+    })
+  } finally {
+    clearTimeout(timeoutId)
+  }
+
+  if (!response.ok) {
+    throw new Error(`WordPress request failed: ${response.status}`)
+  }
+
+  return response.json()
+}
+
 async function getMediaSourceById(mediaId) {
   if (!mediaId) return ''
   const result = await fetchWp(`media/${mediaId}`, {
@@ -344,7 +366,7 @@ export async function getWordPressClients({ perPage = 40 } = {}) {
         ? WP_CLIENTS_ENDPOINT
         : `${WP_SITE_URL}${WP_CLIENTS_ENDPOINT.startsWith('/') ? '' : '/'}${WP_CLIENTS_ENDPOINT}`
 
-      const response = await fetchWpAbsolute(customUrl)
+      const response = await fetchWpAbsoluteNoStore(customUrl)
       const records = Array.isArray(response)
         ? response
         : Array.isArray(response?.data)
@@ -354,20 +376,20 @@ export async function getWordPressClients({ perPage = 40 } = {}) {
       const mappedCustom = records.map((item, index) => {
         const name = stripHtml(
           item?.name ||
-            item?.title ||
-            item?.title?.rendered ||
-            item?.post_title ||
-            '',
+          item?.title ||
+          item?.title?.rendered ||
+          item?.post_title ||
+          '',
         ) || `Client ${index + 1}`
 
         const tagline = stripHtml(
           item?.tagline ||
-            item?.excerpt ||
-            item?.excerpt?.rendered ||
-            item?.description ||
-            item?.content ||
-            item?.content?.rendered ||
-            '',
+          item?.excerpt ||
+          item?.excerpt?.rendered ||
+          item?.description ||
+          item?.content ||
+          item?.content?.rendered ||
+          '',
         ) || 'Partner layanan Trimitra'
 
         const logo =
