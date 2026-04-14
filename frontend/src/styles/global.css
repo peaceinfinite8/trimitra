@@ -11672,7 +11672,9 @@ body.nav-over-hero .berita-editorial-wrap {
 
 .berita-intro-kicker {
   color: #7dd3fc;
-  font: 700 11px/1 "Epilogue", sans-serif;
+  font:
+    700 11px/1 "Epilogue",
+    sans-serif;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -11680,7 +11682,9 @@ body.nav-over-hero .berita-editorial-wrap {
 .berita-intro-title {
   margin-top: 9px;
   color: #f8fbff;
-  font: 700 clamp(30px, 4.8vw, 52px)/0.98 "Epilogue", sans-serif;
+  font:
+    700 clamp(30px, 4.8vw, 52px)/0.98 "Epilogue",
+    sans-serif;
   letter-spacing: -0.03em;
   max-width: 15ch;
 }
@@ -11705,7 +11709,9 @@ body.nav-over-hero .berita-editorial-wrap {
   border: 1px solid rgba(159, 223, 255, 0.44);
   background: rgba(10, 24, 44, 0.58);
   color: #dff2ff;
-  font: 600 11px/1 "Inter", sans-serif;
+  font:
+    600 11px/1 "Inter",
+    sans-serif;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -11759,8 +11765,11 @@ body.nav-over-hero .berita-editorial-wrap {
   padding: clamp(16px, 1.8vw, 22px);
   border: 0;
   border-radius: 22px;
-  background:
-    linear-gradient(160deg, rgba(9, 31, 60, 0.8), rgba(10, 28, 53, 0.55));
+  background: linear-gradient(
+    160deg,
+    rgba(9, 31, 60, 0.8),
+    rgba(10, 28, 53, 0.55)
+  );
   box-shadow: 0 20px 36px rgba(3, 14, 28, 0.32);
   padding-bottom: 22px;
   border-bottom: 0;
@@ -12001,7 +12010,11 @@ body.nav-over-hero .berita-editorial-wrap {
   min-width: 0;
   border: 0;
   border-radius: 20px;
-  background: linear-gradient(165deg, rgba(25, 63, 101, 0.72), rgba(18, 43, 78, 0.58));
+  background: linear-gradient(
+    165deg,
+    rgba(25, 63, 101, 0.72),
+    rgba(18, 43, 78, 0.58)
+  );
   overflow: hidden;
   box-shadow: 0 14px 30px rgba(8, 20, 39, 0.34);
   transition: all 0.28s cubic-bezier(0.22, 1, 0.36, 1);
@@ -12103,7 +12116,11 @@ body.nav-over-hero .berita-editorial-wrap {
   padding: 14px;
   border: 0;
   border-radius: 20px;
-  background: linear-gradient(160deg, rgba(9, 31, 60, 0.78), rgba(10, 26, 52, 0.62));
+  background: linear-gradient(
+    160deg,
+    rgba(9, 31, 60, 0.78),
+    rgba(10, 26, 52, 0.62)
+  );
   box-shadow: 0 12px 26px rgba(4, 11, 24, 0.28);
 }
 
@@ -12118,7 +12135,9 @@ body.nav-over-hero .berita-editorial-wrap {
   border: 1px solid rgba(160, 214, 255, 0.4);
   background: rgba(11, 30, 57, 0.86);
   color: #dff1ff;
-  font: 700 13px/1 "Inter", sans-serif;
+  font:
+    700 13px/1 "Inter",
+    sans-serif;
   transition:
     transform 0.2s ease,
     border-color 0.2s ease,
@@ -12163,12 +12182,7 @@ body.route-news .nav-shell--glass {
 }
 
 body.route-news .nav-link-indicator {
-  background: linear-gradient(
-    90deg,
-    transparent,
-    #76c9ff,
-    transparent
-  );
+  background: linear-gradient(90deg, transparent, #76c9ff, transparent);
 }
 
 body.route-news .nav-link-active .nav-link-label,
@@ -12490,8 +12504,12 @@ body.route-news .berita-page-btn.is-active {
   box-shadow: 0 8px 18px rgba(4, 13, 27, 0.16) !important;
 }
 
-.berita-editorial-page .gallery-pagination .gallery-page-btn:hover:not(:disabled),
-.berita-editorial-page .gallery-pagination .gallery-page-btn:focus-visible:not(:disabled),
+.berita-editorial-page
+  .gallery-pagination
+  .gallery-page-btn:hover:not(:disabled),
+.berita-editorial-page
+  .gallery-pagination
+  .gallery-page-btn:focus-visible:not(:disabled),
 .berita-editorial-page .blog-pagination .gallery-page-btn:hover:not(:disabled),
 .berita-editorial-page
   .blog-pagination
@@ -13548,7 +13566,11 @@ body.route-services .site-header[data-nav-state="transparent"] {
       rgba(84, 120, 166, 0.12) 0%,
       rgba(84, 120, 166, 0) 58%
     ),
-    linear-gradient(180deg, rgba(10, 10, 10, 0.94) 0%, rgba(14, 14, 14, 0.98) 100%);
+    linear-gradient(
+      180deg,
+      rgba(10, 10, 10, 0.94) 0%,
+      rgba(14, 14, 14, 0.98) 100%
+    );
 }
 
 .contact-hero-premium::after {
@@ -13608,9 +13630,15 @@ body.route-services .site-header[data-nav-state="transparent"] {
 }
 
 @keyframes contactOrbFloat {
-  0% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(20px, -15px) scale(1.06); }
-  100% { transform: translate(-10px, 10px) scale(0.96); }
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(20px, -15px) scale(1.06);
+  }
+  100% {
+    transform: translate(-10px, 10px) scale(0.96);
+  }
 }
 
 .contact-hero-grid {
