@@ -11749,7 +11749,7 @@ body.route-home .site-footer::before {
 }
 
 .berita-kicker {
-  color: #38bdf8;
+  color: #7dd3fc;
   font:
     700 10px/1 "Epilogue",
     sans-serif;
@@ -11885,13 +11885,13 @@ body.route-home .site-footer::before {
 }
 
 .berita-section-more {
-  color: #38bdf8;
+  color: #7dd3fc;
   font-size: 13px;
   transition: color 0.24s ease;
 }
 
 .berita-section-more:hover {
-  color: #7dd3fc;
+  color: #d6f3ff;
 }
 
 .berita-editorial-grid4 {
@@ -12106,7 +12106,7 @@ body.route-home .site-footer::before {
   z-index: 2;
   padding: 5px 8px;
   border-radius: 999px;
-  background: rgba(56, 189, 248, 0.9);
+  background: rgba(37, 99, 235, 0.9);
   color: #ffffff;
   font:
     700 10px/1 "Epilogue",
@@ -12261,6 +12261,62 @@ body.route-home .site-footer::before {
 
 .berita-grid-card:focus-within .berita-image-link::before {
   opacity: 1;
+}
+
+.berita-editorial-page .blog-pagination {
+  border: 1px solid rgba(147, 196, 232, 0.18);
+  background: linear-gradient(
+    135deg,
+    rgba(8, 18, 34, 0.36) 0%,
+    rgba(14, 29, 53, 0.5) 100%
+  );
+  box-shadow: 0 14px 30px rgba(3, 10, 21, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.berita-editorial-page .blog-pagination .gallery-page-btn {
+  border-color: rgba(137, 191, 235, 0.18);
+  background: linear-gradient(
+    135deg,
+    rgba(20, 38, 65, 0.86) 0%,
+    rgba(13, 24, 44, 0.84) 100%
+  );
+  color: #cfe4f7;
+  box-shadow: 0 8px 18px rgba(4, 13, 27, 0.16);
+}
+
+.berita-editorial-page .blog-pagination .gallery-page-btn:hover:not(:disabled),
+.berita-editorial-page .blog-pagination .gallery-page-btn:focus-visible:not(:disabled) {
+  border-color: rgba(125, 211, 252, 0.38);
+  background: linear-gradient(
+    135deg,
+    rgba(27, 51, 86, 0.92) 0%,
+    rgba(18, 35, 63, 0.92) 100%
+  );
+  color: #f0f7fd;
+  box-shadow: 0 10px 22px rgba(7, 20, 38, 0.18);
+}
+
+.berita-editorial-page .blog-pagination .gallery-page-btn.is-active {
+  background: linear-gradient(140deg, #173954 0%, #24558c 100%);
+  border-color: rgba(145, 217, 255, 0.42);
+  color: #ffffff;
+  box-shadow: 0 12px 24px rgba(13, 73, 122, 0.2);
+}
+
+.berita-editorial-page .blog-pagination .gallery-page-btn:disabled {
+  border-color: rgba(157, 199, 226, 0.12);
+  background: linear-gradient(
+    135deg,
+    rgba(28, 46, 70, 0.36) 0%,
+    rgba(20, 35, 54, 0.28) 100%
+  );
+  color: rgba(217, 235, 255, 0.3);
+}
+
+.berita-editorial-page .blog-pagination .gallery-page-ellipsis {
+  color: #7ea4c6;
 }
 
 @media (prefers-reduced-motion: reduce) {
