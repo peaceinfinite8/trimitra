@@ -131,6 +131,13 @@ function BeritaPage() {
   const hasSyncedWordPressRef = useRef(initialDataRef.current.hasWordPressData);
 
   useEffect(() => {
+    document.body.classList.add("route-news");
+    return () => {
+      document.body.classList.remove("route-news");
+    };
+  }, []);
+
+  useEffect(() => {
     const rawPage = Number(searchParams.get("page") ?? "1");
     const parsedPage =
       Number.isFinite(rawPage) && rawPage > 0 ? Math.floor(rawPage) : 1;
@@ -321,7 +328,7 @@ function BeritaPage() {
 
   return (
     <div className="berita-editorial-page">
-      <section className="section blog-news-page berita-editorial-wrap">
+      <section className="section blog-news-page berita-editorial-wrap" data-nav-hero>
         <div className="container">
           {isLoadingWp && editorialPosts.length === 0 ? (
             <div className="berita-editorial-loading">
@@ -330,6 +337,23 @@ function BeritaPage() {
           ) : (
             <>
               <div id="berita-list" />
+              <section className="berita-editorial-intro">
+                <div>
+                  <p className="berita-intro-kicker">Editorial Feed</p>
+                  <h1 className="berita-intro-title">Berita & Insight Trimitra</h1>
+                  <p className="berita-intro-lead">
+                    Update proyek terbaru, insight event, dan studi eksekusi lapangan
+                    yang relevan untuk kebutuhan brand activation.
+                  </p>
+                </div>
+                <div className="berita-intro-meta" aria-label="Ringkasan halaman berita">
+                  <span>{filteredPosts.length} artikel</span>
+                  <span>
+                    Halaman {currentPage} / {totalPages}
+                  </span>
+                </div>
+              </section>
+
               <section className="berita-editorial-hero">
                 <div className="berita-editorial-left">
                   {sideHeroPosts.map((item) => (
@@ -433,7 +457,7 @@ function BeritaPage() {
                     <h2>{section.name}</h2>
                     {showViewAllLinks ? (
                       <Link
-                        to={`/berita?type=${inferContentTypeFromText(section.name)}&page=1#berita-list`}
+                        to="/berita?page=1#berita-list"
                         className="berita-section-more"
                       >
                         View all »
@@ -441,15 +465,26 @@ function BeritaPage() {
                     ) : null}
                   </div>
                   <div className="berita-editorial-grid4">
-                    {section.items.slice(0, 4).map((item, index) => {
-                      const gridVariantClass =
-                        index === 0
-                          ? "is-lead"
-                          : index === 1
-                            ? "is-tall"
-                            : index === 2
-                              ? "is-regular"
-                              : "is-wide";
+                    {section.items.slice(0, 4).map((item, index, visibleItems) => {
+                      const visibleCount = visibleItems.length;
+
+                      let gridVariantClass = "is-wide";
+                      if (visibleCount === 1) {
+                        gridVariantClass = "is-full";
+                      } else if (visibleCount === 2) {
+                        gridVariantClass = "is-half";
+                      } else if (visibleCount === 3) {
+                        gridVariantClass = index === 0 ? "is-lead" : "is-regular";
+                      } else {
+                        gridVariantClass =
+                          index === 0
+                            ? "is-lead"
+                            : index === 1
+                              ? "is-tall"
+                              : index === 2
+                                ? "is-regular"
+                                : "is-wide";
+                      }
 
                       return (
                         <article
@@ -498,7 +533,7 @@ function BeritaPage() {
                     <h2>{spotlightMain.category || "Sorotan"}</h2>
                     {showViewAllLinks ? (
                       <Link
-                        to={`/berita?type=${inferContentTypeFromText(spotlightMain.category)}&page=1#berita-list`}
+                        to="/berita?page=1#berita-list"
                         className="berita-section-more"
                       >
                         View all »
@@ -589,25 +624,25 @@ function BeritaPage() {
 
               {filteredPosts.length > 0 && (
                 <div
-                  className="gallery-pagination blog-pagination"
+                  className="gallery-pagination blog-pagination berita-pagination"
                   aria-label="Navigasi halaman berita"
                 >
                   <button
                     type="button"
-                    className="gallery-page-btn"
+                    className="gallery-page-btn berita-page-btn"
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
                   >
                     Prev
                   </button>
 
-                  <div className="gallery-page-number-wrap">
+                  <div className="gallery-page-number-wrap berita-page-number-wrap">
                     {pageItems.map((item, index) => {
                       if (typeof item === "string") {
                         return (
                           <span
                             key={`${item}-${index}`}
-                            className="gallery-page-ellipsis"
+                            className="gallery-page-ellipsis berita-page-ellipsis"
                             aria-hidden="true"
                           >
                             ...
@@ -619,7 +654,7 @@ function BeritaPage() {
                         <button
                           key={item}
                           type="button"
-                          className={`gallery-page-btn ${item === currentPage ? "is-active" : ""}`}
+                          className={`gallery-page-btn berita-page-btn ${item === currentPage ? "is-active" : ""}`}
                           onClick={() => handlePageChange(item)}
                           aria-current={
                             item === currentPage ? "page" : undefined
@@ -633,7 +668,7 @@ function BeritaPage() {
 
                   <button
                     type="button"
-                    className="gallery-page-btn"
+                    className="gallery-page-btn berita-page-btn"
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
                   >
