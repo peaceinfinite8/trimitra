@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { animate, svg, stagger } from 'animejs';
+import { MAINTENANCE_END } from '../utils/maintenanceCheck';
 
 const WHATSAPP_NUMBER = '62811109842';
 const MAINTENANCE_WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Halo Tim Trimitra, saya melihat halaman maintenance dan ingin menghubungi tim untuk kebutuhan saya.')}`;
@@ -149,11 +150,11 @@ export default function MaintenancePage() {
 
     // Timer Effect
     useEffect(() => {
-        const MAINTENANCE_END = new Date(2026, 3, 14, 23, 0, 0).getTime();
+        const maintenanceEnd = MAINTENANCE_END.getTime();
 
         const updateTimer = () => {
             const now = new Date().getTime();
-            const distance = MAINTENANCE_END - now;
+            const distance = maintenanceEnd - now;
 
             if (distance > 0) {
                 setTimeLeft({
