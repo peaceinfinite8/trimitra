@@ -53,9 +53,9 @@ function KontakKamiPage() {
   const submitLabel = pickTextField(uiFields, ['contact_submit_label'], 'Kirim Permintaan Konsultasi')
 
   const addressText = contactInfo.address || 'Jl. Kemang Raya No. 10A, Mampang Prapatan, Jakarta Selatan, 12730'
-  const primaryEmail = contactInfo.emails[0] || 'inquire@trimitra.id'
-  const secondaryEmail = contactInfo.emails[1] || 'press@trimitra.id'
-  const primaryPhone = contactInfo.phones[0] || '+62 21 555 0192'
+  const primaryEmail = contactInfo.emails[0] || 'dhr@trimitramulti.co.id'
+  const secondaryEmail = contactInfo.emails[1] || 'dhr@trimitramulti.co.id'
+  const primaryPhone = contactInfo.phones[0] || '+62811-1098-42'
   const whatsappChatDirectUrl = `${WHATSAPP_BASE_URL}?text=${encodeURIComponent(
     'Halo Tim Trimitra, saya ingin obrolan langsung terkait layanan Anda.',
   )}`
@@ -154,7 +154,7 @@ function KontakKamiPage() {
                     <p className="kicker">Alamat Email</p>
                     <input
                       type="email"
-                      placeholder="j.doe@company.com"
+                      placeholder="dhr@trimitramulti.co.id"
                       name="email"
                       value={formData.email}
                       onChange={handleChange}

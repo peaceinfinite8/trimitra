@@ -11,7 +11,7 @@ const socialItems = [
 const brandSocialItems = [
   { label: 'Instagram', icon: 'instagram', href: 'https://instagram.com' },
   { label: 'LinkedIn', icon: 'linkedin', href: 'https://linkedin.com' },
-  { label: 'Email', icon: 'email', href: 'mailto:hello@trimitra.id' },
+  { label: 'Email', icon: 'email', href: 'mailto:dhr@trimitramulti.co.id' },
 ]
 
 function BrandSocialIcon({ type }) {
@@ -166,7 +166,7 @@ function Footer() {
           <h4>Perusahaan</h4>
           <ul>
             <li><Link to="/tentang-kami" onMouseEnter={() => prefetchRoute('/tentang-kami')} data-prefetch-route="/tentang-kami">Tentang Kami</Link></li>
-            <li><a href="mailto:hello@trimitra.id?subject=Karir%20Trimitra">Karir</a></li>
+            <li><a href="mailto:dhr@trimitramulti.co.id?subject=Karir%20Trimitra">Karir</a></li>
             <li><Link to="/kontak-kami" onMouseEnter={() => prefetchRoute('/kontak-kami')} data-prefetch-route="/kontak-kami">Kontak</Link></li>
             <li><Link to="/kebijakan-privasi" onMouseEnter={() => prefetchRoute('/kebijakan-privasi')} data-prefetch-route="/kebijakan-privasi">Kebijakan Privasi</Link></li>
             <li><Link to="/syarat-layanan" onMouseEnter={() => prefetchRoute('/syarat-layanan')} data-prefetch-route="/syarat-layanan">Syarat Layanan</Link></li>
@@ -178,7 +178,7 @@ function Footer() {
           <ul>
             <li>Jl. Arsitektur No. 88, Jakarta Selatan</li>
             <li><a href="tel:+62217894561">+62 21 789 4561</a></li>
-            <li><a href="mailto:hello@trimitra.id">hello@trimitra.id</a></li>
+            <li><a href="mailto:dhr@trimitramulti.co.id">dhr@trimitramulti.co.id</a></li>
           </ul>
         </section>
       </div>

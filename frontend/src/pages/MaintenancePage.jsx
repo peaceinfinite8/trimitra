@@ -469,7 +469,7 @@ export default function MaintenancePage() {
                         📞 Hubungi Kami
                     </h3>
                     <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: isMobile ? '10px' : '24px' }}>
-                        <a href="mailto:haikallatief0@gmail.com" style={{
+                        <a href="mailto:dhr@trimitramulti.co.id" style={{
                             background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.8))',
                             border: '1px solid rgba(148, 163, 184, 0.2)',
                             borderRadius: '8px',
@@ -484,7 +484,7 @@ export default function MaintenancePage() {
                         }}>
                             <EmailIcon />
                             <p style={{ color: '#E2E8F0', fontWeight: 'bold', margin: 0, fontSize: isMobile ? '0.85rem' : '1rem' }}>Email</p>
-                            <p style={{ color: '#94A3B8', fontSize: isMobile ? '0.7rem' : '0.875rem', margin: 0, wordBreak: 'break-word' }}>haikallatief0@gmail.com</p>
+                            <p style={{ color: '#94A3B8', fontSize: isMobile ? '0.7rem' : '0.875rem', margin: 0, wordBreak: 'break-word' }}>dhr@trimitramulti.co.id</p>
                         </a>
                         <a href={MAINTENANCE_WHATSAPP_URL} target="_blank" rel="noopener noreferrer" style={{
                             background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.8))',
