@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { Component, useEffect, useMemo, useState } from 'react'
 
 const CLIENT_PARTNERS = [
     {
@@ -28,6 +28,33 @@ const CLIENT_PARTNERS = [
 ]
 
 const MARQUEE_PARTNERS = [...CLIENT_PARTNERS, ...CLIENT_PARTNERS]
+
+const marqueeMaskStyle = {
+    maskImage: 'linear-gradient(to right, transparent, black 80px, black calc(100% - 80px), transparent)',
+    WebkitMaskImage: 'linear-gradient(to right, transparent, black 80px, black calc(100% - 80px), transparent)',
+}
+
+class ClientMarqueeErrorBoundary extends Component {
+    constructor(props) {
+        super(props)
+        this.state = { hasError: false }
+    }
+
+    static getDerivedStateFromError() {
+        return { hasError: true }
+    }
+
+    componentDidCatch(error) {
+        console.error('ClientMarquee crashed:', error)
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return this.props.fallback
+        }
+        return this.props.children
+    }
+}
 
 function ClientPartnerCard({ partner }) {
     return (
@@ -79,30 +106,31 @@ function ClientMarquee() {
         }
     }, [canUseMarquee])
 
+    const fallbackContent = (
+        <div className="services-redesign-trust-marquee-fallback" aria-label="Daftar partner layanan Trimitra" style={marqueeMaskStyle}>
+            {partners.map((partner, index) => (
+                <ClientPartnerCard key={`${partner.name}-${index}`} partner={partner} />
+            ))}
+        </div>
+    )
+
     if (!canUseMarquee || !MarqueeComponent) {
-        return (
-            <div className="services-redesign-trust-marquee-fallback" aria-label="Daftar partner layanan Trimitra">
-                {partners.map((partner, index) => (
-                    <ClientPartnerCard key={`${partner.name}-${index}`} partner={partner} />
-                ))}
-            </div>
-        )
+        return fallbackContent
     }
 
     return (
-        <div className="services-redesign-trust-marquee" aria-label="Daftar partner layanan Trimitra">
-            <MarqueeComponent
-                speed={40}
-                gradient
-                gradientColor="#0f2a4a"
-                gradientWidth={80}
-                pauseOnHover
-            >
-                {partners.map((partner, index) => (
-                    <ClientPartnerCard key={`${partner.name}-${index}`} partner={partner} />
-                ))}
-            </MarqueeComponent>
-        </div>
+        <ClientMarqueeErrorBoundary fallback={fallbackContent}>
+            <div className="services-redesign-trust-marquee" aria-label="Daftar partner layanan Trimitra" style={marqueeMaskStyle}>
+                <MarqueeComponent
+                    speed={40}
+                    pauseOnHover
+                >
+                    {partners.map((partner, index) => (
+                        <ClientPartnerCard key={`${partner.name}-${index}`} partner={partner} />
+                    ))}
+                </MarqueeComponent>
+            </div>
+        </ClientMarqueeErrorBoundary>
     )
 }
 
