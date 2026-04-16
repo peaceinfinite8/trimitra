@@ -26,7 +26,7 @@ const PRIMARY_SERVICE_PACKAGES = [
   {
     id: '01',
     title: 'Advertising (Billboard)',
-    image: 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1f?auto=format&fit=crop&w=1800&q=80',
+    image: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=1800&q=82',
     imageAlt: 'Billboard advertising strategis di lokasi utama kota.',
     shortDescription:
       'Layanan advertising kami fokus pada billboard dengan penempatan strategis dan desain visual yang kuat agar pesan brand terbaca cepat dan meninggalkan kesan mendalam.',
@@ -73,7 +73,7 @@ const PRIMARY_SERVICE_PACKAGES = [
   {
     id: '02',
     title: 'Event Organizer',
-    image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1800&q=80',
+    image: 'https://images.unsplash.com/photo-1505236858219-8359eb29e329?auto=format&fit=crop&w=1800&q=82',
     imageAlt: 'Suasana event activation dengan panggung dan audiens.',
     shortDescription:
       'Tim event organizer kami menangani konsep kreatif, produksi teknis, hingga koordinasi lapangan agar setiap momen brand berjalan rapi dan berdampak maksimal.',
@@ -120,7 +120,7 @@ const PRIMARY_SERVICE_PACKAGES = [
   {
     id: '03',
     title: 'Booth Exhibition',
-    image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1800&q=80',
+    image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1800&q=82',
     imageAlt: 'Booth exhibition modern dengan desain menarik dan pengunjung aktif.',
     shortDescription:
       'Kami merancang dan mengeksekusi booth pameran dari konsep visual, alur interaksi, hingga instalasi lapangan agar brand tampil premium dan mudah diingat.',
@@ -577,33 +577,34 @@ function LayananPage() {
                     ))}
                   </div>
 
-                  <div className="services-main-deep-grid" aria-label={`Detail deliverables ${service.title}`}>
-                    <article className="services-main-deep-card">
-                      <h4>Yang Didapat Klien</h4>
-                      <ul>
-                        {service.deliverables.map((item) => (
-                          <li key={item}>{item}</li>
-                        ))}
-                      </ul>
-                    </article>
-                    <article className="services-main-deep-card">
-                      <h4>Proses Kerja</h4>
-                      <ul>
-                        {service.process.map((item) => (
-                          <li key={item}>{item}</li>
-                        ))}
-                      </ul>
-                    </article>
-                    <article className="services-main-deep-card">
-                      <h4>Hasil yang Diharapkan</h4>
-                      <ul>
-                        {service.outcomes.map((item) => (
-                          <li key={item}>{item}</li>
-                        ))}
-                      </ul>
-                    </article>
-                  </div>
                 </motion.div>
+
+                <div className="services-main-deep-grid" aria-label={`Detail deliverables ${service.title}`}>
+                  <article className="services-main-deep-card">
+                    <h4>Yang Didapat Klien</h4>
+                    <ul>
+                      {service.deliverables.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </article>
+                  <article className="services-main-deep-card">
+                    <h4>Proses Kerja</h4>
+                    <ul>
+                      {service.process.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </article>
+                  <article className="services-main-deep-card">
+                    <h4>Hasil yang Diharapkan</h4>
+                    <ul>
+                      {service.outcomes.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </article>
+                </div>
               </motion.article>
             ))}
 
