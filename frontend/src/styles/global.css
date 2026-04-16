@@ -4249,6 +4249,9 @@ body.nav-over-hero .hero-single {
 }
 
 .gallery-page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid rgba(171, 182, 198, 0.45);
   background: linear-gradient(
     135deg,
@@ -4260,6 +4263,9 @@ body.nav-over-hero .hero-single {
   height: 38px;
   padding: 0 10px;
   border-radius: 10px;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
   font:
     700 12px/1 "Epilogue",
     sans-serif;
@@ -9583,12 +9589,17 @@ button,
 }
 
 .gallery-page-simple .gallery-page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-width: 40px;
   height: 40px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.04);
   color: var(--text);
+  line-height: 1;
+  text-decoration: none;
   transition: all 0.22s ease;
 }
 
