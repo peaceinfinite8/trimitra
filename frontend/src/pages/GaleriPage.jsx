@@ -23,6 +23,38 @@ const queryToFilter = Object.fromEntries(
 const ITEMS_PER_PAGE = 18
 const MAX_PAGINATION_NUMBERS = 10
 
+const curationContainerVariants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.15,
+    },
+  },
+}
+
+const curationCardVariants = {
+  hidden: { opacity: 0, y: 40 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: [0.16, 1, 0.3, 1],
+    },
+  },
+}
+
+function CategoryGridIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" role="presentation" aria-hidden="true">
+      <rect x="3.5" y="3.5" width="7" height="7" rx="1.4" stroke="currentColor" strokeWidth="1.8" />
+      <rect x="13.5" y="3.5" width="7" height="7" rx="1.4" stroke="currentColor" strokeWidth="1.8" />
+      <rect x="3.5" y="13.5" width="7" height="7" rx="1.4" stroke="currentColor" strokeWidth="1.8" />
+      <rect x="13.5" y="13.5" width="7" height="7" rx="1.4" stroke="currentColor" strokeWidth="1.8" />
+    </svg>
+  )
+}
+
 function extractUploadYearMonth(src = '') {
   const match = String(src).match(/\/uploads\/(20\d{2})\/(\d{2})\//)
   if (!match) return 0
@@ -98,7 +130,6 @@ function GaleriPage() {
   const [galleryItems, setGalleryItems] = useState([])
   const [isLoadingWp, setIsLoadingWp] = useState(isWordPressConfiguredForPages())
   const prefetchedImagesRef = useRef(new Set())
-  const gridSectionRef = useRef(null)
 
   const activeFilter =
     queryToFilter[searchParams.get('kategori') ?? 'semua'] ?? 'Semua'
@@ -178,6 +209,21 @@ function GaleriPage() {
         }
       }),
     [categoryCounts, galleryItems],
+  )
+  const curatedCategoryCards = useMemo(
+    () => [
+      {
+        filter: 'Semua',
+        count: galleryItems.length,
+        preview: null,
+        totalLabel: `${String(galleryItems.length).padStart(2, '0')} visual tersedia`,
+      },
+      ...gallerySnapshots.map((snapshot) => ({
+        ...snapshot,
+        totalLabel: `${String(snapshot.count).padStart(2, '0')} visual tersedia`,
+      })),
+    ],
+    [galleryItems.length, gallerySnapshots],
   )
 
   useEffect(() => {
@@ -273,7 +319,7 @@ function GaleriPage() {
   }
 
   const scrollToGrid = () => {
-    gridSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    document.getElementById('galeri-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   return (
@@ -409,52 +455,88 @@ function GaleriPage() {
           <div className="gallery-curation-head">
             <p className="gallery-curation-kicker">Pilihan Cepat</p>
             <h2>Mulai dari kategori yang paling Anda butuhkan</h2>
+            <motion.div
+              initial={prefersReducedMotion ? false : { scaleX: 0 }}
+              whileInView={prefersReducedMotion ? { scaleX: 1 } : { scaleX: 1 }}
+              viewport={{ once: true, margin: '-100px' }}
+              transition={{ duration: 0.6, ease: 'easeOut', delay: 0.2 }}
+              style={{ originX: 0 }}
+              className="gallery-curation-underline"
+            />
             <p>
               Gunakan panel ini untuk langsung melompat ke kumpulan karya yang relevan,
               lalu lanjutkan ke grid utama untuk melihat detailnya.
             </p>
           </div>
 
-          <div className="gallery-curation-grid">
-            {gallerySnapshots.map((snapshot, index) => (
-              <motion.button
-                key={snapshot.filter}
-                type="button"
-                className={`gallery-curation-card ${snapshot.filter === activeFilter ? 'is-active' : ''}`}
-                initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
-                whileInView={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{
-                  duration: 0.4,
-                  delay: index * 0.05,
-                  ease: [0.22, 1, 0.36, 1],
-                }}
-                onClick={() => {
-                  handleFilterChange(snapshot.filter)
-                  scrollToGrid()
-                }}
-              >
-                <span className="gallery-curation-media" aria-hidden="true">
-                  {snapshot.preview?.src ? (
-                    <LazyImage
-                      src={snapshot.preview.src}
-                      alt={snapshot.preview.alt || snapshot.filter}
-                      className="gallery-image"
-                    />
-                  ) : (
-                    <span className="gallery-curation-placeholder">Belum ada preview</span>
-                  )}
-                </span>
+          <motion.div
+            className="gallery-curation-grid"
+            variants={curationContainerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-100px' }}
+          >
+            {curatedCategoryCards.map((snapshot, index) => {
+              const isAllCard = snapshot.filter === 'Semua'
+              const isActive = snapshot.filter === activeFilter
 
-                <span className="gallery-curation-body">
-                  <span className="gallery-curation-title">{snapshot.filter}</span>
-                  <span className="gallery-curation-meta">
-                    {String(snapshot.count).padStart(2, '0')} visual tersedia
-                  </span>
-                </span>
-              </motion.button>
-            ))}
-          </div>
+              return (
+                <motion.button
+                  key={snapshot.filter}
+                  type="button"
+                  className={`group gallery-curation-card ${isAllCard ? 'gallery-curation-card--all' : 'gallery-curation-card--image'} ${isActive ? 'is-active' : ''}`}
+                  variants={curationCardVariants}
+                  whileHover={prefersReducedMotion ? undefined : {
+                    scale: 1.02,
+                    boxShadow: '0 0 0 1px rgba(125,211,252,0.35), 0 0 24px rgba(125,211,252,0.15)',
+                  }}
+                  whileFocus={prefersReducedMotion ? undefined : {
+                    scale: 1.02,
+                    boxShadow: '0 0 0 1px rgba(125,211,252,0.35), 0 0 24px rgba(125,211,252,0.15)',
+                  }}
+                  onClick={() => {
+                    handleFilterChange(snapshot.filter)
+                    scrollToGrid()
+                  }}
+                  style={{ animationDelay: `${index * 0.05}s` }}
+                >
+                  {isAllCard ? (
+                    <>
+                      <span className="gallery-curation-all-icon" aria-hidden="true">
+                        <CategoryGridIcon />
+                      </span>
+                      <span className="gallery-curation-all-title">Semua</span>
+                      <span className="gallery-curation-all-meta">
+                        {snapshot.totalLabel || `${String(snapshot.count).padStart(2, '0')} visual tersedia`}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="gallery-curation-media" aria-hidden="true">
+                        {snapshot.preview?.src ? (
+                          <LazyImage
+                            src={snapshot.preview.src}
+                            alt={snapshot.preview.alt || snapshot.filter}
+                            className="gallery-image gallery-curation-image"
+                            wrapperClassName="gallery-curation-image-wrap"
+                          />
+                        ) : null}
+                      </span>
+                      <span className="gallery-curation-topline" aria-hidden="true" />
+                      <span className="gallery-curation-badge">{snapshot.filter}</span>
+                      <span className="gallery-curation-overlay" aria-hidden="true" />
+                      <span className="gallery-curation-body">
+                        <span className="gallery-curation-separator" aria-hidden="true" />
+                        <span className="gallery-curation-meta">{snapshot.totalLabel}</span>
+                        <span className="gallery-curation-title">{snapshot.filter}</span>
+                        <span className="gallery-curation-action">Lihat Semua →</span>
+                      </span>
+                    </>
+                  )}
+                </motion.button>
+              )
+            })}
+          </motion.div>
         </div>
       </section>
 
@@ -482,7 +564,7 @@ function GaleriPage() {
         </div>
       </section>
 
-      <section className="gallery-grid-section" ref={gridSectionRef}>
+      <section className="gallery-grid-section" id="galeri-grid">
         <div className="container gallery-grid-head">
           <p className="gallery-grid-head-kicker">Curated Works</p>
           <h2>Eksplorasi Visual Pilihan</h2>
