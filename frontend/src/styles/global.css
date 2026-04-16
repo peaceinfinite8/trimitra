@@ -14602,6 +14602,31 @@ body.route-services .site-header[data-nav-state="transparent"] {
   color: #f6f1e8;
 }
 
+/* Keep autocomplete/autofill fields visually consistent with the dark contact form theme. */
+.contact-form input:-webkit-autofill,
+.contact-form input:-webkit-autofill:hover,
+.contact-form input:-webkit-autofill:focus,
+.contact-form textarea:-webkit-autofill,
+.contact-form textarea:-webkit-autofill:hover,
+.contact-form textarea:-webkit-autofill:focus,
+.contact-form .contact-select:-webkit-autofill,
+.contact-form .contact-select:-webkit-autofill:hover,
+.contact-form .contact-select:-webkit-autofill:focus {
+  -webkit-text-fill-color: #f6f1e8 !important;
+  caret-color: #f6f1e8;
+  box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.04) inset !important;
+  -webkit-box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.04) inset !important;
+  border: 1px solid rgba(201, 168, 76, 0.22) !important;
+  transition: background-color 9999s ease-out 0s;
+}
+
+.contact-form input:-moz-autofill,
+.contact-form textarea:-moz-autofill,
+.contact-form .contact-select:-moz-autofill {
+  box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.04) inset !important;
+  -moz-text-fill-color: #f6f1e8 !important;
+}
+
 .contact-submit-btn {
   width: 100%;
   margin-top: 18px;
