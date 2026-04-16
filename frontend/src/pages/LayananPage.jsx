@@ -543,7 +543,6 @@ function LayananPage() {
             {PRIMARY_SERVICE_PACKAGES.map((service, serviceIndex) => (
               <motion.article
                 key={service.id}
-                id={service.anchor}
                 className={`services-main-item ${serviceIndex % 2 === 1 ? 'is-reversed' : ''}`}
                 initial={prefersReducedMotion ? false : { opacity: 0, y: 26, filter: 'blur(6px)' }}
                 whileInView={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, filter: 'blur(0px)' }}
@@ -576,6 +575,7 @@ function LayananPage() {
                   viewport={{ once: true, amount: 0.28 }}
                   transition={{ duration: 0.5, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
                 >
+                  <span id={service.anchor} className="services-main-anchor" aria-hidden="true" />
                   <motion.p
                     className="services-main-id"
                     initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.8, rotate: -10 }}
