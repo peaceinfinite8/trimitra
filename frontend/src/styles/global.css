@@ -403,6 +403,12 @@ body.nav-over-hero .page-main {
   padding-top: 0;
 }
 
+/* Defensive guard: hide runtime-injected skip links that leak into visible UI. */
+a.skip-link,
+a[href="#main-content"] {
+  display: none !important;
+}
+
 .route-transition-shell {
   min-height: calc(100vh - 74px);
 }
