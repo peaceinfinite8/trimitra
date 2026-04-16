@@ -188,12 +188,13 @@ function GaleriPage() {
   }, [])
 
   useEffect(() => {
+    if (isLoadingWp) return
     if (currentPage <= totalPages) return
     const next = new URLSearchParams(searchParams)
     next.set('kategori', filterToQuery[activeFilter])
     next.set('page', String(totalPages))
     setSearchParams(next)
-  }, [activeFilter, currentPage, searchParams, setSearchParams, totalPages])
+  }, [activeFilter, currentPage, isLoadingWp, searchParams, setSearchParams, totalPages])
 
   useEffect(() => {
     if (activeIndex === null) return
