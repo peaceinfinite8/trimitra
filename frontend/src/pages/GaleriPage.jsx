@@ -23,6 +23,33 @@ const queryToFilter = Object.fromEntries(
 const ITEMS_PER_PAGE = 18
 const MAX_PAGINATION_NUMBERS = 10
 
+function extractUploadYearMonth(src = '') {
+  const match = String(src).match(/\/uploads\/(20\d{2})\/(\d{2})\//)
+  if (!match) return 0
+  return Number(`${match[1]}${match[2]}`)
+}
+
+function getDatasetRecencyScore(items = []) {
+  return items.reduce((latest, item) => {
+    return Math.max(latest, extractUploadYearMonth(item?.src || ''))
+  }, 0)
+}
+
+function chooseGalleryDataset(pageMedia = [], libraryMedia = []) {
+  if (pageMedia.length === 0) return libraryMedia
+  if (libraryMedia.length === 0) return pageMedia
+
+  const pageRecency = getDatasetRecencyScore(pageMedia)
+  const libraryRecency = getDatasetRecencyScore(libraryMedia)
+
+  // Prefer the newer source when page-level attachments are stale.
+  if (libraryRecency > pageRecency) {
+    return libraryMedia
+  }
+
+  return pageMedia
+}
+
 function buildPageItems(currentPage, totalPages) {
   if (totalPages <= MAX_PAGINATION_NUMBERS) {
     return Array.from({ length: totalPages }, (_, index) => index + 1)
@@ -88,16 +115,13 @@ function GaleriPage() {
         return
       }
       try {
-        const pageMedia = await getWordPressGalleryFromPageBySlugs(['galeri', 'gallery'])
-        if (!cancelled && pageMedia.length > 0) {
-          setGalleryItems(pageMedia)
-          setIsLoadingWp(false)
-          return
-        }
+        const [pageMedia, libraryMedia] = await Promise.all([
+          getWordPressGalleryFromPageBySlugs(['galeri', 'gallery']),
+          getWordPressGalleryMedia({ perPage: 100, allPages: true }),
+        ])
 
-        const libraryMedia = await getWordPressGalleryMedia({ perPage: 100, allPages: true })
         if (!cancelled) {
-          setGalleryItems(libraryMedia)
+          setGalleryItems(chooseGalleryDataset(pageMedia, libraryMedia))
         }
       } catch {
         if (!cancelled) {
