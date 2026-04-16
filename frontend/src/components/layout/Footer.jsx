@@ -122,7 +122,7 @@ function Footer() {
           </div>
           <p>
             Mendefinisikan ulang standar arsitektur temporer melalui presisi
-            teknik dan estetika modern sejak 2012.
+            teknik dan estetika modern sejak 2017.
           </p>
           <motion.div
             className="footer-social-icons"
@@ -166,7 +166,6 @@ function Footer() {
           <h4>Perusahaan</h4>
           <ul>
             <li><Link to="/tentang-kami" onMouseEnter={() => prefetchRoute('/tentang-kami')} data-prefetch-route="/tentang-kami">Tentang Kami</Link></li>
-            <li><a href="mailto:dhr@trimitramulti.co.id?subject=Karir%20Trimitra">Karir</a></li>
             <li><Link to="/kontak-kami" onMouseEnter={() => prefetchRoute('/kontak-kami')} data-prefetch-route="/kontak-kami">Kontak</Link></li>
             <li><Link to="/kebijakan-privasi" onMouseEnter={() => prefetchRoute('/kebijakan-privasi')} data-prefetch-route="/kebijakan-privasi">Kebijakan Privasi</Link></li>
             <li><Link to="/syarat-layanan" onMouseEnter={() => prefetchRoute('/syarat-layanan')} data-prefetch-route="/syarat-layanan">Syarat Layanan</Link></li>
@@ -185,7 +184,7 @@ function Footer() {
 
       <div className="container footer-bottom">
         <div className="footer-copy">
-          © 2024 PT Trimitra Multi Kreasi. Seluruh hak cipta dilindungi.
+          © 2026 PT Trimitra Multi Kreasi. Seluruh hak cipta dilindungi.
         </div>
         <motion.div
           className="footer-social-pills"

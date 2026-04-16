@@ -13395,6 +13395,25 @@ body.route-services .site-footer::before {
   color: #0f3f63;
 }
 
+.services-page-sky .services-tab-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  max-width: 360px;
+  margin-bottom: 18px;
+}
+
+.services-page-sky .services-tab-pill {
+  width: 100%;
+  justify-content: flex-start;
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.services-page-sky .services-tab-pill strong {
+  flex: 1;
+}
+
 .services-page-sky .services-category-grid {
   margin-top: 20px;
   display: grid;
