@@ -322,7 +322,6 @@ function CountUpNumber({ value, suffix = '', duration = 1300 }) {
 function LayananPage() {
   const prefersReducedMotion = useReducedMotion()
   const [wpPage, setWpPage] = useState(null)
-  const [activeServiceId, setActiveServiceId] = useState(PRIMARY_SERVICE_PACKAGES[0].id)
   const [activeFaqIndex, setActiveFaqIndex] = useState(0)
 
   useEffect(() => {
@@ -377,8 +376,6 @@ function LayananPage() {
   const ctaPrimaryLink = pickLinkField(uiFields, ['cta_primary_link'], '/kontak-kami')
   const ctaSecondaryLabel = pickTextField(uiFields, ['cta_secondary_label'], 'Lihat Portofolio')
   const ctaSecondaryLink = pickLinkField(uiFields, ['cta_secondary_link'], '/galeri')
-  const activeService =
-    PRIMARY_SERVICE_PACKAGES.find((item) => item.id === activeServiceId) || PRIMARY_SERVICE_PACKAGES[0]
   const titleWords = safeText(pageTitle, 'Solusi Produk & Jasa Trimitra').split(' ')
   const splitPoint = Math.max(1, Math.ceil(titleWords.length / 2))
   const titleLineOne = titleWords.slice(0, splitPoint).join(' ')
@@ -510,36 +507,17 @@ function LayananPage() {
           </div>
 
           <div className="services-main-flow" aria-label="Tiga layanan utama Trimitra">
-            <div className="services-tab-list" role="tablist" aria-label="Kategori layanan Trimitra">
-              {PRIMARY_SERVICE_PACKAGES.map((service) => {
-                const isActive = service.id === activeServiceId
-                return (
-                  <button
-                    key={service.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={isActive}
-                    className={`services-tab-pill ${isActive ? 'is-active' : ''}`}
-                    onClick={() => setActiveServiceId(service.id)}
-                  >
-                    <span>{service.id}</span>
-                    <strong>{service.title}</strong>
-                  </button>
-                )
-              })}
-            </div>
-
-            <AnimatePresence mode="wait" initial={false}>
+            {PRIMARY_SERVICE_PACKAGES.map((service, serviceIndex) => (
               <motion.article
-                key={activeService.id}
+                key={service.id}
                 className="services-main-item"
                 initial={prefersReducedMotion ? false : { opacity: 0, y: 26, filter: 'blur(6px)' }}
-                animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, filter: 'blur(0px)' }}
-                exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -20, filter: 'blur(6px)' }}
-                transition={{ duration: 0.44, ease: [0.22, 1, 0.36, 1] }}
+                whileInView={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, filter: 'blur(0px)' }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.44, delay: serviceIndex * 0.06, ease: [0.22, 1, 0.36, 1] }}
               >
                 <figure className="services-main-media">
-                  <LazyImage src={activeService.image} alt={activeService.imageAlt} className="services-main-media-image" />
+                  <LazyImage src={service.image} alt={service.imageAlt} className="services-main-media-image" />
                   <span className="services-main-media-glow" aria-hidden="true" />
                 </figure>
 
@@ -547,24 +525,26 @@ function LayananPage() {
                   <motion.p
                     className="services-main-id"
                     initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.8, rotate: -10 }}
-                    animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, scale: 1, rotate: 0 }}
+                    whileInView={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, scale: 1, rotate: 0 }}
+                    viewport={{ once: true, amount: 0.4 }}
                     transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
                   >
-                    Layanan {activeService.id}
+                    Layanan {service.id}
                   </motion.p>
-                  <h3>{activeService.title}</h3>
-                  <p className="muted services-main-description">{activeService.shortDescription}</p>
-                  <p className="services-main-integration">{activeService.integrationCopy}</p>
-                  <p className="services-main-usecase"><strong>Contoh penggunaan:</strong> {activeService.useCase}</p>
+                  <h3>{service.title}</h3>
+                  <p className="muted services-main-description">{service.shortDescription}</p>
+                  <p className="services-main-integration">{service.integrationCopy}</p>
+                  <p className="services-main-usecase"><strong>Contoh penggunaan:</strong> {service.useCase}</p>
 
                   <div className="services-main-card-grid">
-                    {activeService.cards.map((card, index) => (
+                    {service.cards.map((card, index) => (
                       <motion.article
                         key={card.title}
                         className="services-main-card"
                         initial={prefersReducedMotion ? false : { opacity: 0, y: 40 }}
-                        animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                        transition={{ duration: 0.42, delay: index * 0.15, ease: [0.22, 1, 0.36, 1] }}
+                        whileInView={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                        viewport={{ once: true, amount: 0.3 }}
+                        transition={{ duration: 0.42, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
                       >
                         {card.icon && <ServiceCardIcon type={card.icon} accent="#0ea5e9" />}
                         <h4>{card.title}</h4>
@@ -577,11 +557,11 @@ function LayananPage() {
                     ))}
                   </div>
 
-                  <div className="services-main-deep-grid" aria-label="Detail deliverables layanan terpilih">
+                  <div className="services-main-deep-grid" aria-label={`Detail deliverables ${service.title}`}>
                     <article className="services-main-deep-card">
                       <h4>Yang Didapat Klien</h4>
                       <ul>
-                        {activeService.deliverables.map((item) => (
+                        {service.deliverables.map((item) => (
                           <li key={item}>{item}</li>
                         ))}
                       </ul>
@@ -589,7 +569,7 @@ function LayananPage() {
                     <article className="services-main-deep-card">
                       <h4>Proses Kerja</h4>
                       <ul>
-                        {activeService.process.map((item) => (
+                        {service.process.map((item) => (
                           <li key={item}>{item}</li>
                         ))}
                       </ul>
@@ -597,7 +577,7 @@ function LayananPage() {
                     <article className="services-main-deep-card">
                       <h4>Hasil yang Diharapkan</h4>
                       <ul>
-                        {activeService.outcomes.map((item) => (
+                        {service.outcomes.map((item) => (
                           <li key={item}>{item}</li>
                         ))}
                       </ul>
@@ -605,7 +585,7 @@ function LayananPage() {
                   </div>
                 </div>
               </motion.article>
-            </AnimatePresence>
+            ))}
 
             <div className="services-spec-grid" aria-label="Perbandingan deliverables layanan">
               {SERVICE_SPEC_COMPARISON.map((row) => (
