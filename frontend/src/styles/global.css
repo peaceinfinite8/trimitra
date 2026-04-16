@@ -874,6 +874,7 @@ body.nav-over-hero .page-main {
   text-transform: uppercase;
   white-space: nowrap;
   cursor: pointer;
+  text-decoration: none;
   transform: translateZ(0);
   box-shadow: 0 7px 20px rgba(139, 109, 47, 0.2);
   transition:
@@ -903,41 +904,16 @@ body.nav-over-hero .page-main {
   box-shadow: 0 10px 28px rgba(139, 109, 47, 0.3);
 }
 
+.btn:link,
+.btn:visited,
+.btn:hover,
+.btn:focus-visible {
+  text-decoration: none;
+}
+
 .btn:hover::before,
 .btn:focus-visible::before {
   transform: translateX(0);
-}
-
-.btn:active {
-  transform: translateY(1px);
-}
-
-.btn.dark {
-  --btn-bg: linear-gradient(135deg, #232320 0%, #111 100%);
-  --btn-fg: #f7f6f1;
-  --btn-border: #2e2d29;
-  --btn-fill: linear-gradient(
-    140deg,
-    #d8bf8a 0%,
-    var(--gold) 55%,
-    #b48e4f 100%
-  );
-  --btn-fill-fg: #19150d;
-  box-shadow: 0 7px 20px rgba(0, 0, 0, 0.26);
-}
-
-.btn.outline {
-  --btn-bg: transparent;
-  --btn-fg: #e9ddc6;
-  --btn-border: color-mix(in srgb, var(--gold-deep) 50%, #4b4036 50%);
-  --btn-fill: linear-gradient(
-    140deg,
-    #d8bf8a 0%,
-    var(--gold) 55%,
-    #b48e4f 100%
-  );
-  --btn-fill-fg: #19150d;
-  box-shadow: none;
 }
 
 .section {

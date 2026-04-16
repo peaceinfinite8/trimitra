@@ -79,7 +79,6 @@ function MainLayout() {
         <RoutePageLoader key={routeLoaderKey} prefersReducedMotion={prefersReducedMotion} />
       )}
 
-      <a className="skip-link" href="#main-content">Lewati ke konten utama</a>
       <Navbar />
       <main className="page-main" id="main-content" tabIndex="-1">
         <AnimatePresence mode="wait" initial={false}>
