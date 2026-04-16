@@ -510,18 +510,38 @@ function LayananPage() {
             {PRIMARY_SERVICE_PACKAGES.map((service, serviceIndex) => (
               <motion.article
                 key={service.id}
-                className="services-main-item"
+                className={`services-main-item ${serviceIndex % 2 === 1 ? 'is-reversed' : ''}`}
                 initial={prefersReducedMotion ? false : { opacity: 0, y: 26, filter: 'blur(6px)' }}
                 whileInView={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, filter: 'blur(0px)' }}
                 viewport={{ once: true, amount: 0.2 }}
                 transition={{ duration: 0.44, delay: serviceIndex * 0.06, ease: [0.22, 1, 0.36, 1] }}
               >
-                <figure className="services-main-media">
+                <motion.figure
+                  className="services-main-media"
+                  initial={
+                    prefersReducedMotion
+                      ? false
+                      : { opacity: 0, x: serviceIndex % 2 === 1 ? 36 : -36, scale: 0.97 }
+                  }
+                  whileInView={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, x: 0, scale: 1 }}
+                  viewport={{ once: true, amount: 0.32 }}
+                  transition={{ duration: 0.52, delay: 0.06, ease: [0.22, 1, 0.36, 1] }}
+                >
                   <LazyImage src={service.image} alt={service.imageAlt} className="services-main-media-image" />
                   <span className="services-main-media-glow" aria-hidden="true" />
-                </figure>
+                </motion.figure>
 
-                <div className="services-main-content">
+                <motion.div
+                  className="services-main-content"
+                  initial={
+                    prefersReducedMotion
+                      ? false
+                      : { opacity: 0, x: serviceIndex % 2 === 1 ? -28 : 28 }
+                  }
+                  whileInView={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
+                  viewport={{ once: true, amount: 0.28 }}
+                  transition={{ duration: 0.5, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+                >
                   <motion.p
                     className="services-main-id"
                     initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.8, rotate: -10 }}
@@ -583,7 +603,7 @@ function LayananPage() {
                       </ul>
                     </article>
                   </div>
-                </div>
+                </motion.div>
               </motion.article>
             ))}
 
