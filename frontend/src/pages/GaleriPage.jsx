@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import LazyImage from '../components/ui/LazyImage'
 import {
@@ -263,12 +263,12 @@ function GaleriPage() {
     setSearchParams(next)
   }
 
-  const handlePageChange = (page) => {
+  const getPageHref = (page) => {
     const nextPage = Math.min(totalPages, Math.max(1, page))
     const next = new URLSearchParams(searchParams)
     next.set('kategori', filterToQuery[activeFilter])
     next.set('page', String(nextPage))
-    setSearchParams(next)
+    return `?${next.toString()}`
   }
 
   const scrollToGrid = () => {
@@ -559,14 +559,15 @@ function GaleriPage() {
 
         {totalPages > 1 && (
           <div className="container gallery-pagination" aria-label="Navigasi halaman galeri">
-            <button
-              type="button"
-              className="gallery-page-btn"
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              Prev
-            </button>
+            {currentPage === 1 ? (
+              <button type="button" className="gallery-page-btn" disabled>
+                Prev
+              </button>
+            ) : (
+              <Link className="gallery-page-btn" to={getPageHref(currentPage - 1)}>
+                Prev
+              </Link>
+            )}
 
             <div className="gallery-page-number-wrap">
               {pageItems.map((item, index) => {
@@ -579,27 +580,34 @@ function GaleriPage() {
                 }
 
                 return (
-                  <button
-                    key={item}
-                    type="button"
-                    className={`gallery-page-btn ${item === currentPage ? 'is-active' : ''}`}
-                    onClick={() => handlePageChange(item)}
-                    aria-current={item === currentPage ? 'page' : undefined}
-                  >
-                    {item}
-                  </button>
+                  item === currentPage ? (
+                    <button
+                      key={item}
+                      type="button"
+                      className="gallery-page-btn is-active"
+                      aria-current="page"
+                      disabled
+                    >
+                      {item}
+                    </button>
+                  ) : (
+                    <Link key={item} className="gallery-page-btn" to={getPageHref(item)}>
+                      {item}
+                    </Link>
+                  )
                 )
               })}
             </div>
 
-            <button
-              type="button"
-              className="gallery-page-btn"
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-            >
-              Next
-            </button>
+            {currentPage === totalPages ? (
+              <button type="button" className="gallery-page-btn" disabled>
+                Next
+              </button>
+            ) : (
+              <Link className="gallery-page-btn" to={getPageHref(currentPage + 1)}>
+                Next
+              </Link>
+            )}
           </div>
         )}
 
