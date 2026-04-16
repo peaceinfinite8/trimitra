@@ -471,17 +471,19 @@ function GaleriPage() {
             <p className="gallery-filter-eyebrow">Kategori koleksi</p>
             <h2>Temukan karya paling relevan</h2>
           </div>
-          {galleryFilters.map((filter) => (
-            <button
-              key={filter}
-              className={filter === activeFilter ? 'pill active' : 'pill'}
-              onClick={() => handleFilterChange(filter)}
-              type="button"
-            >
-              <span>{filter}</span>
-              <strong>{String(categoryCounts[filter] ?? 0).padStart(2, '0')}</strong>
-            </button>
-          ))}
+          <div className="gallery-filter-actions" role="group" aria-label="Pilih kategori koleksi">
+            {galleryFilters.map((filter) => (
+              <button
+                key={filter}
+                className={filter === activeFilter ? 'pill active' : 'pill'}
+                onClick={() => handleFilterChange(filter)}
+                type="button"
+              >
+                <span>{filter}</span>
+                <strong>{String(categoryCounts[filter] ?? 0).padStart(2, '0')}</strong>
+              </button>
+            ))}
+          </div>
         </div>
       </section>
 

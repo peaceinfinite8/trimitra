@@ -9316,9 +9316,9 @@ button,
 
 .gallery-page-simple .gallery-filter-shell {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, max-content));
+  grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
   justify-content: flex-start;
-  align-items: center;
+  align-items: start;
   gap: 10px;
   padding: 14px 16px;
   border-radius: 16px;
@@ -9331,9 +9331,17 @@ button,
 .gallery-page-simple .gallery-filter-intro {
   display: grid;
   gap: 4px;
-  min-width: 180px;
+  min-width: 0;
   margin-right: 0;
-  grid-column: 1 / -1;
+  align-content: center;
+}
+
+.gallery-page-simple .gallery-filter-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-width: 0;
 }
 
 .gallery-page-simple .gallery-filter-eyebrow {
@@ -9496,11 +9504,13 @@ button,
 .gallery-page-simple .gallery-image {
   width: 100%;
   height: auto;
+  filter: saturate(0.94) contrast(1.02) brightness(0.98);
   transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .gallery-page-simple .gallery-card:hover .gallery-image,
 .gallery-page-simple .gallery-card:focus-within .gallery-image {
+  filter: saturate(1.02) contrast(1.03) brightness(1);
   transform: scale(1.05);
 }
 
@@ -9657,12 +9667,16 @@ button,
   }
 
   .gallery-page-simple .gallery-filter-shell {
-    grid-template-columns: repeat(auto-fit, minmax(130px, max-content));
+    grid-template-columns: minmax(0, 1fr);
     align-items: flex-start;
   }
 
   .gallery-page-simple .gallery-filter-intro {
     min-width: 100%;
+  }
+
+  .gallery-page-simple .gallery-filter-actions {
+    width: 100%;
   }
 
   .gallery-page-simple .gallery-curation-grid {
@@ -9719,6 +9733,13 @@ button,
     min-width: 76%;
     flex: 0 0 auto;
     scroll-snap-align: start;
+  }
+
+  .gallery-page-simple .gallery-filter-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 8px;
   }
 
   .gallery-page-simple .pill {
