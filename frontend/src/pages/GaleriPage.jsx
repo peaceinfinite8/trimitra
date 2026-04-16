@@ -197,57 +197,26 @@ function GaleriPage() {
       return counts
     }, {})
   }, [galleryItems])
-  const gallerySnapshots = useMemo(
-    () => galleryFilters
-      .filter((filter) => filter !== 'Semua')
-      .map((filter) => {
-        const preview = galleryItems.find((item) => item.category === filter)
-        return {
-          filter,
-          count: categoryCounts[filter] ?? 0,
-          preview,
-        }
-      }),
-    [categoryCounts, galleryItems],
-  )
-  const curatedCategoryCards = useMemo(
-    () => [
-      {
-        filter: 'Semua',
-        count: galleryItems.length,
-        preview: null,
-        totalLabel: `${String(galleryItems.length).padStart(2, '0')} visual tersedia`,
-      },
-      ...gallerySnapshots.map((snapshot) => ({
+    const gallerySnapshots = useMemo(
+      () => galleryFilters
+        .filter((filter) => filter !== 'Semua')
+        .map((filter) => {
+          const preview = galleryItems.find((item) => item.category === filter)
+          return {
+            filter,
+            count: categoryCounts[filter] ?? 0,
+            preview,
+          }
+        }),
+      [categoryCounts, galleryItems],
+    )
+    const curatedCategoryCards = useMemo(
+      () => gallerySnapshots.map((snapshot) => ({
         ...snapshot,
         totalLabel: `${String(snapshot.count).padStart(2, '0')} visual tersedia`,
       })),
-    ],
-    [galleryItems.length, gallerySnapshots],
-  )
-
-  useEffect(() => {
-    document.body.classList.add('route-gallery')
-    return () => {
-      document.body.classList.remove('route-gallery')
-    }
-  }, [])
-
-  useEffect(() => {
-    if (isLoadingWp) return
-    if (currentPage <= totalPages) return
-    const next = new URLSearchParams(searchParams)
-    next.set('kategori', filterToQuery[activeFilter])
-    next.set('page', String(totalPages))
-    setSearchParams(next)
-  }, [activeFilter, currentPage, isLoadingWp, searchParams, setSearchParams, totalPages])
-
-  useEffect(() => {
-    if (activeIndex === null) return
-    if (activeIndex > pagedGallery.length - 1) {
-      setActiveIndex(0)
-    }
-  }, [activeIndex, pagedGallery.length])
+      [gallerySnapshots],
+    )
 
   useEffect(() => {
     if (activeIndex === null) return undefined
@@ -500,39 +469,25 @@ function GaleriPage() {
                   }}
                   style={{ animationDelay: `${index * 0.05}s` }}
                 >
-                  {isAllCard ? (
-                    <>
-                      <span className="gallery-curation-all-icon" aria-hidden="true">
-                        <CategoryGridIcon />
-                      </span>
-                      <span className="gallery-curation-all-title">Semua</span>
-                      <span className="gallery-curation-all-meta">
-                        {snapshot.totalLabel || `${String(snapshot.count).padStart(2, '0')} visual tersedia`}
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="gallery-curation-media" aria-hidden="true">
-                        {snapshot.preview?.src ? (
-                          <LazyImage
-                            src={snapshot.preview.src}
-                            alt={snapshot.preview.alt || snapshot.filter}
-                            className="gallery-image gallery-curation-image"
-                            wrapperClassName="gallery-curation-image-wrap"
-                          />
-                        ) : null}
-                      </span>
-                      <span className="gallery-curation-topline" aria-hidden="true" />
-                      <span className="gallery-curation-badge">{snapshot.filter}</span>
-                      <span className="gallery-curation-overlay" aria-hidden="true" />
-                      <span className="gallery-curation-body">
-                        <span className="gallery-curation-separator" aria-hidden="true" />
-                        <span className="gallery-curation-meta">{snapshot.totalLabel}</span>
-                        <span className="gallery-curation-title">{snapshot.filter}</span>
-                        <span className="gallery-curation-action">Lihat Semua →</span>
-                      </span>
-                    </>
-                  )}
+                  <span className="gallery-curation-media" aria-hidden="true">
+                    {snapshot.preview?.src ? (
+                      <LazyImage
+                        src={snapshot.preview.src}
+                        alt={snapshot.preview.alt || snapshot.filter}
+                        className="gallery-image gallery-curation-image"
+                        wrapperClassName="gallery-curation-image-wrap"
+                      />
+                    ) : null}
+                  </span>
+                  <span className="gallery-curation-topline" aria-hidden="true" />
+                  <span className="gallery-curation-badge">{snapshot.filter}</span>
+                  <span className="gallery-curation-overlay" aria-hidden="true" />
+                  <span className="gallery-curation-body">
+                    <span className="gallery-curation-separator" aria-hidden="true" />
+                    <span className="gallery-curation-meta">{snapshot.totalLabel}</span>
+                    <span className="gallery-curation-title">{snapshot.filter}</span>
+                    <span className="gallery-curation-action">Lihat Semua →</span>
+                  </span>
                 </motion.button>
               )
             })}
