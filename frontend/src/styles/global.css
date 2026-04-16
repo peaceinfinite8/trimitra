@@ -336,6 +336,20 @@
   --brand-black: #0a0a0a;
 }
 
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 body {
   font-family: var(--font-jakarta, "Plus Jakarta Sans"), sans-serif;
   background:
@@ -5560,6 +5574,19 @@ body.nav-over-hero .hero-single {
   margin: 0;
   color: #c6c0b2;
   line-height: 1.7;
+}
+
+.site-footer a,
+.site-footer li a,
+.footer-links a {
+  text-decoration: none !important;
+}
+
+.site-footer a:hover,
+.site-footer a:focus-visible,
+.site-footer li a:hover,
+.footer-links a:hover {
+  text-decoration: none !important;
 }
 
 @keyframes fadeUp {
@@ -12333,8 +12360,13 @@ body.route-home .site-footer::before {
   }
 
   .hero-visual-card {
-    aspect-ratio: 16 / 11;
-    min-height: 220px;
+    aspect-ratio: 4 / 5;
+    min-height: 300px;
+    max-height: min(72svh, 560px);
+  }
+
+  .hero-visual-image {
+    object-position: center 34% !important;
   }
 
   .hero-floating-badge {
