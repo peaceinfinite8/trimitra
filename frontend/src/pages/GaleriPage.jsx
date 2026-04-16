@@ -189,13 +189,11 @@ function GaleriPage() {
 
   useEffect(() => {
     if (currentPage <= totalPages) return
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev)
-      next.set('kategori', filterToQuery[activeFilter])
-      next.set('page', String(totalPages))
-      return next
-    })
-  }, [activeFilter, currentPage, setSearchParams, totalPages])
+    const next = new URLSearchParams(searchParams)
+    next.set('kategori', filterToQuery[activeFilter])
+    next.set('page', String(totalPages))
+    setSearchParams(next)
+  }, [activeFilter, currentPage, searchParams, setSearchParams, totalPages])
 
   useEffect(() => {
     if (activeIndex === null) return
@@ -259,22 +257,18 @@ function GaleriPage() {
 
   const handleFilterChange = (filter) => {
     const queryValue = filterToQuery[filter]
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev)
-      next.set('kategori', queryValue)
-      next.set('page', '1')
-      return next
-    })
+    const next = new URLSearchParams(searchParams)
+    next.set('kategori', queryValue)
+    next.set('page', '1')
+    setSearchParams(next)
   }
 
   const handlePageChange = (page) => {
     const nextPage = Math.min(totalPages, Math.max(1, page))
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev)
-      next.set('kategori', filterToQuery[activeFilter])
-      next.set('page', String(nextPage))
-      return next
-    })
+    const next = new URLSearchParams(searchParams)
+    next.set('kategori', filterToQuery[activeFilter])
+    next.set('page', String(nextPage))
+    setSearchParams(next)
   }
 
   const scrollToGrid = () => {
