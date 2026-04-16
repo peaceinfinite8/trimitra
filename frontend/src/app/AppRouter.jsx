@@ -25,6 +25,10 @@ function AppRouter() {
   if (isMaintenanceMode) {
     return (
       <Routes>
+        <Route element={<MainLayout />}>
+          <Route path="/galeri" element={<Suspense fallback={<RouteFallback />}><GaleriPage /></Suspense>} />
+        </Route>
+        <Route path="/maintenance" element={<MaintenancePage />} />
         <Route path="*" element={<MaintenancePage />} />
       </Routes>
     )

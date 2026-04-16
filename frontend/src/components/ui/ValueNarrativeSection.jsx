@@ -46,7 +46,7 @@ const VALUES = [
   },
 ]
 
-function ValueNarrativeSection() {
+function ValueNarrativeSection({ values = VALUES } = {}) {
   const [activeIndex, setActiveIndex] = useState(0)
   const sectionRef = useRef(null)
   const mobileTrackRef = useRef(null)
@@ -69,7 +69,7 @@ function ValueNarrativeSection() {
       const maxScrollable = Math.max(1, sectionHeight - window.innerHeight)
       const progress = (window.scrollY - sectionTop) / maxScrollable
       const clamped = Math.min(1, Math.max(0, progress))
-      const nextIndex = Math.round(clamped * (VALUES.length - 1))
+      const nextIndex = Math.round(clamped * (values.length - 1))
       setActiveIndex((prev) => (prev === nextIndex ? prev : nextIndex))
     }
 
@@ -103,7 +103,7 @@ function ValueNarrativeSection() {
     const sectionTop = window.scrollY + rect.top
     const sectionHeight = section.offsetHeight
     const maxScrollable = Math.max(1, sectionHeight - window.innerHeight)
-    const target = sectionTop + (index / Math.max(1, VALUES.length - 1)) * maxScrollable
+    const target = sectionTop + (index / Math.max(1, values.length - 1)) * maxScrollable
     window.scrollTo({ top: target, behavior: 'smooth' })
   }
 
@@ -114,11 +114,11 @@ function ValueNarrativeSection() {
     setActiveIndex((prev) => (prev === index ? prev : index))
   }
 
-  const active = VALUES[activeIndex]
+  const active = values[activeIndex]
 
   return (
     <SectionReveal className="section values-narrative-section">
-      <div className="container values-narrative-wrap" ref={sectionRef} style={{ '--value-count': VALUES.length }}>
+      <div className="container values-narrative-wrap" ref={sectionRef} style={{ '--value-count': values.length }}>
         <div className="values-narrative-sticky">
           <div className="values-narrative-copy">
             <p className="kicker">Kualitas Kami</p>
@@ -128,7 +128,7 @@ function ValueNarrativeSection() {
             </p>
 
             <div className="values-switcher" role="tablist" aria-label="Nilai utama Trimitra">
-              {VALUES.map((item, index) => {
+              {values.map((item, index) => {
                 const isActive = activeIndex === index
                 return (
                   <button
@@ -180,7 +180,7 @@ function ValueNarrativeSection() {
           role="region"
           aria-label="Nilai Trimitra mobile slider"
         >
-          {VALUES.map((item) => (
+          {values.map((item) => (
             <article className="value-mobile-card" key={`mobile-${item.id}`}>
               <img src={item.image} alt={item.title} loading="lazy" decoding="async" />
               <div className="value-mobile-overlay" />
@@ -195,7 +195,7 @@ function ValueNarrativeSection() {
         </div>
 
         <div className="values-mobile-indicator" aria-hidden="true">
-          {VALUES.map((item, index) => (
+          {values.map((item, index) => (
             <span key={`dot-${item.id}`} className={activeIndex === index ? 'is-active' : ''} />
           ))}
         </div>

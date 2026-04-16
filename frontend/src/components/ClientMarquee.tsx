@@ -24,8 +24,8 @@ type ClientMarqueeProps = {
     theme?: ClientMarqueeTheme;
 };
 
-export default function ClientMarquee({ theme = "dark" }: ClientMarqueeProps) {
-    const [clients, setClients] = useState<MarqueeClient[]>(fallbackClients);
+export default function ClientMarquee({ theme = "dark", clients: initialClients }: ClientMarqueeProps & { clients?: MarqueeClient[] }) {
+    const [clients, setClients] = useState<MarqueeClient[]>(initialClients?.length ? initialClients : fallbackClients);
 
     useEffect(() => {
         let cancelled = false;
@@ -34,7 +34,7 @@ export default function ClientMarquee({ theme = "dark" }: ClientMarqueeProps) {
             if (!isWordPressConfiguredForPages()) return;
 
             const wpClients = await getWordPressClients({ perPage: 40 });
-            if (!cancelled && Array.isArray(wpClients) && wpClients.length > 0) {
+            if (!cancelled && Array.isArray(wpClients) && wpClients.length > 0 && !initialClients?.length) {
                 setClients(wpClients as MarqueeClient[]);
             }
         }

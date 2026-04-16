@@ -2,8 +2,6 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import LazyImage from '../components/ui/LazyImage'
-import MaintenancePage from './MaintenancePage'
-import { isInMaintenanceWindow } from '../utils/maintenanceCheck'
 import {
   getWordPressGalleryMedia,
   getWordPressGalleryFromPageBySlugs,
@@ -66,67 +64,11 @@ function buildPageItems(currentPage, totalPages) {
   ]
 }
 
-const fallbackGallery = [
-  {
-    type: 'square',
-    category: 'Booth Pameran',
-    src: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=900&q=80',
-    alt: 'Booth pameran brand dengan struktur modern dan pencahayaan fokus.',
-  },
-  {
-    type: 'tall',
-    category: 'Booth Pameran',
-    src: 'https://images.unsplash.com/photo-1467810563316-b5476525c0f9?auto=format&fit=crop&w=900&q=80',
-    alt: 'Detail area booth exhibition dengan alur pengunjung yang terarah.',
-  },
-  {
-    type: 'square',
-    category: 'Billboard',
-    src: 'https://images.unsplash.com/photo-1526498460520-4c246339dccb?auto=format&fit=crop&w=900&q=80',
-    alt: 'Media billboard outdoor di koridor jalan utama perkotaan.',
-  },
-  {
-    type: 'square',
-    category: 'Event',
-    src: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=900&q=80',
-    alt: 'Suasana event korporat dengan panggung dan audiens aktif.',
-  },
-  {
-    type: 'square',
-    category: 'Event',
-    src: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=900&q=80',
-    alt: 'Momen event activation dengan tata cahaya dan crowd engagement.',
-  },
-  {
-    type: 'tall',
-    category: 'Booth Pameran',
-    src: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=900&q=80',
-    alt: 'Elevasi vertikal booth pameran untuk meningkatkan visibilitas brand.',
-  },
-  {
-    type: 'tall',
-    category: 'Billboard',
-    src: 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1f?auto=format&fit=crop&w=900&q=80',
-    alt: 'Penempatan billboard di titik traffic padat dengan exposure tinggi.',
-  },
-  {
-    type: 'wide',
-    category: 'Booth Pameran',
-    src: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1400&q=80',
-    alt: 'Tampilan lebar area booth exhibition untuk kebutuhan showcase brand.',
-  },
-]
-
 function GaleriPage() {
-  // Check if in maintenance window
-  if (isInMaintenanceWindow()) {
-    return <MaintenancePage />
-  }
-
   const prefersReducedMotion = useReducedMotion()
   const [searchParams, setSearchParams] = useSearchParams()
   const [activeIndex, setActiveIndex] = useState(null)
-  const [galleryItems, setGalleryItems] = useState(fallbackGallery)
+  const [galleryItems, setGalleryItems] = useState([])
   const [isLoadingWp, setIsLoadingWp] = useState(isWordPressConfiguredForPages())
   const prefetchedImagesRef = useRef(new Set())
   const gridSectionRef = useRef(null)
@@ -141,7 +83,10 @@ function GaleriPage() {
     let cancelled = false
 
     async function loadGalleryFromWordPress() {
-      if (!isWordPressConfiguredForPages()) return
+      if (!isWordPressConfiguredForPages()) {
+        if (!cancelled) setIsLoadingWp(false)
+        return
+      }
       try {
         const pageMedia = await getWordPressGalleryFromPageBySlugs(['galeri', 'gallery'])
         if (!cancelled && pageMedia.length > 0) {
@@ -151,11 +96,13 @@ function GaleriPage() {
         }
 
         const libraryMedia = await getWordPressGalleryMedia({ perPage: 100, allPages: true })
-        if (!cancelled && libraryMedia.length > 0) {
+        if (!cancelled) {
           setGalleryItems(libraryMedia)
         }
       } catch {
-        // Keep fallback gallery when WordPress media is unreachable.
+        if (!cancelled) {
+          setGalleryItems([])
+        }
       } finally {
         if (!cancelled) {
           setIsLoadingWp(false)
@@ -185,8 +132,8 @@ function GaleriPage() {
     [currentPage, totalPages],
   )
   const activeFilterTransitionKey = `${activeFilter}-${currentPage}`
-  const heroImage = galleryItems[0]?.src || fallbackGallery[0].src
-  const heroFeatureTitle = galleryItems[0]?.alt || fallbackGallery[0].alt
+  const heroImage = galleryItems[0]?.src || ''
+  const heroFeatureTitle = galleryItems[0]?.alt || 'Tambahkan foto di halaman GALERI WordPress untuk ditampilkan di sini.'
   const categoryCounts = useMemo(() => {
     return galleryFilters.reduce((counts, filter) => {
       counts[filter] = filter === 'Semua'
@@ -195,6 +142,19 @@ function GaleriPage() {
       return counts
     }, {})
   }, [galleryItems])
+  const gallerySnapshots = useMemo(
+    () => galleryFilters
+      .filter((filter) => filter !== 'Semua')
+      .map((filter) => {
+        const preview = galleryItems.find((item) => item.category === filter)
+        return {
+          filter,
+          count: categoryCounts[filter] ?? 0,
+          preview,
+        }
+      }),
+    [categoryCounts, galleryItems],
+  )
 
   useEffect(() => {
     document.body.classList.add('route-gallery')
@@ -299,7 +259,7 @@ function GaleriPage() {
 
   return (
     <div className="galeri-page-fix gallery-page-simple">
-      <section className="gallery-hero gallery-hero-redesign">
+      <section className="gallery-hero gallery-hero-redesign" data-nav-hero>
         <div className="container">
           <div className="gallery-hero-grid">
             <div className="gallery-hero-copy">
@@ -312,6 +272,27 @@ function GaleriPage() {
                 Setiap karya di sini disusun untuk memperlihatkan hasil akhir secara bersih, agar
                 Anda bisa cepat menilai kualitas, skala, dan karakter eksekusi kami.
               </p>
+
+              <div className="gallery-hero-points" aria-label="Nilai utama galeri Trimitra">
+                <span>Kurasi rapi per kategori</span>
+                <span>Visual resolusi tinggi</span>
+                <span>Flow eksplorasi cepat</span>
+              </div>
+
+              <div className="gallery-hero-meta-rail" aria-label="Ringkasan koleksi galeri">
+                <article className="gallery-hero-meta-item">
+                  <span>Total Visual</span>
+                  <strong>{String(galleryItems.length).padStart(2, '0')}</strong>
+                </article>
+                <article className="gallery-hero-meta-item">
+                  <span>Kategori Aktif</span>
+                  <strong>{activeFilter}</strong>
+                </article>
+                <article className="gallery-hero-meta-item">
+                  <span>Halaman</span>
+                  <strong>{currentPage}/{totalPages}</strong>
+                </article>
+              </div>
 
               <div className="gallery-hero-actions">
                 <button type="button" className="btn btn-primary" onClick={scrollToGrid}>
@@ -329,23 +310,29 @@ function GaleriPage() {
               animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
               transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
             >
-              <button
-                type="button"
-                className="gallery-lightbox-trigger gallery-hero-feature-trigger"
-                onClick={() => setActiveIndex(0)}
-                aria-label="Buka karya unggulan galeri"
-              >
-                <LazyImage
-                  src={heroImage}
-                  alt="Galeri karya Trimitra"
-                  className="gallery-image gallery-hero-feature-image"
-                />
-                <span className="gallery-card-overlay gallery-hero-feature-overlay" aria-hidden="true">
-                  <span className="gallery-card-badge">Highlight Galeri</span>
-                  <span className="gallery-card-title">{heroFeatureTitle}</span>
-                  <span className="gallery-hero-feature-meta">Visual pembuka koleksi</span>
-                </span>
-              </button>
+              {heroImage ? (
+                <button
+                  type="button"
+                  className="gallery-lightbox-trigger gallery-hero-feature-trigger"
+                  onClick={() => setActiveIndex(0)}
+                  aria-label="Buka karya unggulan galeri"
+                >
+                  <LazyImage
+                    src={heroImage}
+                    alt="Galeri karya Trimitra"
+                    className="gallery-image gallery-hero-feature-image"
+                  />
+                  <span className="gallery-card-overlay gallery-hero-feature-overlay" aria-hidden="true">
+                    <span className="gallery-card-badge">Highlight Galeri</span>
+                    <span className="gallery-card-title">{heroFeatureTitle}</span>
+                    <span className="gallery-hero-feature-meta">Visual pembuka koleksi</span>
+                  </span>
+                </button>
+              ) : (
+                <div className="gallery-hero-feature-empty" role="status" aria-live="polite">
+                  <p>Belum ada foto dari GALERI WordPress.</p>
+                </div>
+              )}
             </motion.article>
           </div>
         </div>
@@ -398,7 +385,63 @@ function GaleriPage() {
         </div>
       </section>
 
-      <section className="gallery-filter gallery-filter-sticky">
+      <section className="gallery-curation-band" aria-label="Eksplorasi kategori unggulan">
+        <div className="container">
+          <div className="gallery-curation-head">
+            <p className="gallery-curation-kicker">Pilihan Cepat</p>
+            <h2>Mulai dari kategori yang paling Anda butuhkan</h2>
+            <p>
+              Gunakan panel ini untuk langsung melompat ke kumpulan karya yang relevan,
+              lalu lanjutkan ke grid utama untuk melihat detailnya.
+            </p>
+          </div>
+
+          <div className="gallery-curation-grid">
+            {gallerySnapshots.map((snapshot, index) => (
+              <motion.button
+                key={snapshot.filter}
+                type="button"
+                className={`gallery-curation-card ${snapshot.filter === activeFilter ? 'is-active' : ''}`}
+                initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
+                whileInView={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{
+                  duration: 0.4,
+                  delay: index * 0.05,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+                onClick={() => {
+                  handleFilterChange(snapshot.filter)
+                  scrollToGrid()
+                }}
+              >
+                <span className="gallery-curation-media" aria-hidden="true">
+                  {snapshot.preview?.src ? (
+                    <LazyImage
+                      src={snapshot.preview.src}
+                      alt={snapshot.preview.alt || snapshot.filter}
+                      className="gallery-image"
+                    />
+                  ) : (
+                    <span className="gallery-curation-placeholder">Belum ada preview</span>
+                  )}
+                </span>
+
+                <span className="gallery-curation-body">
+                  <span className="gallery-curation-title">{snapshot.filter}</span>
+                  <span className="gallery-curation-meta">
+                    {String(snapshot.count).padStart(2, '0')} visual tersedia
+                  </span>
+                </span>
+              </motion.button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section
+        className="gallery-filter gallery-filter-sticky"
+      >
         <div className="container filter-pills gallery-filter-shell">
           <div className="gallery-filter-intro">
             <p className="gallery-filter-eyebrow">Kategori koleksi</p>
@@ -419,6 +462,15 @@ function GaleriPage() {
       </section>
 
       <section className="gallery-grid-section" ref={gridSectionRef}>
+        <div className="container gallery-grid-head">
+          <p className="gallery-grid-head-kicker">Curated Works</p>
+          <h2>Eksplorasi Visual Pilihan</h2>
+          <p>
+            Menampilkan <strong>{pagedGallery.length}</strong> karya di halaman ini dari total{' '}
+            <strong>{visibleGallery.length}</strong> karya pada kategori <strong>{activeFilter}</strong>.
+          </p>
+        </div>
+
         {isLoadingWp ? (
           <div className="container gallery-grid" aria-label="Memuat galeri">
             {Array.from({ length: ITEMS_PER_PAGE }, (_, index) => (
@@ -430,6 +482,11 @@ function GaleriPage() {
                 <div className="gallery-skeleton-block" />
               </article>
             ))}
+          </div>
+        ) : visibleGallery.length === 0 ? (
+          <div className="container gallery-empty-state" role="status" aria-live="polite">
+            <h3>Foto galeri belum tersedia</h3>
+            <p>Silakan tambahkan gambar pada halaman GALERI di WordPress agar tampil di halaman ini.</p>
           </div>
         ) : (
           <AnimatePresence mode="wait" initial={false}>
@@ -525,6 +582,21 @@ function GaleriPage() {
             </button>
           </div>
         )}
+
+        <div className="container gallery-layout-cta">
+          <div className="gallery-layout-cta-shell">
+            <p className="gallery-layout-cta-kicker">Punya brief proyek spesifik?</p>
+            <h3>Diskusikan konsep visual Anda bersama tim Trimitra</h3>
+            <div className="gallery-layout-cta-actions">
+              <a href="/kontak-kami" className="btn btn-primary">
+                Mulai Konsultasi
+              </a>
+              <button type="button" className="btn btn-secondary" onClick={scrollToGrid}>
+                Kembali ke koleksi
+              </button>
+            </div>
+          </div>
+        </div>
       </section>
 
       {activeIndex !== null && pagedGallery[activeIndex] && (

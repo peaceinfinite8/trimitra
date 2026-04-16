@@ -155,20 +155,25 @@ const HERO_MARQUEE_TEXT =
   'BOOTH EXHIBITION ● EVENT ACTIVATION ● OUTDOOR MEDIA ● TRIMITRA SERVICE EXPLORER ● ' +
   'BOOTH EXHIBITION ● EVENT ACTIVATION ● OUTDOOR MEDIA ● TRIMITRA SERVICE EXPLORER ● '
 
-function AccordionHero() {
+function AccordionHero({
+  kicker = 'Trimitra Campaign Selector',
+  modes = HERO_CAMPAIGN_MODES,
+  primaryLink = '/kontak-kami',
+  secondaryLink = '/galeri',
+}) {
   const prefersReducedMotion = useReducedMotion()
 
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    HERO_CAMPAIGN_MODES.forEach((mode) => {
+    modes.forEach((mode) => {
       const image = new window.Image()
       image.decoding = 'async'
       image.src = mode.image
     })
-  }, [])
+  }, [modes])
 
-  const activeMode = HERO_CAMPAIGN_MODES[0]
+  const activeMode = modes[0] || HERO_CAMPAIGN_MODES[0]
   const headlineWords = activeMode.headline.split(' ')
   const gradientWordSet = new Set(['booth', 'event', 'outdoor', 'brand', 'exhibition', 'activation', 'media'])
   const headlineStartDelay = 0.26
@@ -205,7 +210,7 @@ function AccordionHero() {
                 animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
                 transition={{ duration: 0.46, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
               >
-                Trimitra Campaign Selector
+                {kicker}
               </motion.p>
               <motion.h1 className="hero-single-title">
                 <span className="hero-headline-stage">
@@ -298,10 +303,10 @@ function AccordionHero() {
                 animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
                 transition={{ duration: 0.42, delay: actionsDelay, ease: [0.22, 1, 0.36, 1] }}
               >
-                <Link className="btn" to="/kontak-kami" data-magnetic>
+                <Link className="btn" to={primaryLink} data-magnetic>
                   {activeMode.ctaPrimary}
                 </Link>
-                <Link className="btn outline hero-glass-secondary" to="/galeri" data-magnetic>
+                <Link className="btn outline hero-glass-secondary" to={secondaryLink} data-magnetic>
                   {activeMode.ctaSecondary}
                 </Link>
               </motion.div>

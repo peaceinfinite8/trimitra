@@ -3,6 +3,7 @@
 const WP_SITE_URL = (import.meta.env.VITE_WP_SITE_URL || '').trim().replace(/\/$/, '')
 const WP_CLIENTS_ENDPOINT = (import.meta.env.VITE_WP_CLIENTS_ENDPOINT || '').trim()
 const WP_CACHE_TTL_MS = 5 * 60 * 1000
+const WP_CACHE_VERSION = 'v2'
 const WP_FETCH_TIMEOUT_MS = 6500
 
 const hasWindow = typeof window !== 'undefined'
@@ -233,13 +234,17 @@ async function fetchWp(endpoint, params = {}) {
   const query = new URLSearchParams(params).toString()
   const url = `${WP_SITE_URL}/wp-json/wp/v2/${endpoint}${query ? `?${query}` : ''}`
 
-  return withCache(`wp:${url}`, WP_CACHE_TTL_MS, async () => {
+  return withCache(`wp:${WP_CACHE_VERSION}:${url}`, WP_CACHE_TTL_MS, async () => {
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), WP_FETCH_TIMEOUT_MS)
 
     let response
     try {
-      response = await fetch(url, { signal: controller.signal })
+      response = await fetch(url, {
+        signal: controller.signal,
+        cache: 'no-store',
+        credentials: 'omit',
+      })
     } finally {
       clearTimeout(timeoutId)
     }
@@ -251,17 +256,21 @@ async function fetchWp(endpoint, params = {}) {
     const data = await response.json()
     const totalPages = Number(response.headers.get('X-WP-TotalPages') || '1')
     return { data, totalPages }
-  })
+  }, { staleWhileRevalidate: false })
 }
 
 async function fetchWpAbsolute(url) {
-  return withCache(`wp:${url}`, WP_CACHE_TTL_MS, async () => {
+  return withCache(`wp:${WP_CACHE_VERSION}:${url}`, WP_CACHE_TTL_MS, async () => {
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), WP_FETCH_TIMEOUT_MS)
 
     let response
     try {
-      response = await fetch(url, { signal: controller.signal })
+      response = await fetch(url, {
+        signal: controller.signal,
+        cache: 'no-store',
+        credentials: 'omit',
+      })
     } finally {
       clearTimeout(timeoutId)
     }
@@ -271,7 +280,7 @@ async function fetchWpAbsolute(url) {
     }
 
     return response.json()
-  })
+  }, { staleWhileRevalidate: false })
 }
 
 async function fetchWpAbsoluteNoStore(url) {
@@ -498,64 +507,80 @@ export async function getWordPressClients({ perPage = 40 } = {}) {
 export async function getWordPressGalleryMedia({ perPage = 100, allPages = true } = {}) {
   if (!isWordPressConfiguredForPages()) return []
 
-  const clampedPerPage = Math.min(25, Math.max(1, perPage))
-  const searchTerms = ['booth', 'pameran', 'event', 'billboard', 'reklame', 'exhibition']
+  const clampedPerPage = Math.min(100, Math.max(1, perPage))
+  const firstPage = await fetchWp('media', {
+    media_type: 'image',
+    per_page: String(clampedPerPage),
+    page: '1',
+    orderby: 'date',
+    order: 'desc',
+    _fields: 'id,source_url,alt_text,title.rendered,caption.rendered,media_details.width,media_details.height',
+  })
 
-  const queries = await Promise.all(
-    searchTerms.map(async (term) => {
-      const result = await fetchMediaBySearchTerm(term, clampedPerPage)
+  let items = Array.isArray(firstPage.data) ? [...firstPage.data] : []
 
-      if (!allPages || result.totalPages <= 1) {
-        return Array.isArray(result.data) ? result.data : []
+  if (allPages && Number(firstPage.totalPages || 1) > 1) {
+    const requests = []
+    for (let page = 2; page <= firstPage.totalPages; page += 1) {
+      requests.push(
+        fetchWp('media', {
+          media_type: 'image',
+          per_page: String(clampedPerPage),
+          page: String(page),
+          orderby: 'date',
+          order: 'desc',
+          _fields: 'id,source_url,alt_text,title.rendered,caption.rendered,media_details.width,media_details.height',
+        }),
+      )
+    }
+
+    const rest = await Promise.all(requests)
+    rest.forEach((item) => {
+      if (Array.isArray(item.data)) {
+        items = items.concat(item.data)
       }
+    })
+  }
 
-      const pages = Array.isArray(result.data) ? result.data : []
-      const requests = []
-      for (let page = 2; page <= result.totalPages; page += 1) {
-        requests.push(
-          fetchWp('media', {
-            media_type: 'image',
-            search: term,
-            per_page: String(clampedPerPage),
-            page: String(page),
-            orderby: 'date',
-            order: 'desc',
-            _fields: 'id,source_url,alt_text,title.rendered,caption.rendered,media_details.width,media_details.height',
-          }),
-        )
-      }
-
-      const rest = await Promise.all(requests)
-      rest.forEach((item) => {
-        if (Array.isArray(item.data)) {
-          pages.push(...item.data)
-        }
-      })
-
-      return pages
-    }),
-  )
-
-  const items = queries.flat()
-
-  return items
+  const normalizedItems = items
     .map((item) => {
       const title = decodeHtml(item?.title?.rendered || '')
       const alt = decodeHtml(item?.alt_text || title)
       const caption = decodeHtml(item?.caption?.rendered || '')
-      const hintText = `${title} ${alt} ${caption}`
+      const sourceUrl = item?.source_url || ''
+      const hintText = `${title} ${alt} ${caption} ${sourceUrl}`
       const width = item?.media_details?.width
       const height = item?.media_details?.height
 
       return {
         id: item?.id,
-        src: item?.source_url,
+        src: sourceUrl,
         alt: alt || title || 'Galeri',
         category: inferGalleryCategory(hintText),
         type: normalizeGalleryType(width, height),
+        width,
+        height,
       }
     })
-    .filter((item) => item.src)
+    .filter((item) => {
+      if (!item.src) return false
+
+      const source = item.src.toLowerCase()
+      const isUtilityAsset =
+        source.includes('/email.') ||
+        source.includes('/telp.') ||
+        source.includes('/wa.') ||
+        source.includes('/logo-') ||
+        source.includes('/icon-') ||
+        source.includes('/favicon')
+
+      if (isUtilityAsset) return false
+
+      const hasLargeEnoughDimensions = (item.width || 0) >= 480 && (item.height || 0) >= 280
+      return hasLargeEnoughDimensions || source.includes('/uploads/2025/') || source.includes('/uploads/2026/')
+    })
+
+  return normalizedItems
 }
 
 export async function getWordPressGalleryFromPageBySlugs(slugs = ['galeri', 'gallery']) {
@@ -584,7 +609,10 @@ export async function getWordPressGalleryFromPageBySlugs(slugs = ['galeri', 'gal
 
   let renderedHtml = ''
   try {
-    const response = await fetch(pageUrl, { credentials: 'omit' })
+    const response = await fetch(pageUrl, {
+      credentials: 'omit',
+      cache: 'no-store',
+    })
     if (response.ok) {
       renderedHtml = await response.text()
     }
@@ -594,42 +622,6 @@ export async function getWordPressGalleryFromPageBySlugs(slugs = ['galeri', 'gal
 
   const renderedImages = extractGalleryImagesFromHtml(renderedHtml)
   const inlineImages = parseImagesFromRenderedHtml(page?.content?.rendered || '')
-
-  const mediaFirstPage = await fetchWp('media', {
-    parent: String(pageId),
-    media_type: 'image',
-    per_page: '100',
-    page: '1',
-    orderby: 'date',
-    order: 'desc',
-    _fields: 'id,source_url,alt_text,title.rendered,caption.rendered,media_details.width,media_details.height',
-  })
-
-  let mediaItems = Array.isArray(mediaFirstPage.data) ? mediaFirstPage.data : []
-
-  if (mediaFirstPage.totalPages > 1) {
-    const reqs = []
-    for (let pageNumber = 2; pageNumber <= mediaFirstPage.totalPages; pageNumber += 1) {
-      reqs.push(
-        fetchWp('media', {
-          parent: String(pageId),
-          media_type: 'image',
-          per_page: '100',
-          page: String(pageNumber),
-          orderby: 'date',
-          order: 'desc',
-          _fields: 'id,source_url,alt_text,title.rendered,caption.rendered,media_details.width,media_details.height',
-        }),
-      )
-    }
-
-    const restResults = await Promise.all(reqs)
-    restResults.forEach((result) => {
-      if (Array.isArray(result.data)) {
-        mediaItems = mediaItems.concat(result.data)
-      }
-    })
-  }
 
   const fromRendered = renderedImages.map((item) => {
     const hintText = `${item.alt || ''} ${item.src || ''}`
@@ -641,25 +633,6 @@ export async function getWordPressGalleryFromPageBySlugs(slugs = ['galeri', 'gal
       type: inferGalleryTypeFromRatio(item.width, item.height),
       width: item.width,
       height: item.height,
-    }
-  })
-
-  const fromMedia = mediaItems.map((item) => {
-    const title = decodeHtml(item?.title?.rendered || '')
-    const alt = decodeHtml(item?.alt_text || title)
-    const caption = decodeHtml(item?.caption?.rendered || '')
-    const hintText = `${title} ${alt} ${caption}`
-    const width = item?.media_details?.width
-    const height = item?.media_details?.height
-
-    return {
-      id: item?.id,
-      src: item?.source_url,
-      alt: alt || title || 'Galeri',
-      category: inferGalleryCategory(hintText),
-      type: inferGalleryTypeFromRatio(width, height),
-      width,
-      height,
     }
   })
 
@@ -676,7 +649,69 @@ export async function getWordPressGalleryFromPageBySlugs(slugs = ['galeri', 'gal
     }
   })
 
-  const combined = [...fromRendered, ...fromMedia, ...inlineMapped].filter((item) => item.src)
+  let combined = [...fromRendered, ...inlineMapped].filter((item) => item.src)
+
+  // Muffin Builder setups often keep gallery selections outside content.rendered.
+  // In that case, use media attached to this GALERI page as a strict page-level fallback.
+  if (combined.length === 0 && pageId) {
+    const mediaFirstPage = await fetchWp('media', {
+      parent: String(pageId),
+      media_type: 'image',
+      per_page: '100',
+      page: '1',
+      orderby: 'date',
+      order: 'desc',
+      _fields: 'id,source_url,alt_text,title.rendered,caption.rendered,media_details.width,media_details.height',
+    })
+
+    let mediaItems = Array.isArray(mediaFirstPage.data) ? mediaFirstPage.data : []
+
+    if (mediaFirstPage.totalPages > 1) {
+      const reqs = []
+      for (let pageNumber = 2; pageNumber <= mediaFirstPage.totalPages; pageNumber += 1) {
+        reqs.push(
+          fetchWp('media', {
+            parent: String(pageId),
+            media_type: 'image',
+            per_page: '100',
+            page: String(pageNumber),
+            orderby: 'date',
+            order: 'desc',
+            _fields: 'id,source_url,alt_text,title.rendered,caption.rendered,media_details.width,media_details.height',
+          }),
+        )
+      }
+
+      const restResults = await Promise.all(reqs)
+      restResults.forEach((result) => {
+        if (Array.isArray(result.data)) {
+          mediaItems = mediaItems.concat(result.data)
+        }
+      })
+    }
+
+    combined = mediaItems
+      .map((item) => {
+        const title = decodeHtml(item?.title?.rendered || '')
+        const alt = decodeHtml(item?.alt_text || title)
+        const caption = decodeHtml(item?.caption?.rendered || '')
+        const hintText = `${title} ${alt} ${caption}`
+        const width = item?.media_details?.width
+        const height = item?.media_details?.height
+
+        return {
+          id: item?.id,
+          src: item?.source_url,
+          alt: alt || title || 'Galeri',
+          category: inferGalleryCategory(hintText),
+          type: inferGalleryTypeFromRatio(width, height),
+          width,
+          height,
+        }
+      })
+      .filter((item) => item.src)
+  }
+
   const uniqueBySrc = []
   const seen = new Set()
 

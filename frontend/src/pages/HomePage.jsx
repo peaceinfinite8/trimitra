@@ -14,7 +14,7 @@ import {
   getWordPressPageBySlugs,
   isWordPressConfiguredForPages,
 } from '../data/wordpressPages'
-import { pickLinkField, pickTextField } from '../data/wpUiFields'
+import { pickArrayField, pickLinkField, pickTextField } from '../data/wpUiFields'
 
 const portfolioContainerVariants = {
   hidden: {},
@@ -77,20 +77,24 @@ function PortfolioShowcase({ kicker, title, images }) {
 }
 
 function HomeIdentitySection({
+  kicker = 'Tentang Website Ini',
   title = 'PT Trimitra Multi Kreasi',
   summary = 'Kami adalah perusahaan jasa booth pameran, event organizer, dan media outdoor untuk membantu brand tampil menonjol dengan eksekusi yang rapi dan terukur.',
-}) {
-  const pillars = [
+  pillars = [
     'Booth Pameran',
     'Event Organizer',
     'Media Outdoor',
     'Interior Komersial',
-  ]
-
+  ],
+  primaryLabel = 'Lihat Layanan',
+  primaryLink = '/layanan',
+  secondaryLabel = 'Konsultasi Gratis',
+  secondaryLink = '/kontak-kami',
+}) {
   return (
     <SectionReveal className="section home-identity-section">
       <div className="container home-identity-shell">
-        <p className="kicker">Tentang Website Ini</p>
+        <p className="kicker">{kicker}</p>
         <h2 className="home-identity-title">{title}</h2>
         <p className="home-identity-summary">{summary}</p>
 
@@ -101,8 +105,8 @@ function HomeIdentitySection({
         </div>
 
         <div className="home-identity-actions">
-          <Link className="btn" to="/layanan" data-magnetic>Lihat Layanan</Link>
-          <Link className="btn outline home-cta-secondary" to="/kontak-kami" data-magnetic>Konsultasi Gratis</Link>
+          <Link className="btn" to={primaryLink} data-magnetic>{primaryLabel}</Link>
+          <Link className="btn outline home-cta-secondary" to={secondaryLink} data-magnetic>{secondaryLabel}</Link>
         </div>
       </div>
     </SectionReveal>
@@ -168,16 +172,18 @@ function HomeJournalSection({
   )
 }
 
-function HomePartnershipSection() {
+function HomePartnershipSection({
+  kicker = 'Dipercaya Untuk',
+  title = 'Partner yang Sejalan dengan Skala dan Ritme Kerja Kami',
+  copy = 'Kami mendukung berbagai kebutuhan brand experience, dari aktivasi korporat sampai media outdoor, dengan eksekusi yang rapi dan presisi.',
+}) {
   return (
     <SectionReveal className="section home-partnership-section">
       <div className="container home-partnership-shell">
         <div className="home-partnership-head">
-          <p className="kicker">Dipercaya Untuk</p>
-          <h2 className="home-partnership-title">Partner yang Sejalan dengan Skala dan Ritme Kerja Kami</h2>
-          <p className="muted home-partnership-copy">
-            Kami mendukung berbagai kebutuhan brand experience, dari aktivasi korporat sampai media outdoor, dengan eksekusi yang rapi dan presisi.
-          </p>
+          <p className="kicker">{kicker}</p>
+          <h2 className="home-partnership-title">{title}</h2>
+          <p className="muted home-partnership-copy">{copy}</p>
         </div>
 
         <div className="home-partnership-marquee">
@@ -186,6 +192,79 @@ function HomePartnershipSection() {
       </div>
     </SectionReveal>
   )
+}
+
+const DEFAULT_HOME_HIGHLIGHTS = [
+  { label: 'Project Delivery', value: '350+', note: 'Proyek lintas industri dengan eksekusi terukur.' },
+  { label: 'On-Time Ratio', value: '98%', note: 'Timeline ketat untuk event, booth, dan instalasi.' },
+  { label: 'Client Retention', value: '87%', note: 'Kolaborasi berulang karena kualitas hasil konsisten.' },
+  { label: 'Active Cities', value: '24', note: 'Jangkauan layanan nasional dengan tim operasional adaptif.' },
+]
+
+const DEFAULT_HOME_PILLARS = [
+  'Booth Pameran',
+  'Event Organizer',
+  'Media Outdoor',
+  'Interior Komersial',
+]
+
+function normalizeHighlightItem(item, fallbackItem) {
+  if (item && typeof item === 'object') {
+    return {
+      label: pickTextField(item, ['label', 'title', 'name'], fallbackItem.label),
+      value: pickTextField(item, ['value', 'stat', 'number'], fallbackItem.value),
+      note: pickTextField(item, ['note', 'description', 'copy', 'subtitle'], fallbackItem.note),
+    }
+  }
+
+  if (typeof item === 'string') {
+    return {
+      ...fallbackItem,
+      label: item.trim() || fallbackItem.label,
+    }
+  }
+
+  return fallbackItem
+}
+
+function normalizeStringList(items, fallbackItems) {
+  const sourceItems = Array.isArray(items) && items.length > 0 ? items : fallbackItems
+  return sourceItems
+    .map((item, index) => {
+      if (typeof item === 'string') {
+        const trimmed = item.trim()
+        return trimmed || fallbackItems[index] || fallbackItems[0] || ''
+      }
+
+      if (item && typeof item === 'object') {
+        return pickTextField(item, ['label', 'title', 'name', 'value'], fallbackItems[index] || fallbackItems[0] || '')
+      }
+
+      return fallbackItems[index] || fallbackItems[0] || ''
+    })
+    .filter(Boolean)
+}
+
+function parseHighlightField(value, fallbackItem) {
+  if (value && typeof value === 'object') {
+    return {
+      label: pickTextField(value, ['label', 'title', 'name'], fallbackItem.label),
+      value: pickTextField(value, ['value', 'stat', 'number'], fallbackItem.value),
+      note: pickTextField(value, ['note', 'description', 'copy', 'subtitle'], fallbackItem.note),
+    }
+  }
+
+  if (typeof value === 'string') {
+    const parts = value.split('|').map((part) => part.trim())
+
+    return {
+      label: parts[0] || fallbackItem.label,
+      value: parts[1] || fallbackItem.value,
+      note: parts[2] || fallbackItem.note,
+    }
+  }
+
+  return fallbackItem
 }
 
 function HomePage() {
@@ -309,41 +388,86 @@ function HomePage() {
   }))
   const featuredJournal = journals[0]
   const sideJournals = journals.slice(1)
+  const pageFields = wpHomePage ? { ...(wpHomePage.meta || {}), ...(wpHomePage.acf || {}) } : {}
+  const homeKicker = pickTextField(pageFields, ['home_kicker', 'hero_kicker'], 'Home')
+  const introKicker = pickTextField(pageFields, ['intro_kicker', 'home_intro_kicker'], 'Studio Trimitra')
+  const introTitle = pickTextField(
+    pageFields,
+    ['intro_title', 'home_intro_title'],
+    'Siap Membuat Booth Anda Jadi Pusat Perhatian di Setiap Pameran?',
+  )
+  const introCopy = pickTextField(
+    pageFields,
+    ['intro_copy', 'home_intro_copy'],
+    'Kami membantu brand tampil standout melalui desain, produksi, dan instalasi booth exhibition profesional.',
+  )
+  const heroKicker = pickTextField(pageFields, ['hero_kicker', 'home_hero_kicker'], 'Trimitra Campaign Selector')
+  const heroPrimaryLink = pickLinkField(pageFields, ['hero_primary_link', 'home_hero_primary_link'], '/kontak-kami')
+  const heroSecondaryLink = pickLinkField(pageFields, ['hero_secondary_link', 'home_hero_secondary_link'], '/galeri')
+  const identityKicker = pickTextField(pageFields, ['identity_kicker', 'home_identity_kicker'], 'Tentang Website Ini')
+  const identityTitle = pickTextField(pageFields, ['identity_title', 'home_identity_title'], 'PT Trimitra Multi Kreasi')
+  const identitySummary = pickTextField(
+    pageFields,
+    ['identity_summary', 'home_identity_summary'],
+    'Website ini adalah profil layanan Trimitra untuk booth pameran, event organizer, dan media outdoor. Fokus kami adalah membantu brand terlihat kuat dengan desain, produksi, dan eksekusi yang terintegrasi.',
+  )
+  const identityPillars = normalizeStringList(
+    pickArrayField(pageFields, ['identity_pillars', 'home_identity_pillars'], DEFAULT_HOME_PILLARS),
+    DEFAULT_HOME_PILLARS,
+  )
+  const identityPrimaryLabel = pickTextField(pageFields, ['identity_primary_label', 'home_identity_primary_label'], 'Lihat Layanan')
+  const identityPrimaryLink = pickLinkField(pageFields, ['identity_primary_link', 'home_identity_primary_link'], '/layanan')
+  const identitySecondaryLabel = pickTextField(
+    pageFields,
+    ['identity_secondary_label', 'home_identity_secondary_label'],
+    'Konsultasi Gratis',
+  )
+  const identitySecondaryLink = pickLinkField(
+    pageFields,
+    ['identity_secondary_link', 'home_identity_secondary_link'],
+    '/kontak-kami',
+  )
+  const partnershipKicker = pickTextField(pageFields, ['partnership_kicker', 'home_partnership_kicker'], 'Dipercaya Untuk')
+  const partnershipTitle = pickTextField(
+    pageFields,
+    ['partnership_title', 'home_partnership_title'],
+    'Partner yang Sejalan dengan Skala dan Ritme Kerja Kami',
+  )
+  const partnershipCopy = pickTextField(
+    pageFields,
+    ['partnership_copy', 'home_partnership_copy'],
+    'Kami mendukung berbagai kebutuhan brand experience, dari aktivasi korporat sampai media outdoor, dengan eksekusi yang rapi dan presisi.',
+  )
   const homeHighlights = [
-    { label: 'Project Delivery', value: '350+', note: 'Proyek lintas industri dengan eksekusi terukur.' },
-    { label: 'On-Time Ratio', value: '98%', note: 'Timeline ketat untuk event, booth, dan instalasi.' },
-    { label: 'Client Retention', value: '87%', note: 'Kolaborasi berulang karena kualitas hasil konsisten.' },
-    { label: 'Active Cities', value: '24', note: 'Jangkauan layanan nasional dengan tim operasional adaptif.' },
+    parseHighlightField(pageFields.highlight_1, DEFAULT_HOME_HIGHLIGHTS[0]),
+    parseHighlightField(pageFields.highlight_2, DEFAULT_HOME_HIGHLIGHTS[1]),
+    parseHighlightField(pageFields.highlight_3, DEFAULT_HOME_HIGHLIGHTS[2]),
+    parseHighlightField(pageFields.highlight_4, DEFAULT_HOME_HIGHLIGHTS[3]),
   ]
 
   if (wpHomePage) {
-    const uiFields = { ...(wpHomePage.meta || {}), ...(wpHomePage.acf || {}) }
-    const homeKicker = pickTextField(uiFields, ['home_kicker', 'hero_kicker'], 'Home')
-    const journalKicker = pickTextField(uiFields, ['journal_kicker'], 'Insight Terbaru')
-    const journalTitle = pickTextField(uiFields, ['journal_title'], 'Berita & Artikel Trimitra')
-    const journalButtonLabel = pickTextField(uiFields, ['journal_button_label'], 'Lihat Semua')
-    const portfolioKicker = pickTextField(uiFields, ['portfolio_kicker'], 'Portofolio')
-    const portfolioTitle = pickTextField(uiFields, ['portfolio_title'], 'Proyek Unggulan')
-    const ctaTitle = pickTextField(uiFields, ['cta_title', 'home_cta_title'], 'Siap Wujudkan Aktivasi Brand yang Lebih Berdampak?')
-    const ctaCopy = pickTextField(uiFields, ['cta_copy', 'home_cta_copy'], 'Konsultasikan kebutuhan booth, event, dan media outdoor Anda bersama tim Trimitra untuk eksekusi yang lebih presisi.')
-    const ctaPrimaryLabel = pickTextField(uiFields, ['cta_primary_label'], 'Konsultasi Sekarang')
-    const ctaPrimaryLink = pickLinkField(uiFields, ['cta_primary_link'], '/kontak-kami')
-    const ctaSecondaryLabel = pickTextField(uiFields, ['cta_secondary_label'], 'Lihat Portofolio')
-    const ctaSecondaryLink = pickLinkField(uiFields, ['cta_secondary_link'], '/layanan')
+    const journalKicker = pickTextField(pageFields, ['journal_kicker'], 'Insight Terbaru')
+    const journalTitle = pickTextField(pageFields, ['journal_title'], 'Berita & Artikel Trimitra')
+    const journalButtonLabel = pickTextField(pageFields, ['journal_button_label'], 'Lihat Semua')
+    const portfolioKicker = pickTextField(pageFields, ['portfolio_kicker'], 'Portofolio')
+    const portfolioTitle = pickTextField(pageFields, ['portfolio_title'], 'Proyek Unggulan')
+    const ctaTitle = pickTextField(pageFields, ['cta_title', 'home_cta_title'], 'Siap Wujudkan Aktivasi Brand yang Lebih Berdampak?')
+    const ctaCopy = pickTextField(pageFields, ['cta_copy', 'home_cta_copy'], 'Konsultasikan kebutuhan booth, event, dan media outdoor Anda bersama tim Trimitra untuk eksekusi yang lebih presisi.')
+    const ctaPrimaryLabel = pickTextField(pageFields, ['cta_primary_label'], 'Konsultasi Sekarang')
+    const ctaPrimaryLink = pickLinkField(pageFields, ['cta_primary_link'], '/kontak-kami')
+    const ctaSecondaryLabel = pickTextField(pageFields, ['cta_secondary_label'], 'Lihat Portofolio')
+    const ctaSecondaryLink = pickLinkField(pageFields, ['cta_secondary_link'], '/layanan')
 
     return (
       <div className="home-page-lumen">
-        <AccordionHero />
+        <AccordionHero kicker={heroKicker} primaryLink={heroPrimaryLink} secondaryLink={heroSecondaryLink} />
 
         <SectionReveal className="section home-lumen-intro">
           <div className="container home-lumen-intro-grid">
             <div className="home-lumen-intro-copy">
-              <p className="kicker">{homeKicker}</p>
-              <h2 className="home-lumen-title">Ruang Aktivasi Brand yang Lebih Hidup, Terukur, dan Premium</h2>
-              <p className="muted home-lumen-copy">
-                Kami menggabungkan desain, produksi, dan eksekusi lapangan dalam satu alur kerja agar brand tampil menonjol
-                dengan pengalaman yang rapi, segar, dan relevan untuk audiens Anda.
-              </p>
+              <p className="kicker">{introKicker}</p>
+              <h2 className="home-lumen-title">{introTitle}</h2>
+              <p className="muted home-lumen-copy">{introCopy}</p>
             </div>
 
             <div className="home-lumen-stat-grid">
@@ -359,8 +483,14 @@ function HomePage() {
         </SectionReveal>
 
         <HomeIdentitySection
-          title="PT Trimitra Multi Kreasi"
-          summary="Website ini adalah profil layanan Trimitra untuk booth pameran, event organizer, dan media outdoor. Fokus kami adalah membantu brand terlihat kuat dengan desain, produksi, dan eksekusi yang terintegrasi."
+          kicker={identityKicker}
+          title={identityTitle}
+          summary={identitySummary}
+          pillars={identityPillars}
+          primaryLabel={identityPrimaryLabel}
+          primaryLink={identityPrimaryLink}
+          secondaryLabel={identitySecondaryLabel}
+          secondaryLink={identitySecondaryLink}
         />
 
         <ServiceShowcaseSection />
@@ -369,7 +499,11 @@ function HomePage() {
 
         <ValueNarrativeSection />
 
-        <HomePartnershipSection />
+        <HomePartnershipSection
+          kicker={partnershipKicker}
+          title={partnershipTitle}
+          copy={partnershipCopy}
+        />
 
         <SectionReveal className="section cms-page-shell">
           <div className="container">
@@ -421,16 +555,14 @@ function HomePage() {
 
   return (
     <div className="home-page-lumen">
-      <AccordionHero />
+      <AccordionHero kicker={heroKicker} primaryLink={heroPrimaryLink} secondaryLink={heroSecondaryLink} />
 
       <SectionReveal className="section home-lumen-intro">
         <div className="container home-lumen-intro-grid">
           <div className="home-lumen-intro-copy">
-            <p className="kicker">Studio Trimitra</p>
-            <h1 className="home-lumen-title">Siap Membuat Booth Anda Jadi Pusat Perhatian di Setiap Pameran?</h1>
-            <p className="muted home-lumen-copy">
-              Kami membantu brand tampil standout melalui desain, produksi, dan instalasi booth exhibition profesional.
-            </p>
+            <p className="kicker">{introKicker}</p>
+            <h1 className="home-lumen-title">{introTitle}</h1>
+            <p className="muted home-lumen-copy">{introCopy}</p>
           </div>
 
           <div className="home-lumen-stat-grid">
@@ -445,7 +577,16 @@ function HomePage() {
         </div>
       </SectionReveal>
 
-      <HomeIdentitySection />
+      <HomeIdentitySection
+        kicker={identityKicker}
+        title={identityTitle}
+        summary={identitySummary}
+        pillars={identityPillars}
+        primaryLabel={identityPrimaryLabel}
+        primaryLink={identityPrimaryLink}
+        secondaryLabel={identitySecondaryLabel}
+        secondaryLink={identitySecondaryLink}
+      />
 
       <ServiceShowcaseSection />
 
@@ -453,7 +594,11 @@ function HomePage() {
 
       <ValueNarrativeSection />
 
-      <HomePartnershipSection />
+      <HomePartnershipSection
+        kicker={partnershipKicker}
+        title={partnershipTitle}
+        copy={partnershipCopy}
+      />
 
       <HomeJournalSection
         kicker="Insight Terbaru"

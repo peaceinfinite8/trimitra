@@ -103,7 +103,7 @@ function ServiceFeatureIcon({ icon }) {
   )
 }
 
-function ServiceShowcaseSection() {
+function ServiceShowcaseSection({ items = SERVICE_SPLIT_ITEMS } = {}) {
   const [activeIndex, setActiveIndex] = useState(0)
   const activeIndexRef = useRef(0)
   const sectionRef = useRef(null)
@@ -207,7 +207,7 @@ function ServiceShowcaseSection() {
             showPanel(activeIndexRef.current)
           },
           onUpdate: (self) => {
-            const total = SERVICE_SPLIT_ITEMS.length
+            const total = items.length
             const nextIndex = Math.min(total - 1, Math.floor(self.progress * total))
             if (nextIndex === activeIndexRef.current) return
 
@@ -336,7 +336,7 @@ function ServiceShowcaseSection() {
         <div className="service-sticky-track" ref={stickyTrackRef}>
           <div className="service-sticky-shell" ref={stickyShellRef}>
             <aside className="service-sticky-nav" aria-label="Navigasi layanan">
-              {SERVICE_SPLIT_ITEMS.map((service, index) => (
+              {items.map((service, index) => (
                 <div
                   key={`nav-${service.id}`}
                   className={`service-sticky-nav-item ${activeIndex === index ? 'is-active' : ''}`}
@@ -348,8 +348,8 @@ function ServiceShowcaseSection() {
             </aside>
 
             <div className="service-sticky-stage" aria-live="polite">
-              {SERVICE_SPLIT_ITEMS.map((service, index) => {
-                const progressValue = `${Math.round(((index + 1) / SERVICE_SPLIT_ITEMS.length) * 100)}%`
+              {items.map((service, index) => {
+                const progressValue = `${Math.round(((index + 1) / items.length) * 100)}%`
                 return (
                   <article
                     key={service.id}
@@ -408,7 +408,7 @@ function ServiceShowcaseSection() {
         </div>
 
         <div className="service-mobile-list">
-          {SERVICE_SPLIT_ITEMS.map((service) => (
+          {items.map((service) => (
             <article key={`mobile-${service.id}`} className="service-mobile-card">
               <div className="service-mobile-media-wrap">
                 <img className="service-mobile-media" src={service.image} alt={service.imageAlt} loading="lazy" decoding="async" />
