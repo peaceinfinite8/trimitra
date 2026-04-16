@@ -9745,40 +9745,38 @@ button,
   }
 
   .gallery-page-simple .gallery-filter-shell {
-    display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    gap: 8px;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding-top: 12px;
+    padding-bottom: 12px;
     padding-inline: 12px;
-    scrollbar-width: thin;
-    scroll-snap-type: x mandatory;
     border-radius: 12px;
   }
 
   .gallery-page-simple .gallery-filter-intro h2 {
-    font-size: 18px;
+    font-size: 20px;
+    line-height: 1.08;
   }
 
   .gallery-page-simple .gallery-filter-intro {
-    min-width: 76%;
-    flex: 0 0 auto;
-    scroll-snap-align: start;
+    min-width: 100%;
   }
 
   .gallery-page-simple .gallery-filter-actions {
-    display: flex;
-    align-items: center;
-    flex-wrap: nowrap;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
+    width: 100%;
   }
 
   .gallery-page-simple .pill {
-    flex: 0 0 auto;
-    min-width: max-content;
-    scroll-snap-align: start;
-    padding: 8px 12px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 0;
+    padding: 9px 10px;
     font-size: 13px;
   }
 
@@ -9806,6 +9804,12 @@ button,
   .gallery-page-simple .gallery-layout-cta-shell {
     border-radius: 16px;
     padding: 18px 16px;
+  }
+}
+
+@media (max-width: 420px) {
+  .gallery-page-simple .gallery-filter-actions {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -14004,6 +14008,44 @@ body.route-services .site-footer::before {
     grid-template-columns: 1fr;
   }
 
+  .services-page-sky .services-redesign-head-title {
+    font-size: clamp(28px, 8.2vw, 40px);
+    line-height: 1.02;
+  }
+
+  .services-page-sky .services-main-item {
+    gap: 12px;
+  }
+
+  .services-page-sky .services-main-media {
+    min-height: 240px;
+    aspect-ratio: 4 / 3;
+    border-radius: 14px;
+  }
+
+  .services-page-sky .services-main-content h3 {
+    font-size: clamp(30px, 7.6vw, 38px);
+    line-height: 1;
+  }
+
+  .services-page-sky .services-main-card-grid {
+    margin-top: 14px;
+    gap: 10px;
+  }
+
+  .services-page-sky .services-main-card {
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  .services-page-sky .services-main-deep-grid {
+    gap: 10px;
+  }
+
+  .services-page-sky .services-main-deep-card {
+    padding: 14px;
+  }
+
   .services-page-sky .services-redesign-hero-actions .btn,
   .services-page-sky .services-redesign-hero-actions .btn.outline {
     width: 100%;
@@ -14027,8 +14069,13 @@ body.route-services .site-footer::before {
     border-radius: 14px;
   }
 
+  .services-page-sky .services-main-content h3 {
+    font-size: clamp(26px, 8vw, 32px);
+  }
+
   .services-page-sky .services-main-media {
     border-radius: 16px;
+    min-height: 220px;
   }
 
   .services-page-sky .services-category-card {
