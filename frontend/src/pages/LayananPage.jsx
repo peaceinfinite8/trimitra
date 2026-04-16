@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { SectionReveal, StaggerGroup, StaggerItem } from '../components/animation/Reveal'
 import LazyImage from '../components/ui/LazyImage'
@@ -25,6 +25,7 @@ function ServiceCardIcon({ type = 'strategy', accent = '#0ea5e9' }) {
 const PRIMARY_SERVICE_PACKAGES = [
   {
     id: '01',
+    anchor: 'advertising-billboard',
     title: 'Advertising (Billboard)',
     image: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=1800&q=82',
     imageAlt: 'Billboard advertising strategis di lokasi utama kota.',
@@ -72,6 +73,7 @@ const PRIMARY_SERVICE_PACKAGES = [
   },
   {
     id: '02',
+    anchor: 'event-organizer',
     title: 'Event Organizer',
     image: 'https://images.unsplash.com/photo-1505236858219-8359eb29e329?auto=format&fit=crop&w=1800&q=82',
     imageAlt: 'Suasana event activation dengan panggung dan audiens.',
@@ -119,6 +121,7 @@ const PRIMARY_SERVICE_PACKAGES = [
   },
   {
     id: '03',
+    anchor: 'booth-exhibition',
     title: 'Booth Exhibition',
     image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1800&q=82',
     imageAlt: 'Booth exhibition modern dengan desain menarik dan pengunjung aktif.',
@@ -321,6 +324,7 @@ function CountUpNumber({ value, suffix = '', duration = 1300 }) {
 
 function LayananPage() {
   const prefersReducedMotion = useReducedMotion()
+  const location = useLocation()
   const [wpPage, setWpPage] = useState(null)
   const [activeFaqIndex, setActiveFaqIndex] = useState(0)
 
@@ -353,6 +357,35 @@ function LayananPage() {
       cancelled = true
     }
   }, [])
+
+  useEffect(() => {
+    if (!location.hash) return undefined
+
+    const targetId = decodeURIComponent(location.hash.slice(1))
+    if (!targetId) return undefined
+
+    const scrollToTarget = () => {
+      const targetElement = document.getElementById(targetId)
+      if (!targetElement) return false
+
+      targetElement.scrollIntoView({
+        behavior: prefersReducedMotion ? 'auto' : 'smooth',
+        block: 'start',
+      })
+
+      return true
+    }
+
+    if (scrollToTarget()) return undefined
+
+    const retryOne = window.setTimeout(scrollToTarget, 180)
+    const retryTwo = window.setTimeout(scrollToTarget, 420)
+
+    return () => {
+      window.clearTimeout(retryOne)
+      window.clearTimeout(retryTwo)
+    }
+  }, [location.hash, prefersReducedMotion])
 
   const uiFields = ENABLE_LAYANAN_WP_ENHANCEMENT && wpPage ? { ...(wpPage.meta || {}), ...(wpPage.acf || {}) } : {}
 
@@ -510,6 +543,7 @@ function LayananPage() {
             {PRIMARY_SERVICE_PACKAGES.map((service, serviceIndex) => (
               <motion.article
                 key={service.id}
+                id={service.anchor}
                 className={`services-main-item ${serviceIndex % 2 === 1 ? 'is-reversed' : ''}`}
                 initial={prefersReducedMotion ? false : { opacity: 0, y: 26, filter: 'blur(6px)' }}
                 whileInView={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, filter: 'blur(0px)' }}

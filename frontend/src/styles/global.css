@@ -13569,6 +13569,7 @@ body.route-services .site-footer::before {
 .services-page-sky .services-main-item {
   gap: 20px;
   align-items: stretch;
+  scroll-margin-top: 128px;
 }
 
 .services-page-sky .services-main-item + .services-main-item {

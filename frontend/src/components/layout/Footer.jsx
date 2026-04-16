@@ -155,10 +155,9 @@ function Footer() {
         <section>
           <h4>Layanan</h4>
           <ul>
-            <li><Link to="/layanan" onMouseEnter={() => prefetchRoute('/layanan')} data-prefetch-route="/layanan">Booth Pameran</Link></li>
-            <li><Link to="/layanan" onMouseEnter={() => prefetchRoute('/layanan')} data-prefetch-route="/layanan">Desain Interior</Link></li>
-            <li><Link to="/layanan" onMouseEnter={() => prefetchRoute('/layanan')} data-prefetch-route="/layanan">Event Organizer</Link></li>
-            <li><Link to="/layanan" onMouseEnter={() => prefetchRoute('/layanan')} data-prefetch-route="/layanan">Pemasaran Billboard</Link></li>
+            <li><Link to="/layanan#advertising-billboard" onMouseEnter={() => prefetchRoute('/layanan')} data-prefetch-route="/layanan">Advertising (Billboard)</Link></li>
+            <li><Link to="/layanan#event-organizer" onMouseEnter={() => prefetchRoute('/layanan')} data-prefetch-route="/layanan">Event Organizer</Link></li>
+            <li><Link to="/layanan#booth-exhibition" onMouseEnter={() => prefetchRoute('/layanan')} data-prefetch-route="/layanan">Booth Exhibition</Link></li>
           </ul>
         </section>
 
