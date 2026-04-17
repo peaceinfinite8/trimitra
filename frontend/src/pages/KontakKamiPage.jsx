@@ -16,8 +16,9 @@ import { pickTextField } from "../data/wpUiFields";
 const CONTACT_DRAFT_KEY = "trimitra-contact-draft-v1";
 const WHATSAPP_NUMBER = "62811109842";
 const WHATSAPP_BASE_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
+const GOOGLE_MAPS_PLACE_URL = "https://maps.app.goo.gl/br2X3Bdp7dtWtNVj7";
 const GOOGLE_MAPS_EMBED_URL =
-  "https://www.google.com/maps?q=Jl.+Kemang+Raya+No.+10A,+Mampang+Prapatan,+Jakarta+Selatan,+12730&z=16&output=embed";
+  "https://www.google.com/maps?q=-6.4231941,106.8307972&z=17&output=embed";
 const EMPTY_FORM_DATA = {
   name: "",
   email: "",
@@ -175,7 +176,7 @@ function KontakKamiPage() {
 
   const addressText =
     contactInfo.address ||
-    "Jl. Kemang Raya No. 10A, Mampang Prapatan, Jakarta Selatan, 12730";
+    "HRGJ+P8F, Tirtajaya, Kec. Sukmajaya, Kota Depok, Jawa Barat 16413";
   const contactEmails = useMemo(() => {
     const seen = new Set();
     const deduped = [];
@@ -537,7 +538,7 @@ function KontakKamiPage() {
                   </svg>
                 </span>
                 <div>
-                  <h3>Kantor Pusat Jakarta</h3>
+                  <h3>Kantor Pusat Depok</h3>
                   <p className="muted">{addressText}</p>
                 </div>
               </article>
@@ -613,12 +614,12 @@ function KontakKamiPage() {
                 <div className="contact-map-note">
                   <p className="kicker">Temukan Kami</p>
                   <p className="muted">
-                    Kantor Trimitra berada di kawasan Kemang, Jakarta Selatan,
-                    dengan akses cepat ke area bisnis dan venue event utama.
+                    Kantor Trimitra berada di Tirtajaya, Sukmajaya, Kota Depok,
+                    dengan akses mudah untuk koordinasi proyek dan meeting.
                   </p>
                   <a
                     className="contact-map-link"
-                    href="https://maps.google.com/?q=Jl.+Kemang+Raya+No.+10A,+Mampang+Prapatan,+Jakarta+Selatan,+12730"
+                    href={GOOGLE_MAPS_PLACE_URL}
                     target="_blank"
                     rel="noreferrer"
                   >

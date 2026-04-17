@@ -58,7 +58,7 @@ Format konten yang disarankan agar blok kontak kanan terbaca otomatis:
 Contoh singkat:
 
 ```html
-<p>Jl. Tiritajaya, Kec. Sukmajaya, Kota Depok, Jawa Barat 16413</p>
+<p>HRGJ+P8F, Tirtajaya, Kec. Sukmajaya, Kota Depok, Jawa Barat 16413</p>
 <p><a href="mailto:dhr@trimitramulti.co.id">dhr@trimitramulti.co.id</a></p>
 <p><a href="tel:+622129416195">+62 21-29416195</a></p>
 <p><a href="https://wa.me/62811109842">WhatsApp Admin</a></p>
