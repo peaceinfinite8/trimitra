@@ -5441,7 +5441,7 @@ body.nav-over-hero .hero-single {
 
 .footer-social-icons {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 10px;
 }

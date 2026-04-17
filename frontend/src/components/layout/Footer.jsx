@@ -157,8 +157,6 @@ function Footer() {
                 className="social-orb"
                 aria-label={item.label}
                 variants={socialItemVariants}
-                whileHover={prefersReducedMotion ? undefined : { y: -2, scale: 1.04 }}
-                whileFocus={prefersReducedMotion ? undefined : { y: -2, scale: 1.04 }}
               >
                 <span className="social-orb-core" aria-hidden="true">
                   <BrandSocialIcon type={item.icon} />
@@ -217,8 +215,6 @@ function Footer() {
               rel="noreferrer"
               className="social-pill"
               variants={socialItemVariants}
-              whileHover={prefersReducedMotion ? undefined : { y: -2 }}
-              whileFocus={prefersReducedMotion ? undefined : { y: -2 }}
             >
               <span className="social-pill-dot" aria-hidden="true" />
               <span className="social-pill-label">{item.label}</span>
