@@ -3,18 +3,36 @@ import { motion, useReducedMotion } from 'framer-motion'
 import { prefetchRoute } from '../../app/routePrefetch'
 
 const socialItems = [
-  { label: 'Twitter', href: 'https://x.com' },
-  { label: 'Instagram', href: 'https://instagram.com' },
-  { label: 'LinkedIn', href: 'https://linkedin.com' },
+  { label: 'Facebook', href: 'https://www.facebook.com/pages/Trimitra-Adv-EO-/875557699145830' },
+  { label: 'Twitter', href: 'https://x.com/2D3DComm' },
+  { label: 'Instagram', href: 'https://www.instagram.com/2d3dcomm' },
+  { label: 'YouTube', href: 'https://www.youtube.com/channel/UCej-FukQIiutfpdACxx8ygA' },
 ]
 
 const brandSocialItems = [
-  { label: 'Instagram', icon: 'instagram', href: 'https://instagram.com' },
-  { label: 'LinkedIn', icon: 'linkedin', href: 'https://linkedin.com' },
-  { label: 'Email', icon: 'email', href: 'mailto:dhr@trimitramulti.co.id' },
+  { label: 'Facebook', icon: 'facebook', href: 'https://www.facebook.com/pages/Trimitra-Adv-EO-/875557699145830' },
+  { label: 'Twitter', icon: 'twitter', href: 'https://x.com/2D3DComm' },
+  { label: 'Instagram', icon: 'instagram', href: 'https://www.instagram.com/2d3dcomm' },
+  { label: 'YouTube', icon: 'youtube', href: 'https://www.youtube.com/channel/UCej-FukQIiutfpdACxx8ygA' },
 ]
 
 function BrandSocialIcon({ type }) {
+  if (type === 'facebook') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" role="presentation" aria-hidden="true">
+        <path d="M13.4 21v-7h2.3l.4-3h-2.7V9.1c0-.87.24-1.46 1.5-1.46h1.3V5a15.74 15.74 0 0 0-1.9-.1c-2.5 0-4.2 1.52-4.2 4.31V11H7.8v3h2.3v7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    )
+  }
+
+  if (type === 'twitter') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" role="presentation" aria-hidden="true">
+        <path d="M5 5h3.1l3.1 4.4L15.2 5H19l-5.9 6.6L19.2 19H16l-3.4-4.8L8.3 19H5l6-6.8z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    )
+  }
+
   if (type === 'instagram') {
     return (
       <svg viewBox="0 0 24 24" fill="none" role="presentation" aria-hidden="true">
@@ -25,12 +43,11 @@ function BrandSocialIcon({ type }) {
     )
   }
 
-  if (type === 'linkedin') {
+  if (type === 'youtube') {
     return (
       <svg viewBox="0 0 24 24" fill="none" role="presentation" aria-hidden="true">
-        <path d="M7.8 10.2v6.2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-        <circle cx="7.8" cy="7.6" r="1.2" fill="currentColor" />
-        <path d="M11.8 16.4v-3.4a2 2 0 0 1 3.9 0v3.4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        <rect x="4" y="7" width="16" height="10" rx="3" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M10.5 10.3 15 12l-4.5 1.7z" fill="currentColor" />
       </svg>
     )
   }
