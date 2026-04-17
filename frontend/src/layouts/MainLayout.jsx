@@ -63,14 +63,24 @@ function MainLayout() {
   }, [])
 
   useLayoutEffect(() => {
-    window.scrollTo(0, 0)
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
     document.documentElement.scrollTop = 0
     document.body.scrollTop = 0
+
+    const rafId = window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+      document.documentElement.scrollTop = 0
+      document.body.scrollTop = 0
+    })
+
+    return () => {
+      window.cancelAnimationFrame(rafId)
+    }
   }, [location.key, location.pathname, location.search])
 
   useEffect(() => {
     const main = document.getElementById('main-content')
-    if (main) main.focus()
+    if (main) main.focus({ preventScroll: true })
   }, [location.key, location.pathname, location.search])
 
   return (
