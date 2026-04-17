@@ -16,6 +16,8 @@ import { pickTextField } from "../data/wpUiFields";
 const CONTACT_DRAFT_KEY = "trimitra-contact-draft-v1";
 const WHATSAPP_NUMBER = "62811109842";
 const WHATSAPP_BASE_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
+const GOOGLE_MAPS_EMBED_URL =
+  "https://www.google.com/maps?q=Jl.+Kemang+Raya+No.+10A,+Mampang+Prapatan,+Jakarta+Selatan,+12730&z=16&output=embed";
 const EMPTY_FORM_DATA = {
   name: "",
   email: "",
@@ -174,9 +176,35 @@ function KontakKamiPage() {
   const addressText =
     contactInfo.address ||
     "Jl. Kemang Raya No. 10A, Mampang Prapatan, Jakarta Selatan, 12730";
-  const primaryEmail = contactInfo.emails[0] || "dhr@trimitramulti.co.id";
-  const secondaryEmail = contactInfo.emails[1] || "dhr@trimitramulti.co.id";
-  const primaryPhone = contactInfo.phones[0] || "+62811-1098-42";
+  const contactEmails = useMemo(() => {
+    const seen = new Set();
+    const deduped = [];
+
+    for (const email of contactInfo.emails || []) {
+      const normalized = email.trim().toLowerCase();
+      if (!normalized || seen.has(normalized)) continue;
+      seen.add(normalized);
+      deduped.push(email.trim());
+    }
+
+    return deduped.length > 0 ? deduped : ["dhr@trimitramulti.co.id"];
+  }, [contactInfo.emails]);
+
+  const contactPhones = useMemo(() => {
+    const seen = new Set();
+    const deduped = [];
+
+    for (const phone of contactInfo.phones || []) {
+      const normalized = phone.replace(/\s+/g, "").trim();
+      if (!normalized || seen.has(normalized)) continue;
+      seen.add(normalized);
+      deduped.push(phone.trim());
+    }
+
+    return deduped.length > 0 ? deduped : ["+62811-1098-42"];
+  }, [contactInfo.phones]);
+
+  const primaryPhone = contactPhones[0] || "+62811-1098-42";
   const whatsappChatDirectUrl = `${WHATSAPP_BASE_URL}?text=${encodeURIComponent(
     "Halo Tim Trimitra, saya ingin obrolan langsung terkait layanan Anda.",
   )}`;
@@ -531,12 +559,11 @@ function KontakKamiPage() {
                 </span>
                 <div>
                   <h3>Email Bisnis</h3>
-                  <p className="muted">
-                    <a href={`mailto:${primaryEmail}`}>{primaryEmail}</a>
-                  </p>
-                  <p className="muted">
-                    <a href={`mailto:${secondaryEmail}`}>{secondaryEmail}</a>
-                  </p>
+                  {contactEmails.map((email) => (
+                    <p className="muted" key={email}>
+                      <a href={`mailto:${email}`}>{email}</a>
+                    </p>
+                  ))}
                 </div>
               </article>
 
@@ -573,19 +600,30 @@ function KontakKamiPage() {
                 </div>
               </article>
 
-              <article className="contact-map card">
+              <article className="contact-map card contact-map-premium">
+                <div className="contact-map-glow" aria-hidden="true" />
                 <iframe
                   title="Peta lokasi Trimitra"
-                  src="https://www.openstreetmap.org/export/embed.html?bbox=106.8046%2C-6.2688%2C106.8202%2C-6.2544&layer=mapnik&marker=-6.2616%2C106.8124"
+                  className="contact-map-frame"
+                  src={GOOGLE_MAPS_EMBED_URL}
                   loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
+                  allowFullScreen
+                  referrerPolicy="strict-origin-when-cross-origin"
                 />
-                <div className="map-note">
+                <div className="contact-map-note">
                   <p className="kicker">Temukan Kami</p>
                   <p className="muted">
-                    Atelier kami terletak di jantung distrik kreatif Jakarta,
-                    Kemang.
+                    Kantor Trimitra berada di kawasan Kemang, Jakarta Selatan,
+                    dengan akses cepat ke area bisnis dan venue event utama.
                   </p>
+                  <a
+                    className="contact-map-link"
+                    href="https://maps.google.com/?q=Jl.+Kemang+Raya+No.+10A,+Mampang+Prapatan,+Jakarta+Selatan,+12730"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Buka di Google Maps
+                  </a>
                 </div>
               </article>
 
