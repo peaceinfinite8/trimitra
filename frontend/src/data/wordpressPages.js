@@ -343,7 +343,8 @@ export async function getWordPressPageBySlugs(slugs = []) {
     const image = await getMediaSourceById(page?.featured_media)
     const contentHtml = page?.content?.rendered || ''
     const excerpt = decodeHtml(page?.excerpt?.rendered || '')
-    const hasContent = hasMeaningfulHtml(contentHtml) || Boolean(excerpt) || Boolean(image)
+    const hasAcf = Boolean(page?.acf && typeof page.acf === 'object' && Object.keys(page.acf).length > 0)
+    const hasContent = hasMeaningfulHtml(contentHtml) || Boolean(excerpt) || Boolean(image) || hasAcf
 
     if (!hasContent) {
       continue
