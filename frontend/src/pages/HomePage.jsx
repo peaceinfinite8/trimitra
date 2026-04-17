@@ -342,7 +342,7 @@ function HomePage() {
     async function loadHomePageFromWordPress() {
       if (!isWordPressConfiguredForPages()) return
       try {
-        const page = await getWordPressPageBySlugs(['home', 'beranda'])
+        const page = await getWordPressPageBySlugs(['home-react'])
         if (!cancelled && page) {
           setWpHomePage(page)
         }
@@ -389,7 +389,6 @@ function HomePage() {
   const featuredJournal = journals[0]
   const sideJournals = journals.slice(1)
   const pageFields = wpHomePage ? { ...(wpHomePage.meta || {}), ...(wpHomePage.acf || {}) } : {}
-  const homeKicker = pickTextField(pageFields, ['home_kicker', 'hero_kicker'], 'Home')
   const introKicker = pickTextField(pageFields, ['intro_kicker', 'home_intro_kicker'], 'Studio Trimitra')
   const introTitle = pickTextField(
     pageFields,
@@ -504,28 +503,6 @@ function HomePage() {
           title={partnershipTitle}
           copy={partnershipCopy}
         />
-
-        <SectionReveal className="section cms-page-shell">
-          <div className="container">
-            <p className="kicker">{homeKicker}</p>
-            <h1 className="section-title">{wpHomePage.title}</h1>
-            {wpHomePage.excerpt && (
-              <p className="muted" style={{ marginTop: 12, maxWidth: 860 }}>
-                {wpHomePage.excerpt}
-              </p>
-            )}
-            {wpHomePage.image && (
-              <div className="blog-detail-image-wrap" style={{ marginTop: 18, marginBottom: 22 }}>
-                <LazyImage
-                  src={wpHomePage.image}
-                  alt={wpHomePage.title}
-                  className="blog-detail-image"
-                />
-              </div>
-            )}
-            <article className="blog-detail-content cms-page-content" dangerouslySetInnerHTML={{ __html: wpHomePage.contentHtml }} />
-          </div>
-        </SectionReveal>
 
         <HomeJournalSection
           kicker={journalKicker}
