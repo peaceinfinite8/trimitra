@@ -411,7 +411,7 @@ function KontakKamiPage() {
             </p>
           </div>
 
-          <StaggerGroup className="contact-shell contact-shell-premium">
+          <div className="contact-shell contact-shell-premium">
             <form
               className="contact-form card"
               onSubmit={handleSubmit}
@@ -425,7 +425,7 @@ function KontakKamiPage() {
               </div>
 
               <div className="form-grid">
-                <StaggerItem>
+                <div>
                   <label>
                     <p className="kicker">Nama Lengkap *</p>
                     <input
@@ -437,9 +437,9 @@ function KontakKamiPage() {
                       required
                     />
                   </label>
-                </StaggerItem>
+                </div>
 
-                <StaggerItem>
+                <div>
                   <label>
                     <p className="kicker">Alamat Email *</p>
                     <input
@@ -451,9 +451,9 @@ function KontakKamiPage() {
                       required
                     />
                   </label>
-                </StaggerItem>
+                </div>
 
-                <StaggerItem>
+                <div>
                   <label>
                     <p className="kicker">No. Telepon</p>
                     <input
@@ -464,9 +464,9 @@ function KontakKamiPage() {
                       onChange={handleChange}
                     />
                   </label>
-                </StaggerItem>
+                </div>
 
-                <StaggerItem>
+                <div>
                   <label>
                     <p className="kicker">Perusahaan / Organisasi</p>
                     <input
@@ -477,9 +477,9 @@ function KontakKamiPage() {
                       onChange={handleChange}
                     />
                   </label>
-                </StaggerItem>
+                </div>
 
-                <StaggerItem className="full">
+                <div className="full">
                   <label className="full">
                     <p className="kicker">Jenis Layanan</p>
                     <select
@@ -496,9 +496,9 @@ function KontakKamiPage() {
                       ))}
                     </select>
                   </label>
-                </StaggerItem>
+                  </div>
 
-                <StaggerItem className="full">
+                  <div className="full">
                   <label className="full">
                     <p className="kicker">Ringkasan Proyek *</p>
                     <textarea
@@ -510,7 +510,7 @@ function KontakKamiPage() {
                       required
                     />
                   </label>
-                </StaggerItem>
+                </div>
               </div>
 
               <button
@@ -664,7 +664,7 @@ function KontakKamiPage() {
                 </a>
               </article>
             </div>
-          </StaggerGroup>
+          </div>
         </div>
       </SectionReveal>
 
