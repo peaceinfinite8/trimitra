@@ -60,7 +60,13 @@ export function SectionReveal({ children, className = '', style, ...rest }) {
       {...rest}
       variants={sectionVariants}
       initial={prefersReducedMotion ? false : 'hidden'}
-      animate={prefersReducedMotion ? { opacity: 1, y: 0, scale: 1, clipPath: 'inset(0 0 0% 0)', filter: 'blur(0px)' } : 'show'}
+      whileInView={prefersReducedMotion ? undefined : 'show'}
+      viewport={{ once: true, amount: 0.16 }}
+      animate={
+        prefersReducedMotion
+          ? { opacity: 1, y: 0, scale: 1, clipPath: 'inset(0 0 0% 0)', filter: 'blur(0px)' }
+          : undefined
+      }
       data-gsap-section
     >
       {children}
@@ -77,7 +83,9 @@ export function StaggerGroup({ children, className = '', style, once = false, am
       style={style}
       variants={groupVariants}
       initial={prefersReducedMotion ? false : 'hidden'}
-      animate={prefersReducedMotion ? {} : 'show'}
+      whileInView={prefersReducedMotion ? undefined : 'show'}
+      viewport={{ once, amount }}
+      animate={prefersReducedMotion ? {} : undefined}
     >
       {children}
     </motion.div>

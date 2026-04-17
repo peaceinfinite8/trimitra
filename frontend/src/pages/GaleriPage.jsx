@@ -197,26 +197,26 @@ function GaleriPage() {
       return counts
     }, {})
   }, [galleryItems])
-    const gallerySnapshots = useMemo(
-      () => galleryFilters
-        .filter((filter) => filter !== 'Semua')
-        .map((filter) => {
-          const preview = galleryItems.find((item) => item.category === filter)
-          return {
-            filter,
-            count: categoryCounts[filter] ?? 0,
-            preview,
-          }
-        }),
-      [categoryCounts, galleryItems],
-    )
-    const curatedCategoryCards = useMemo(
-      () => gallerySnapshots.map((snapshot) => ({
-        ...snapshot,
-        totalLabel: `${String(snapshot.count).padStart(2, '0')} visual tersedia`,
-      })),
-      [gallerySnapshots],
-    )
+  const gallerySnapshots = useMemo(
+    () => galleryFilters
+      .filter((filter) => filter !== 'Semua')
+      .map((filter) => {
+        const preview = galleryItems.find((item) => item.category === filter)
+        return {
+          filter,
+          count: categoryCounts[filter] ?? 0,
+          preview,
+        }
+      }),
+    [categoryCounts, galleryItems],
+  )
+  const curatedCategoryCards = useMemo(
+    () => gallerySnapshots.map((snapshot) => ({
+      ...snapshot,
+      totalLabel: `${String(snapshot.count).padStart(2, '0')} visual tersedia`,
+    })),
+    [gallerySnapshots],
+  )
 
   useEffect(() => {
     if (activeIndex === null) return undefined
