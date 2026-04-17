@@ -1,6 +1,10 @@
 import { withCache } from './wpCache'
 
-const WP_SITE_URL = (import.meta.env.VITE_WP_SITE_URL || '').replace(/\/$/, '')
+const DEFAULT_WP_SITE_URL = 'https://cms.trimitramulti.co.id'
+const RAW_WP_SITE_URL = (import.meta.env.VITE_WP_SITE_URL || '').trim().replace(/\/$/, '')
+const WP_SITE_URL = (RAW_WP_SITE_URL || DEFAULT_WP_SITE_URL)
+  .replace(/^https?:\/\/trimitramulti\.co\.id\/?$/i, DEFAULT_WP_SITE_URL)
+  .replace(/\/$/, '')
 const WP_CACHE_TTL_MS = 60 * 1000
 const WP_FETCH_TIMEOUT_MS = 6500
 

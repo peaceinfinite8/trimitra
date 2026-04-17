@@ -13,7 +13,7 @@ cp .env.example .env.local
 Isi URL WordPress live:
 
 ```env
-VITE_WP_SITE_URL=https://trimitramulti.co.id
+VITE_WP_SITE_URL=https://cms.trimitramulti.co.id
 ```
 
 ## 2) Development
@@ -44,7 +44,7 @@ Langkah:
 2. Build frontend: `npm run build`.
 3. Upload isi folder `dist/` ke document root subdomain.
 4. Pastikan file `.htaccess` ikut ter-upload (sudah disiapkan di `public/.htaccess`).
-5. Set `VITE_WP_SITE_URL=https://trimitramulti.co.id` lalu rebuild jika perlu.
+5. Set `VITE_WP_SITE_URL=https://cms.trimitramulti.co.id` lalu rebuild jika perlu.
 
 ### Skenario B: Frontend di Root Domain
 

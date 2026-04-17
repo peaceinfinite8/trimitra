@@ -1,6 +1,10 @@
 ﻿import { withCache } from './wpCache'
 
-const WP_SITE_URL = (import.meta.env.VITE_WP_SITE_URL || '').trim().replace(/\/$/, '')
+const DEFAULT_WP_SITE_URL = 'https://cms.trimitramulti.co.id'
+const RAW_WP_SITE_URL = (import.meta.env.VITE_WP_SITE_URL || '').trim().replace(/\/$/, '')
+const WP_SITE_URL = (RAW_WP_SITE_URL || DEFAULT_WP_SITE_URL)
+  .replace(/^https?:\/\/trimitramulti\.co\.id\/?$/i, DEFAULT_WP_SITE_URL)
+  .replace(/\/$/, '')
 const WP_CLIENTS_ENDPOINT = (import.meta.env.VITE_WP_CLIENTS_ENDPOINT || '').trim()
 const WP_CACHE_TTL_MS = 5 * 60 * 1000
 const WP_CACHE_VERSION = 'v2'
