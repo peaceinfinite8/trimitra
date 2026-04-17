@@ -18,7 +18,9 @@ const WHATSAPP_NUMBER = "62811109842";
 const WHATSAPP_BASE_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
 const GOOGLE_MAPS_PLACE_URL = "https://maps.app.goo.gl/br2X3Bdp7dtWtNVj7";
 const GOOGLE_MAPS_EMBED_URL =
-  "https://www.google.com/maps?q=-6.4231941,106.8307972&z=17&output=embed";
+  "https://www.google.com/maps?q=Tirtajaya,+Kec.+Sukmajaya,+Kota+Depok,+Jawa+Barat+16413&z=17&output=embed";
+const OFFICE_ADDRESS =
+  "Tirtajaya, Kec. Sukmajaya, Kota Depok, Jawa Barat 16413";
 const EMPTY_FORM_DATA = {
   name: "",
   email: "",
@@ -138,6 +140,15 @@ function WhatsAppIcon() {
   );
 }
 
+function normalizeOfficeAddress(value) {
+  if (!value) return "";
+
+  return value
+    .replace(/^[A-Z0-9]{4}\+[A-Z0-9]{2,4},\s*/i, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
 function KontakKamiPage() {
   const prefersReducedMotion = useReducedMotion();
   const [wpPage, setWpPage] = useState(null);
@@ -174,9 +185,7 @@ function KontakKamiPage() {
     "Kirim Permintaan Konsultasi",
   );
 
-  const addressText =
-    contactInfo.address ||
-    "HRGJ+P8F, Tirtajaya, Kec. Sukmajaya, Kota Depok, Jawa Barat 16413";
+  const addressText = normalizeOfficeAddress(contactInfo.address) || OFFICE_ADDRESS;
   const contactEmails = useMemo(() => {
     const seen = new Set();
     const deduped = [];

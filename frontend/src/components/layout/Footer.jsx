@@ -174,7 +174,7 @@ function Footer() {
         <section>
           <h4>Hubungi Kami</h4>
           <ul>
-            <li>HRGJ+P8F, Tirtajaya, Kec. Sukmajaya, Kota Depok, Jawa Barat 16413</li>
+            <li>Tirtajaya, Kec. Sukmajaya, Kota Depok, Jawa Barat 16413</li>
             <li><a href="tel:+62217894561">+62 21 789 4561</a></li>
             <li><a href="mailto:dhr@trimitramulti.co.id">dhr@trimitramulti.co.id</a></li>
           </ul>

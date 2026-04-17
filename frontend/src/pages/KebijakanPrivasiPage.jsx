@@ -97,7 +97,7 @@ function KebijakanPrivasiPage() {
             {' '}atau telepon <a href="tel:+62217894561">+62 21 789 4561</a>.
           </p>
           <p className="muted" style={{ margin: 0, lineHeight: 1.75 }}>
-            Alamat korespondensi: HRGJ+P8F, Tirtajaya, Kec. Sukmajaya, Kota Depok, Jawa Barat 16413.
+            Alamat korespondensi: Tirtajaya, Kec. Sukmajaya, Kota Depok, Jawa Barat 16413.
           </p>
         </article>
       </div>
