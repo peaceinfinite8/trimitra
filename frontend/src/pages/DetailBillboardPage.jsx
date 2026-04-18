@@ -123,7 +123,9 @@ function DetailBillboardPage() {
         .mbb-marquee{height:52px;background:linear-gradient(90deg,#d9ebff 0%,#cbe2ff 50%,#deeeff 100%);border-top:1px solid rgba(21,69,125,.12);border-bottom:1px solid rgba(21,69,125,.12);overflow:hidden;display:flex;align-items:center}
         .mbb-marquee-track{white-space:nowrap;display:flex;animation:mbbMarquee 30s linear infinite;color:rgba(16,64,116,.62);font:600 12px/1 'Inter',sans-serif;letter-spacing:.08em}
         .mbb-marquee-track span{padding-right:60px}
-        .mbb-light{background:#f8fbff;padding:120px 8%}
+        .mbb-light{background:linear-gradient(180deg,#eaf3ff 0%,#f6faff 28%,#f8fbff 100%);padding:120px 8%;position:relative;overflow:hidden}
+        .mbb-light::before{content:'';position:absolute;inset:-140px 0 auto; height:320px; background:radial-gradient(70% 100% at 50% 0%,rgba(77,144,224,.14) 0%,rgba(77,144,224,0) 70%);pointer-events:none}
+        .mbb-light > *{position:relative;z-index:1}
         .mbb-kicker{margin:0;color:rgba(15,39,70,.52);font:600 11px/1 'Inter',sans-serif;letter-spacing:.14em;text-transform:uppercase}
         .mbb-title{margin:12px 0 0;color:#0f2746;font:800 clamp(32px,4.5vw,56px)/1.1 'Plus Jakarta Sans',sans-serif;letter-spacing:-0.02em}
         .mbb-grid3{margin-top:40px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
