@@ -19,7 +19,7 @@ const BASE_SECTION_ITEMS = [
     image: 'https://images.unsplash.com/photo-1598908314732-07113901949e?w=800&q=80',
     floatingTop: '150+ LOKASI AKTIF',
     floatingBottom: 'Sejak 2017',
-    dark: true,
+    dark: false,
     reverse: false,
     buttonTheme: 'sky',
   },
@@ -34,7 +34,7 @@ const BASE_SECTION_ITEMS = [
     image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=800&q=80',
     floatingTop: '250+ EVENT SUKSES',
     floatingBottom: '',
-    dark: false,
+    dark: true,
     reverse: true,
     buttonTheme: 'navy',
   },
@@ -49,7 +49,7 @@ const BASE_SECTION_ITEMS = [
     image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80',
     floatingTop: '350+ BOOTH SELESAI',
     floatingBottom: '',
-    dark: true,
+    dark: false,
     reverse: false,
     buttonTheme: 'sky',
   },
@@ -326,6 +326,13 @@ function LayananPage() {
           background: transparent;
           color: #0a1628;
         }
+        .lp-service.is-billboard,
+        .lp-service.is-booth {
+          background:
+            radial-gradient(900px 520px at 10% 12%, rgba(186, 230, 253, 0.34) 0%, rgba(186, 230, 253, 0) 66%),
+            linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+          color: #0a1628;
+        }
         .lp-service.is-dark {
           background:
             radial-gradient(900px 520px at 10% 12%, rgba(56, 189, 248, 0.18) 0%, rgba(56, 189, 248, 0) 66%),
@@ -333,11 +340,13 @@ function LayananPage() {
             linear-gradient(130deg, #06142b 0%, #0a2342 52%, #123563 100%);
           color: #e6f2ff;
         }
-        .lp-service.is-light {
+        .lp-service.is-event {
           background:
-            radial-gradient(900px 520px at 10% 12%, rgba(186, 230, 253, 0.42) 0%, rgba(186, 230, 253, 0) 66%),
-            linear-gradient(180deg, #f7fbff 0%, #eef6ff 100%);
-          color: #0a1628;
+            radial-gradient(900px 520px at 12% 18%, rgba(125, 211, 252, 0.28) 0%, rgba(125, 211, 252, 0) 58%),
+            radial-gradient(780px 460px at 88% 82%, rgba(59, 130, 246, 0.28) 0%, rgba(59, 130, 246, 0) 66%),
+            linear-gradient(135deg, #0a4a8a 0%, #0e67b5 48%, #1677c7 100%);
+          color: #ffffff;
+          isolation: isolate;
         }
 
         .lp-service.is-dark .lp-label {
@@ -371,11 +380,6 @@ function LayananPage() {
           color: #f8fbff;
         }
 
-        .lp-service.is-event {
-          background: #f6fbff;
-          color: #ffffff;
-          isolation: isolate;
-        }
         .lp-service.is-event::before,
         .lp-service.is-event::after {
           content: '';
@@ -390,22 +394,20 @@ function LayananPage() {
         }
         .lp-service.is-event::before {
           top: -1px;
-          background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.18) 100%);
+          background: linear-gradient(180deg, rgba(14, 103, 181, 0.55) 0%, rgba(14, 103, 181, 0.06) 100%);
         }
         .lp-service.is-event::after {
           bottom: -1px;
-          background: linear-gradient(0deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.18) 100%);
+          background: linear-gradient(0deg, rgba(14, 103, 181, 0.55) 0%, rgba(14, 103, 181, 0.06) 100%);
         }
         .lp-service.is-event .lp-service-inner {
           position: relative;
           z-index: 1;
           padding: clamp(28px, 4vw, 48px);
           border-radius: 36px;
-          background:
-            radial-gradient(900px 520px at 10% 18%, rgba(56, 189, 248, 0.18) 0%, rgba(56, 189, 248, 0) 60%),
-            linear-gradient(130deg, rgba(6, 20, 43, 0.97) 0%, rgba(10, 35, 66, 0.97) 52%, rgba(18, 53, 99, 0.96) 100%);
-          box-shadow: 0 28px 80px rgba(4, 10, 22, 0.18);
-          border: 1px solid rgba(255, 255, 255, 0.16);
+          background: transparent;
+          box-shadow: none;
+          border: none;
           backdrop-filter: blur(24px) saturate(160%);
           -webkit-backdrop-filter: blur(24px) saturate(160%);
         }
@@ -418,7 +420,7 @@ function LayananPage() {
           color: #fff;
         }
         .lp-service.is-event .lp-label {
-          color: rgba(255, 255, 255, 0.82);
+          color: rgba(255, 255, 255, 0.88);
         }
         .lp-service.is-event .lp-watermark {
           color: rgba(255, 255, 255, 0.08);
@@ -435,18 +437,18 @@ function LayananPage() {
           text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
         }
         .lp-service.is-event .lp-chip {
-          background: rgba(255, 255, 255, 0.12);
-          border-color: rgba(255, 255, 255, 0.18);
+          background: rgba(255, 255, 255, 0.14);
+          border-color: rgba(255, 255, 255, 0.2);
           color: #ffffff !important;
           text-shadow: 0 1px 1px rgba(0, 0, 0, 0.12);
         }
         .lp-service.is-event .lp-service-media {
           border-color: rgba(255, 255, 255, 0.18);
           box-shadow: 0 24px 64px rgba(4, 10, 22, 0.42);
-          background: rgba(255, 255, 255, 0.08);
+          background: rgba(255, 255, 255, 0.12);
         }
         .lp-service.is-event .lp-floating-badge {
-          background: rgba(255, 255, 255, 0.14);
+          background: rgba(255, 255, 255, 0.16);
           border-color: rgba(255, 255, 255, 0.18);
           color: #fff;
         }
