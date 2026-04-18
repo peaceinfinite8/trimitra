@@ -11260,6 +11260,22 @@ body::after {
   --gradient-main: linear-gradient(135deg, #0ea5e9, #6366f1);
 }
 
+.glass-dark {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.glass-light {
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 16px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
 .site-header,
 .site-header * {
   transition: all 0.3s ease;
@@ -12097,7 +12113,6 @@ body.route-home .site-footer::before {
 .about-page-lumen .about-hero-photo-card {
   border-radius: 18px;
   overflow: hidden;
-  border: 1px solid rgba(158, 216, 248, 0.52);
   box-shadow: 0 18px 34px rgba(8, 20, 37, 0.35);
 }
 
@@ -12117,10 +12132,6 @@ body.route-home .site-footer::before {
 
 .about-page-lumen .about-hero-milestone-card {
   border-radius: 12px;
-  border: 1px solid rgba(162, 212, 241, 0.44);
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   padding: 10px 9px 9px;
 }
 

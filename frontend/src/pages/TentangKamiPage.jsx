@@ -282,7 +282,7 @@ function TentangKamiPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
           >
-            <article className="about-hero-photo-card">
+            <article className="about-hero-photo-card glass-dark">
               <img
                 className="about-hero-photo"
                 src={wpPage?.image || 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1500&q=80'}
@@ -293,7 +293,7 @@ function TentangKamiPage() {
             </article>
             <div className="about-hero-milestones">
               {ABOUT_HERO_MILESTONES.map((item) => (
-                <article key={item.year} className="about-hero-milestone-card">
+                <article key={item.year} className="about-hero-milestone-card glass-dark">
                   <p>{item.year}</p>
                   <h3>{item.title}</h3>
                 </article>

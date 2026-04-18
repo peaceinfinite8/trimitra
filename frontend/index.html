@@ -56,8 +56,31 @@
 </head>
 
 <body>
+  <div class="page-loader-overlay" id="global-splash">
+    <div class="page-loader-mark">
+      <div class="page-loader-aura"></div>
+      <div class="page-loader-ring"></div>
+      <img class="page-loader-logo" src="/logo-trimitra.webp" alt="Trimitra" />
+    </div>
+  </div>
+
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
+  
+  <script>
+    // Fade out splash screen when React mounts and window loads
+    window.addEventListener('load', () => {
+      const splash = document.getElementById('global-splash');
+      if (splash) {
+        // Beri sedikit jeda agar animasi cincin sempat berputar dengan mulus
+        setTimeout(() => {
+          splash.classList.add('is-exiting');
+          // Hapus dari DOM setelah transisi opacity selesai (0.8s + delay 0.4s)
+          setTimeout(() => splash.remove(), 1200);
+        }, 300);
+      }
+    });
+  </script>
 </body>
 
 </html>

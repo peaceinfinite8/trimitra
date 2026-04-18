@@ -227,7 +227,7 @@ function BeritaDetailPage() {
 
             {post.contentHtml ? (
               <div
-                className="blog-detail-content"
+                className="blog-detail-content cms-page-content"
                 dangerouslySetInnerHTML={{ __html: post.contentHtml }}
               />
             ) : (

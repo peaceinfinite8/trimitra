@@ -496,9 +496,9 @@ function KontakKamiPage() {
                       ))}
                     </select>
                   </label>
-                  </div>
+                </div>
 
-                  <div className="full">
+                <div className="full">
                   <label className="full">
                     <p className="kicker">Ringkasan Proyek *</p>
                     <textarea

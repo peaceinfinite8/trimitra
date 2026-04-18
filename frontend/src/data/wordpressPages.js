@@ -5,12 +5,30 @@ const RAW_WP_SITE_URL = (import.meta.env.VITE_WP_SITE_URL || '').trim().replace(
 const WP_SITE_URL = (RAW_WP_SITE_URL || DEFAULT_WP_SITE_URL)
   .replace(/^https?:\/\/trimitramulti\.co\.id\/?$/i, DEFAULT_WP_SITE_URL)
   .replace(/\/$/, '')
-const WP_CLIENTS_ENDPOINT = (import.meta.env.VITE_WP_CLIENTS_ENDPOINT || '').trim()
+const DEFAULT_WP_CLIENTS_ENDPOINT = `${DEFAULT_WP_SITE_URL}/wp-json/wp/v2/client`
+const RAW_WP_CLIENTS_ENDPOINT = (import.meta.env.VITE_WP_CLIENTS_ENDPOINT || '').trim()
+const WP_CLIENTS_ENDPOINT = RAW_WP_CLIENTS_ENDPOINT || DEFAULT_WP_CLIENTS_ENDPOINT
 const WP_CACHE_TTL_MS = 5 * 60 * 1000
 const WP_CACHE_VERSION = 'v2'
 const WP_FETCH_TIMEOUT_MS = 6500
 
 const hasWindow = typeof window !== 'undefined'
+
+function normalizeWpAssetUrl(value) {
+  if (!value || typeof value !== 'string') return ''
+  const trimmed = value.trim()
+  if (!trimmed) return ''
+  return trimmed
+    .replace(/^https?:\/\/trimitramulti\.co\.id(?=\/|$)/i, WP_SITE_URL)
+    .replace(/^https?:\/\/www\.trimitramulti\.co\.id(?=\/|$)/i, WP_SITE_URL)
+}
+
+function parseClientNameFromMediaTitle(value, fallbackIndex = 0) {
+  const decoded = stripHtml(value || '').trim()
+  if (!decoded) return `Partner ${String(fallbackIndex + 1).padStart(2, '0')}`
+  if (/^\d+$/.test(decoded)) return `Partner ${decoded.padStart(2, '0')}`
+  return decoded
+}
 
 function decodeHtml(value) {
   if (!value) return ''
@@ -317,7 +335,7 @@ async function getMediaSourceById(mediaId) {
 
   const media = result?.data
   if (media && typeof media === 'object' && media.source_url) {
-    return media.source_url
+    return normalizeWpAssetUrl(media.source_url)
   }
 
   return ''
@@ -387,7 +405,7 @@ export async function getWordPressClients({ perPage = 40 } = {}) {
           ? response.data
           : []
 
-      const mappedCustom = records.map((item, index) => {
+      const mappedCustom = await Promise.all(records.map(async (item, index) => {
         const name = stripHtml(
           item?.name ||
           item?.title ||
@@ -406,13 +424,33 @@ export async function getWordPressClients({ perPage = 40 } = {}) {
           '',
         ) || 'Partner layanan Trimitra'
 
-        const logo =
+        let logo =
           item?.logo ||
           item?.image ||
           item?.source_url ||
           item?.featured_image ||
           item?.featured_media_url ||
+          item?.acf?.logo ||
+          item?.acf?.client_logo ||
+          item?.acf?.image ||
           ''
+
+        if (logo && typeof logo === 'object') {
+          logo =
+            logo?.source_url ||
+            logo?.url ||
+            logo?.guid?.rendered ||
+            ''
+        }
+
+        const embedded = item?._embedded?.['wp:featuredmedia']
+        if ((!logo || typeof logo !== 'string') && Array.isArray(embedded) && embedded[0]?.source_url) {
+          logo = embedded[0].source_url
+        }
+
+        if ((!logo || typeof logo !== 'string') && item?.featured_media) {
+          logo = await getMediaSourceById(item.featured_media)
+        }
 
         return {
           id: item?.id || `custom-${index}`,
@@ -420,9 +458,9 @@ export async function getWordPressClients({ perPage = 40 } = {}) {
           name,
           tagline,
           color: palette[index % palette.length],
-          logo,
+          logo: normalizeWpAssetUrl(logo),
         }
-      })
+      }))
 
       const usableCustom = mappedCustom.filter((item) => item.name)
       if (usableCustom.length > 0) {
@@ -481,7 +519,7 @@ export async function getWordPressClients({ perPage = 40 } = {}) {
           let logo = ''
           const embedded = post?._embedded?.['wp:featuredmedia']
           if (Array.isArray(embedded) && embedded[0]?.source_url) {
-            logo = embedded[0].source_url
+            logo = normalizeWpAssetUrl(embedded[0].source_url)
           } else if (post?.featured_media) {
             logo = await getMediaSourceById(post.featured_media)
           }
@@ -492,7 +530,7 @@ export async function getWordPressClients({ perPage = 40 } = {}) {
             name,
             tagline,
             color: palette[index % palette.length],
-            logo,
+            logo: normalizeWpAssetUrl(logo),
           }
         }),
       )
@@ -504,6 +542,73 @@ export async function getWordPressClients({ perPage = 40 } = {}) {
     } catch {
       // Try next endpoint variant.
     }
+  }
+
+  try {
+    // Fallback for installations where `client` CPT is not exposed in REST.
+    const first = await fetchWp('media', {
+      media_type: 'image',
+      per_page: '100',
+      page: '1',
+      orderby: 'date',
+      order: 'desc',
+      _fields: 'id,title.rendered,source_url,media_details.sizes',
+    })
+
+    let mediaItems = Array.isArray(first.data) ? [...first.data] : []
+
+    if (Number(first.totalPages || 1) > 1) {
+      const maxPages = Math.min(Number(first.totalPages || 1), 5)
+      const requests = []
+      for (let page = 2; page <= maxPages; page += 1) {
+        requests.push(
+          fetchWp('media', {
+            media_type: 'image',
+            per_page: '100',
+            page: String(page),
+            orderby: 'date',
+            order: 'desc',
+            _fields: 'id,title.rendered,source_url,media_details.sizes',
+          }),
+        )
+      }
+
+      const rest = await Promise.all(requests)
+      rest.forEach((result) => {
+        if (Array.isArray(result.data)) {
+          mediaItems = mediaItems.concat(result.data)
+        }
+      })
+    }
+
+    const logoItems = mediaItems.filter((item) => {
+      const sizes = item?.media_details?.sizes
+      return Boolean(sizes && sizes['clients-slider'])
+    })
+
+    if (logoItems.length > 0) {
+      const mappedMediaFallback = logoItems
+        .slice(0, Math.min(Math.max(1, perPage), 40))
+        .map((item, index) => {
+          const sliderLogo = item?.media_details?.sizes?.['clients-slider']?.source_url
+          const fullLogo = item?.source_url
+          return {
+            id: item?.id || `media-client-${index}`,
+            initials: getInitialsFromName(parseClientNameFromMediaTitle(item?.title?.rendered, index)),
+            name: parseClientNameFromMediaTitle(item?.title?.rendered, index),
+            tagline: 'Partner layanan Trimitra',
+            color: palette[index % palette.length],
+            logo: normalizeWpAssetUrl(sliderLogo || fullLogo || ''),
+          }
+        })
+        .filter((item) => item.logo)
+
+      if (mappedMediaFallback.length > 0) {
+        return mappedMediaFallback
+      }
+    }
+  } catch {
+    // Keep empty and let UI fallback to hardcoded client cards.
   }
 
   return []

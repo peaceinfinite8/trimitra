@@ -147,7 +147,7 @@ function ServiceSection({ item }) {
             {item.chips.map((chip) => (
               <span
                 key={chip}
-                className="lp-chip"
+                className={`lp-chip ${item.dark ? 'glass-dark' : 'glass-light'}`}
               >
                 {chip}
               </span>
@@ -176,8 +176,8 @@ function ServiceSection({ item }) {
             decoding="async"
             className="lp-media-image"
           />
-          {item.floatingTop ? <span className="lp-floating-badge top">{item.floatingTop}</span> : null}
-          {item.floatingBottom ? <span className="lp-floating-badge bottom">{item.floatingBottom}</span> : null}
+          {item.floatingTop ? <span className={`lp-floating-badge top ${item.dark ? 'glass-dark' : 'glass-light'}`}>{item.floatingTop}</span> : null}
+          {item.floatingBottom ? <span className={`lp-floating-badge bottom ${item.dark ? 'glass-dark' : 'glass-light'}`}>{item.floatingBottom}</span> : null}
         </motion.div>
       </div>
     </section>
@@ -365,8 +365,6 @@ function LayananPage() {
           color: rgba(230, 242, 255, 0.84);
         }
         .lp-service.is-dark .lp-chip {
-          background: rgba(8, 28, 52, 0.66);
-          border-color: rgba(160, 213, 255, 0.28);
           color: #e8f3ff;
         }
         .lp-service.is-dark .lp-service-media {
@@ -375,8 +373,6 @@ function LayananPage() {
           background: rgba(255, 255, 255, 0.08);
         }
         .lp-service.is-dark .lp-floating-badge {
-          background: rgba(255, 255, 255, 0.1);
-          border-color: rgba(255, 255, 255, 0.15);
           color: #f8fbff;
         }
 
@@ -437,8 +433,6 @@ function LayananPage() {
           text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
         }
         .lp-service.is-event .lp-chip {
-          background: rgba(255, 255, 255, 0.14);
-          border-color: rgba(255, 255, 255, 0.2);
           color: #ffffff !important;
           text-shadow: 0 1px 1px rgba(0, 0, 0, 0.12);
         }
@@ -448,8 +442,6 @@ function LayananPage() {
           background: rgba(255, 255, 255, 0.12);
         }
         .lp-service.is-event .lp-floating-badge {
-          background: rgba(255, 255, 255, 0.16);
-          border-color: rgba(255, 255, 255, 0.18);
           color: #fff;
         }
 
@@ -532,8 +524,6 @@ function LayananPage() {
           margin-top: 8px;
         }
         .lp-chip {
-          background: rgba(255, 255, 255, 0.6);
-          border: 1px solid rgba(10, 22, 40, 0.08);
           color: #0a1628;
           border-radius: 100px;
           padding: 6px 14px;
@@ -541,7 +531,6 @@ function LayananPage() {
           font-size: 13px;
         }
         .lp-service.is-light .lp-chip {
-          border-color: rgba(10, 22, 40, 0.08);
           color: #0a1628;
         }
 
@@ -597,10 +586,6 @@ function LayananPage() {
           font-weight: 600;
           font-size: 13px;
           letter-spacing: 0.02em;
-          background: rgba(255, 255, 255, 0.85);
-          border: 1px solid rgba(255, 255, 255, 0.4);
-          backdrop-filter: blur(16px) saturate(180%);
-          -webkit-backdrop-filter: blur(16px) saturate(180%);
           color: #0a1628;
           box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
         }

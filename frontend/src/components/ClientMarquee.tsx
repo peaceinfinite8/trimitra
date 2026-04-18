@@ -12,10 +12,23 @@ type MarqueeClient = {
 };
 
 const fallbackClients: MarqueeClient[] = [
-    { initials: "PK", name: "PT Kota Advertise", tagline: "Billboard & media outdoor", color: "#1877F2" },
-    { initials: "NE", name: "Nexus Event Indonesia", tagline: "Event organizer & aktivasi brand", color: "#E4405F" },
-    { initials: "PB", name: "Prestige Booth Design", tagline: "Booth exhibition & pameran", color: "#0A66C2" },
-    { initials: "MA", name: "Metro Activation", tagline: "Campaign activation lintas kota", color: "#FF6B35" },
+    { initials: "ME", name: "Melsa", tagline: "Partner", color: "#1877F2", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/1.jpeg" },
+    { initials: "BB", name: "Bank BJB", tagline: "Partner", color: "#E4405F", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/2.jpeg" },
+    { initials: "TG", name: "Tegar", tagline: "Partner", color: "#0A66C2", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/3.jpeg" },
+    { initials: "PD", name: "Paricara Darma", tagline: "Partner", color: "#FF6B35", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/4.jpeg" },
+    { initials: "PR", name: "Prima", tagline: "Partner", color: "#16A34A", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/5.jpeg" },
+    { initials: "JS", name: "Jskye", tagline: "Partner", color: "#7C3AED", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/6.jpeg" },
+    { initials: "OH", name: "Omni Hospitals", tagline: "Partner", color: "#0EA5E9", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/7.jpeg" },
+    { initials: "HP", name: "Humpuss", tagline: "Partner", color: "#1D4ED8", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/8.jpeg" },
+    { initials: "PI", name: "Perbanas Institute", tagline: "Partner", color: "#DB2777", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/9.jpeg" },
+    { initials: "GP", name: "Garda Persada", tagline: "Partner", color: "#EA580C", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/10.jpeg" },
+    { initials: "NP", name: "Nipress", tagline: "Partner", color: "#2563EB", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/11.jpeg" },
+    { initials: "DK", name: "Dua Kelinci", tagline: "Partner", color: "#DC2626", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/12.jpeg" },
+    { initials: "TW", name: "TirtaWening", tagline: "Partner", color: "#0891B2", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/13.jpeg" },
+    { initials: "IB", name: "InfoBank", tagline: "Partner", color: "#BE123C", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/14.jpeg" },
+    { initials: "NK", name: "PT Nindya Karya", tagline: "Partner", color: "#0284C7", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/15.jpeg" },
+    { initials: "AS", name: "Alam Sutra", tagline: "Partner", color: "#14B8A6", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/16.jpeg" },
+    { initials: "KG", name: "Kalla Group", tagline: "Partner", color: "#0F766E", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/17.jpeg" },
 ];
 
 type ClientMarqueeTheme = "light" | "dark";
@@ -139,7 +152,7 @@ export default function ClientMarquee({ theme = "dark", clients: initialClients 
                                         <img
                                             src={client.logo}
                                             alt={client.name}
-                                            style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "10px" }}
+                                            style={{ width: "100%", height: "100%", objectFit: "contain", borderRadius: "10px", background: "#fff" }}
                                             loading="lazy"
                                             decoding="async"
                                         />
@@ -200,7 +213,7 @@ export default function ClientMarquee({ theme = "dark", clients: initialClients 
                                         <img
                                             src={client.logo}
                                             alt={client.name}
-                                            style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "10px" }}
+                                            style={{ width: "100%", height: "100%", objectFit: "contain", borderRadius: "10px", background: "#fff" }}
                                             loading="lazy"
                                             decoding="async"
                                         />
