@@ -296,6 +296,7 @@ function BeritaPage() {
       next.set("page", String(clampedPage));
       return next;
     });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const pageItems = useMemo(
