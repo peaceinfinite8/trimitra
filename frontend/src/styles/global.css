@@ -11007,12 +11007,12 @@ body::after {
     0 0 0 8px rgba(94, 178, 229, 0.24), 0 0 20px rgba(80, 167, 222, 0.5);
   background:
     radial-gradient(86% 80% at 8% 0%,
-      rgba(90, 179, 241, 0.3) 0%,
-      rgba(90, 179, 241, 0) 62%),
+      rgba(195, 236, 255, 0.34) 0%,
+      rgba(195, 236, 255, 0) 62%),
     radial-gradient(86% 72% at 92% 8%,
-      rgba(70, 123, 226, 0.24) 0%,
-      rgba(70, 123, 226, 0) 66%),
-    linear-gradient(180deg, #0a1b32 0%, #0f2d4d 48%, #143a62 100%);
+      rgba(215, 219, 255, 0.28) 0%,
+      rgba(215, 219, 255, 0) 66%),
+    linear-gradient(180deg, #eef8ff 0%, #ecf6ff 48%, #eaf5ff 100%);
 }
 
 .about-page-lumen .about-hero::after {
@@ -11743,14 +11743,6 @@ body.route-about {
   --cta-footer-bridge-bottom: #081b31;
   --cta-footer-bridge-glow: rgba(110, 208, 255, 0.34);
   --cta-footer-bridge-glow-soft: rgba(142, 176, 255, 0.28);
-  background:
-    radial-gradient(86% 80% at 8% 0%,
-      rgba(90, 179, 241, 0.3) 0%,
-      rgba(90, 179, 241, 0) 62%),
-    radial-gradient(86% 72% at 92% 8%,
-      rgba(70, 123, 226, 0.24) 0%,
-      rgba(70, 123, 226, 0) 66%),
-    linear-gradient(180deg, #0a1b32 0%, #0f2d4d 48%, #143a62 100%);
 }
 
 body.route-about .site-footer {
