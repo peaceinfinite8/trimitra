@@ -100,7 +100,7 @@ function DetailBillboardPage() {
         .mbb-close:hover{transform:scale(1.08);background:#fff;border-color:rgba(27,97,171,.38)}
         .mbb-sec{position:relative}
         .mbb-hero{min-height:90vh;padding:120px 8% 80px;background:radial-gradient(1200px 520px at 8% 6%,rgba(97,175,255,.2) 0%,rgba(97,175,255,0) 58%),radial-gradient(880px 460px at 100% 4%,rgba(52,130,226,.22) 0%,rgba(52,130,226,0) 65%),linear-gradient(160deg,#f1f7ff 0%,#dfedff 52%,#f5f9ff 100%);display:grid;align-items:center}
-        .mbb-hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center}
+        .mbb-hero-grid{display:grid;grid-template-columns:1.18fr .82fr;gap:48px;align-items:start}
         .mbb-pill{margin:0;width:fit-content;padding:8px 16px;border-radius:100px;border:1px solid rgba(27,97,171,.22);background:rgba(255,255,255,.64);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#15457c;font:600 12px/1 'Inter',sans-serif;letter-spacing:.08em}
         .mbb-heading{margin:24px 0 16px;color:#0f2746;font:800 clamp(38px,4.8vw,68px)/1.1 'Plus Jakarta Sans',sans-serif;letter-spacing:-0.02em}
         .mbb-heading span{display:inline-block}
@@ -117,7 +117,7 @@ function DetailBillboardPage() {
         .mbb-btn.sky:hover{background:#0077ec;transform:scale(1.02);box-shadow:0 6px 20px rgba(0,113,227,.4)}
         .mbb-btn.ghost{background:rgba(255,255,255,.74);color:#13457d;border-color:rgba(19,69,125,.2)}
         .mbb-btn.ghost:hover{background:#fff;transform:scale(1.02)}
-        .mbb-media{position:relative;border-radius:24px;overflow:hidden;aspect-ratio:16/10;min-height:0;max-height:460px;box-shadow:0 24px 48px rgba(15,39,70,.22)}
+        .mbb-media{position:relative;justify-self:end;width:min(100%,440px);border-radius:24px;overflow:hidden;aspect-ratio:4/3;min-height:0;max-height:380px;box-shadow:0 24px 48px rgba(15,39,70,.22)}
         .mbb-media img{width:100%;height:100%;object-fit:cover;display:block}
         .mbb-float{position:absolute;top:20px;right:20px;padding:10px 16px;border-radius:100px;background:rgba(255,255,255,.86);border:1px solid rgba(21,69,125,.18);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);color:#104074;font:600 12px/1 'Inter',sans-serif;letter-spacing:.04em;box-shadow:0 8px 24px rgba(15,39,70,.16)}
         .mbb-marquee{height:52px;background:linear-gradient(90deg,#d9ebff 0%,#cbe2ff 50%,#deeeff 100%);border-top:1px solid rgba(21,69,125,.12);border-bottom:1px solid rgba(21,69,125,.12);overflow:hidden;display:flex;align-items:center}
@@ -161,7 +161,7 @@ function DetailBillboardPage() {
         @keyframes mbbMarquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
         @media (max-width:1023px){
             .mbb-hero,.mbb-light,.mbb-flow,.mbb-reach,.mbb-cta{padding:80px 6%}
-            .mbb-media{max-height:380px}
+            .mbb-media{width:min(100%,380px);max-height:320px}
             .mbb-reach-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
             .mbb-reach-card{border-right:none;border-bottom:1px solid #e7f0fb;padding:32px 0}
             .mbb-reach-card:nth-child(3),.mbb-reach-card:nth-child(4){border-bottom:none}
@@ -171,7 +171,7 @@ function DetailBillboardPage() {
           .mbb-close{top:16px;right:16px;width:40px;height:40px}
           .mbb-hero{padding:100px 24px 60px}
           .mbb-hero-grid{grid-template-columns:1fr;gap:40px}
-          .mbb-media{order:-1;aspect-ratio:16/10;min-height:0;max-height:260px;border-radius:20px}
+          .mbb-media{order:-1;justify-self:stretch;width:100%;aspect-ratio:4/3;min-height:0;max-height:260px;border-radius:20px}
           .mbb-media img{height:100%}
           .mbb-light,.mbb-flow,.mbb-reach,.mbb-cta{padding:64px 24px}
           .mbb-grid3{grid-template-columns:1fr;gap:16px}
