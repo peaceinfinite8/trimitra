@@ -102,7 +102,7 @@ function DetailEventOrganizerPage() {
         .meo-btn.sky:hover{background:#0ea5e9;transform:scale(1.02);}
         .meo-btn.ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.2)}
         .meo-btn.ghost:hover{background:rgba(255,255,255,.05);transform:scale(1.02)}
-        .meo-media{position:relative;justify-self:end;width:min(100%,430px);border-radius:20px;overflow:hidden;aspect-ratio:4/3;min-height:0;max-height:380px;transition:transform 0.3s ease;}
+        .meo-media{position:relative;justify-self:end;width:min(100%,390px);border-radius:20px;overflow:hidden;aspect-ratio:3/4;min-height:0;max-height:520px;transition:transform 0.3s ease;}
         .meo-media:hover{transform:scale(1.02);}
         .meo-media img{width:100%;height:100%;object-fit:cover;display:block}
         .meo-float{position:absolute;top:20px;right:20px;padding:10px 16px;border-radius:100px;background:rgba(10,22,40,.6);border:0.5px solid rgba(255,255,255,.15);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;font:600 12px/1 'Inter',sans-serif;letter-spacing:.04em;}
@@ -150,7 +150,7 @@ function DetailEventOrganizerPage() {
         @keyframes meoMarquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
         @media (max-width:1023px){
             .meo-hero,.meo-dark,.meo-light,.meo-achieve,.meo-cta{padding:80px 6%}
-            .meo-media{width:min(100%,380px);max-height:320px}
+            .meo-media{width:min(100%,340px);max-height:440px}
             .meo-achieve-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important;}
             .meo-achieve-card{border-right:none !important;border-bottom:0.5px solid rgba(56,189,248,.15) !important;}
             .meo-achieve-card:nth-child(3),.meo-achieve-card:nth-child(4){border-bottom:none !important;}
@@ -161,7 +161,7 @@ function DetailEventOrganizerPage() {
           .meo-close{top:16px;right:16px;width:40px;height:40px;}
           .meo-hero{padding:100px 24px 60px;}
           .meo-grid{grid-template-columns:1fr;gap:40px;}
-          .meo-media{order:-1;justify-self:stretch;width:100%;aspect-ratio:4/3;min-height:0;max-height:260px;}
+          .meo-media{order:-1;justify-self:stretch;width:100%;aspect-ratio:3/4;min-height:0;max-height:360px;}
           .meo-media img{height:100%;}
           .meo-dark,.meo-light,.meo-achieve,.meo-cta{padding:64px 24px;}
           .meo-grid3{grid-template-columns:1fr;}

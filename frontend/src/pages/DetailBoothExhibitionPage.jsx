@@ -102,7 +102,7 @@ function DetailBoothExhibitionPage() {
         .mbe-btn.ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.2)}
         .mbe-btn.ghost:hover{background:rgba(255,255,255,.05);transform:scale(1.02)}
         
-        .mbe-media{position:relative;justify-self:end;width:min(100%,430px);border-radius:20px;overflow:hidden;aspect-ratio:4/3;min-height:0;max-height:380px;transition:transform 0.3s ease;box-shadow:0 24px 64px rgba(0,0,0,.4)}
+        .mbe-media{position:relative;justify-self:end;width:min(100%,390px);border-radius:20px;overflow:hidden;aspect-ratio:3/4;min-height:0;max-height:520px;transition:transform 0.3s ease;box-shadow:0 24px 64px rgba(0,0,0,.4)}
         .mbe-media:hover{transform:scale(1.02);}
         .mbe-media img{width:100%;height:100%;object-fit:cover;display:block}
         .mbe-float{position:absolute;top:20px;right:20px;padding:10px 16px;border-radius:100px;background:rgba(2,6,23,.65);border:0.5px solid rgba(255,255,255,.15);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#fff;font:600 12px/1 'Inter',sans-serif;letter-spacing:.04em;}
@@ -158,7 +158,7 @@ function DetailBoothExhibitionPage() {
         
         @media (max-width:1023px){
             .mbe-hero,.mbe-light,.mbe-process,.mbe-stats,.mbe-cta{padding:80px 6%}
-            .mbe-media{width:min(100%,380px);max-height:320px}
+            .mbe-media{width:min(100%,340px);max-height:440px}
             .mbe-stats-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important;}
             .mbe-stat{border-right:none !important;border-bottom:0.5px solid rgba(255,255,255,.08) !important;padding:32px 0;}
             .mbe-stat:nth-child(3),.mbe-stat:nth-child(4){border-bottom:none !important;}
@@ -167,7 +167,7 @@ function DetailBoothExhibitionPage() {
           .mbe-close{top:16px;right:16px;width:40px;height:40px}
           .mbe-hero{padding:100px 24px 60px}
           .mbe-grid{grid-template-columns:1fr;gap:40px;}
-          .mbe-media{order:-1;justify-self:stretch;width:100%;aspect-ratio:4/3;min-height:0;max-height:260px;box-shadow:0 16px 32px rgba(0,0,0,.4)}
+          .mbe-media{order:-1;justify-self:stretch;width:100%;aspect-ratio:3/4;min-height:0;max-height:360px;box-shadow:0 16px 32px rgba(0,0,0,.4)}
           .mbe-media img{height:100%}
           .mbe-features{flex-direction:row;gap:8px;}
           .mbe-light,.mbe-process,.mbe-stats,.mbe-cta{padding:64px 24px}

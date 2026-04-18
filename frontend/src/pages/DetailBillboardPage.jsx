@@ -117,7 +117,7 @@ function DetailBillboardPage() {
         .mbb-btn.sky:hover{background:#0077ec;transform:scale(1.02);box-shadow:0 6px 20px rgba(0,113,227,.4)}
         .mbb-btn.ghost{background:rgba(255,255,255,.74);color:#13457d;border-color:rgba(19,69,125,.2)}
         .mbb-btn.ghost:hover{background:#fff;transform:scale(1.02)}
-        .mbb-media{position:relative;justify-self:end;width:min(100%,440px);border-radius:24px;overflow:hidden;aspect-ratio:4/3;min-height:0;max-height:380px;box-shadow:0 24px 48px rgba(15,39,70,.22)}
+        .mbb-media{position:relative;justify-self:end;width:min(100%,390px);border-radius:24px;overflow:hidden;aspect-ratio:3/4;min-height:0;max-height:520px;box-shadow:0 24px 48px rgba(15,39,70,.22)}
         .mbb-media img{width:100%;height:100%;object-fit:cover;display:block}
         .mbb-float{position:absolute;top:20px;right:20px;padding:10px 16px;border-radius:100px;background:rgba(255,255,255,.86);border:1px solid rgba(21,69,125,.18);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);color:#104074;font:600 12px/1 'Inter',sans-serif;letter-spacing:.04em;box-shadow:0 8px 24px rgba(15,39,70,.16)}
         .mbb-marquee{height:52px;background:linear-gradient(90deg,#d9ebff 0%,#cbe2ff 50%,#deeeff 100%);border-top:1px solid rgba(21,69,125,.12);border-bottom:1px solid rgba(21,69,125,.12);overflow:hidden;display:flex;align-items:center}
@@ -161,7 +161,7 @@ function DetailBillboardPage() {
         @keyframes mbbMarquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
         @media (max-width:1023px){
             .mbb-hero,.mbb-light,.mbb-flow,.mbb-reach,.mbb-cta{padding:80px 6%}
-            .mbb-media{width:min(100%,380px);max-height:320px}
+            .mbb-media{width:min(100%,340px);max-height:440px}
             .mbb-reach-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
             .mbb-reach-card{border-right:none;border-bottom:1px solid #e7f0fb;padding:32px 0}
             .mbb-reach-card:nth-child(3),.mbb-reach-card:nth-child(4){border-bottom:none}
@@ -171,7 +171,7 @@ function DetailBillboardPage() {
           .mbb-close{top:16px;right:16px;width:40px;height:40px}
           .mbb-hero{padding:100px 24px 60px}
           .mbb-hero-grid{grid-template-columns:1fr;gap:40px}
-          .mbb-media{order:-1;justify-self:stretch;width:100%;aspect-ratio:4/3;min-height:0;max-height:260px;border-radius:20px}
+          .mbb-media{order:-1;justify-self:stretch;width:100%;aspect-ratio:3/4;min-height:0;max-height:360px;border-radius:20px}
           .mbb-media img{height:100%}
           .mbb-light,.mbb-flow,.mbb-reach,.mbb-cta{padding:64px 24px}
           .mbb-grid3{grid-template-columns:1fr;gap:16px}
