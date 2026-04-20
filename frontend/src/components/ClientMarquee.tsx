@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
-import { getWordPressClients, isWordPressConfiguredForPages } from "../data/wordpressPages";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { getCachedWordPressClients, getWordPressClients, isWordPressConfiguredForPages } from "../data/wordpressPages";
 
 type MarqueeClient = {
     id?: string | number;
@@ -11,229 +11,224 @@ type MarqueeClient = {
     logo?: string;
 };
 
-const fallbackClients: MarqueeClient[] = [
-    { initials: "ME", name: "Melsa", tagline: "Partner", color: "#1877F2", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/1.jpeg" },
-    { initials: "BB", name: "Bank BJB", tagline: "Partner", color: "#E4405F", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/2.jpeg" },
-    { initials: "TG", name: "Tegar", tagline: "Partner", color: "#0A66C2", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/3.jpeg" },
-    { initials: "PD", name: "Paricara Darma", tagline: "Partner", color: "#FF6B35", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/4.jpeg" },
-    { initials: "PR", name: "Prima", tagline: "Partner", color: "#16A34A", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/5.jpeg" },
-    { initials: "JS", name: "Jskye", tagline: "Partner", color: "#7C3AED", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/6.jpeg" },
-    { initials: "OH", name: "Omni Hospitals", tagline: "Partner", color: "#0EA5E9", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/7.jpeg" },
-    { initials: "HP", name: "Humpuss", tagline: "Partner", color: "#1D4ED8", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/8.jpeg" },
-    { initials: "PI", name: "Perbanas Institute", tagline: "Partner", color: "#DB2777", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/9.jpeg" },
-    { initials: "GP", name: "Garda Persada", tagline: "Partner", color: "#EA580C", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/10.jpeg" },
-    { initials: "NP", name: "Nipress", tagline: "Partner", color: "#2563EB", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/11.jpeg" },
-    { initials: "DK", name: "Dua Kelinci", tagline: "Partner", color: "#DC2626", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/12.jpeg" },
-    { initials: "TW", name: "TirtaWening", tagline: "Partner", color: "#0891B2", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/13.jpeg" },
-    { initials: "IB", name: "InfoBank", tagline: "Partner", color: "#BE123C", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/14.jpeg" },
-    { initials: "NK", name: "PT Nindya Karya", tagline: "Partner", color: "#0284C7", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/15.jpeg" },
-    { initials: "AS", name: "Alam Sutra", tagline: "Partner", color: "#14B8A6", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/16.jpeg" },
-    { initials: "KG", name: "Kalla Group", tagline: "Partner", color: "#0F766E", logo: "https://cms.trimitramulti.co.id/wp-content/uploads/2020/06/17.jpeg" },
-];
-
 type ClientMarqueeTheme = "light" | "dark";
 
 type ClientMarqueeProps = {
     theme?: ClientMarqueeTheme;
+    clients?: MarqueeClient[];
 };
 
-export default function ClientMarquee({ theme = "dark", clients: initialClients }: ClientMarqueeProps & { clients?: MarqueeClient[] }) {
-    const [clients, setClients] = useState<MarqueeClient[]>(initialClients?.length ? initialClients : fallbackClients);
+function duplicateForMarquee(items: MarqueeClient[]) {
+    if (items.length === 0) return [];
+    return [...items, ...items];
+}
+
+function ClientLogoSkeleton() {
+    return (
+        <article className="home-partnership-card" aria-hidden="true">
+            <div className="home-partnership-logo-wrap home-partnership-logo-wrap--placeholder" />
+            <div className="home-partnership-copy-block">
+                <h3 style={{ width: "78%", height: "12px", background: "rgba(16,43,68,0.12)", borderRadius: "999px", marginBottom: "6px" }} />
+                <p style={{ width: "52%", height: "10px", background: "rgba(16,43,68,0.1)", borderRadius: "999px" }} />
+            </div>
+        </article>
+    );
+}
+
+function ClientMarqueeCard({ client }: { client: MarqueeClient }) {
+    const displayName = client.name;
+    const displayTagline = client.tagline || "Partner";
+    const [logoError, setLogoError] = useState(false);
+    const shouldShowLogo = Boolean(client.logo) && !logoError;
+
+    return (
+        <article className="home-partnership-card home-partnership-marquee-item">
+            <div className="home-partnership-logo-wrap">
+                {shouldShowLogo ? (
+                    <img
+                        src={client.logo}
+                        alt={`Logo ${displayName}`}
+                        className="home-partnership-logo"
+                        loading="lazy"
+                        decoding="async"
+                        style={{ imageRendering: "auto" }}
+                        onError={() => setLogoError(true)}
+                    />
+                ) : (
+                    <div className="home-partnership-logo home-partnership-logo--placeholder">
+                        {client.initials || displayName.slice(0, 2).toUpperCase()}
+                    </div>
+                )}
+            </div>
+
+            <div className="home-partnership-copy-block">
+                <h3>{displayName}</h3>
+                <p>{displayTagline}</p>
+            </div>
+        </article>
+    );
+}
+
+export default function ClientMarquee({ theme = "light", clients: initialClients }: ClientMarqueeProps) {
+    const cachedClients = getCachedWordPressClients();
+    const [clients, setClients] = useState<MarqueeClient[]>(() => {
+        if (initialClients?.length) return initialClients;
+        if (cachedClients?.length) return cachedClients as MarqueeClient[];
+        return [];
+    });
+    const [status, setStatus] = useState<"loading" | "ready" | "empty" | "error">(() => {
+        if (initialClients?.length) return "ready";
+        if (cachedClients?.length) return "ready";
+        return "loading";
+    });
+    const clientRefreshInProgressRef = useRef(false);
 
     useEffect(() => {
         let cancelled = false;
 
-        async function loadWordPressClients() {
-            if (!isWordPressConfiguredForPages()) return;
+        async function loadWordPressClients({ forceFresh = false } = {}) {
+            if (!isWordPressConfiguredForPages()) {
+                if (!cancelled) {
+                    setStatus(initialClients?.length ? "ready" : "empty");
+                }
+                return;
+            }
 
-            const wpClients = await getWordPressClients({ perPage: 40 });
-            if (!cancelled && Array.isArray(wpClients) && wpClients.length > 0 && !initialClients?.length) {
-                setClients(wpClients as MarqueeClient[]);
+            if (clientRefreshInProgressRef.current) return;
+            clientRefreshInProgressRef.current = true;
+
+            try {
+                const wpClients = await getWordPressClients({ perPage: 100, skipCache: forceFresh });
+
+                if (cancelled) return;
+
+                if (Array.isArray(wpClients) && wpClients.length > 0) {
+                    setClients(wpClients as MarqueeClient[]);
+                    setStatus("ready");
+                    return;
+                }
+
+                loadWordPressClients({ forceFresh: false });
+                setStatus("empty");
+            } catch {
+                if (!cancelled) {
+                    setClients(initialClients?.length ? initialClients : []);
+                    setStatus(initialClients?.length ? "ready" : "error");
+                }
+            } finally {
+                clientRefreshInProgressRef.current = false;
             }
         }
 
-        loadWordPressClients().catch(() => {
-            // Keep static fallback clients if WordPress fetch fails.
-        });
+        loadWordPressClients({ forceFresh: false });
+
+        const onFocus = () => loadWordPressClients({ forceFresh: true });
+        const onVisibilityChange = () => {
+            if (document.visibilityState === "visible") {
+                loadWordPressClients({ forceFresh: true });
+            }
+        };
+
+        const intervalId = window.setInterval(() => {
+            if (document.visibilityState === "visible") {
+                loadWordPressClients({ forceFresh: true });
+            }
+        }, 20000);
+
+        window.addEventListener("focus", onFocus);
+        document.addEventListener("visibilitychange", onVisibilityChange);
 
         return () => {
             cancelled = true;
+            window.clearInterval(intervalId);
+            window.removeEventListener("focus", onFocus);
+            document.removeEventListener("visibilitychange", onVisibilityChange);
         };
-    }, []);
+    }, [initialClients]);
 
-    const topRowClients = useMemo(() => [...clients, ...clients, ...clients], [clients]);
-    const bottomRowClients = useMemo(() => [...clients].reverse(), [clients]);
-    const allBottomRowClients = useMemo(
-        () => [...bottomRowClients, ...bottomRowClients, ...bottomRowClients],
-        [bottomRowClients],
-    );
+    const displayClients = useMemo(() => clients.slice(0, 12), [clients]);
+    const midpoint = useMemo(() => Math.max(1, Math.ceil(displayClients.length / 2)), [displayClients.length]);
+    const rowOneClients = useMemo(() => duplicateForMarquee(displayClients.slice(0, midpoint)), [displayClients, midpoint]);
+    const rowTwoBaseClients = useMemo(() => {
+        const remainder = displayClients.slice(midpoint);
+        const source = remainder.length > 0 ? remainder : displayClients;
+        return [...source].reverse();
+    }, [displayClients, midpoint]);
+    const rowTwoClients = useMemo(() => duplicateForMarquee(rowTwoBaseClients), [rowTwoBaseClients]);
 
-    const isLight = theme === "light";
-    const cardBackground = isLight ? "rgba(255,255,255,0.78)" : "rgba(255,255,255,0.08)";
-    const cardBorder = isLight ? "1px solid rgba(133,182,219,0.62)" : "1px solid rgba(255,255,255,0.15)";
-    const titleColor = isLight ? "#163855" : "white";
-    const taglineColor = isLight ? "rgba(34,74,107,0.75)" : "rgba(255,255,255,0.55)";
-
-    return (
-        <>
-            <style>{`
-        @keyframes marquee-scroll-left {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-33.333%); }
-        }
-        @keyframes marquee-scroll-right {
-          0% { transform: translateX(-33.333%); }
-          100% { transform: translateX(0); }
-        }
-        .marquee-root {
-          display: grid;
-          gap: 12px;
-          overflow: hidden;
-        }
-        .marquee-row {
-          overflow: hidden;
-          -webkit-mask-image: linear-gradient(to right, transparent, black 100px, black calc(100% - 100px), transparent);
-          mask-image: linear-gradient(to right, transparent, black 100px, black calc(100% - 100px), transparent);
-        }
-        .marquee-track {
-          display: flex;
-          width: max-content;
-          will-change: transform;
-        }
-        .marquee-track-left {
-                    animation: marquee-scroll-left 62s linear infinite;
-        }
-        .marquee-track-right {
-                    animation: marquee-scroll-right 68s linear infinite;
-        }
-        .marquee-root:hover .marquee-track {
-          animation-play-state: paused;
-        }
-      `}</style>
-
-            <div className="marquee-root" aria-label="Daftar partner layanan Trimitra dua baris">
-                <div className="marquee-row">
-                    <div className="marquee-track marquee-track-left">
-                        {topRowClients.map((client, i) => (
-                            <div
-                                key={`top-${i}`}
-                                style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "12px",
-                                    background: cardBackground,
-                                    backdropFilter: "blur(8px)",
-                                    border: cardBorder,
-                                    borderRadius: "14px",
-                                    padding: "12px 20px",
-                                    marginRight: "16px",
-                                    minWidth: "220px",
-                                    maxWidth: "220px",
-                                    flexShrink: 0,
-                                }}
-                            >
-                                <div
-                                    style={{
-                                        width: "40px",
-                                        height: "40px",
-                                        borderRadius: "10px",
-                                        background: client.color,
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        fontWeight: "700",
-                                        fontSize: "13px",
-                                        color: "white",
-                                        flexShrink: 0,
-                                        overflow: "hidden",
-                                    }}
-                                >
-                                    {client.logo ? (
-                                        <img
-                                            src={client.logo}
-                                            alt={client.name}
-                                            style={{ width: "100%", height: "100%", objectFit: "contain", borderRadius: "10px", background: "#fff" }}
-                                            loading="lazy"
-                                            decoding="async"
-                                        />
-                                    ) : (
-                                        client.initials
-                                    )}
-                                </div>
-                                <div style={{ overflow: "hidden" }}>
-                                    <p style={{ fontWeight: "600", fontSize: "13px", color: titleColor, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                                        {client.name}
-                                    </p>
-                                    <p style={{ fontSize: "11px", color: taglineColor, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                                        {client.tagline}
-                                    </p>
-                                </div>
+    if (status === "loading" && displayClients.length === 0) {
+        return (
+            <div className="home-partnership-marquee-viewport" aria-label="Memuat daftar partner">
+                <div className="home-partnership-marquee-row home-partnership-marquee-row--left">
+                    <div className="home-partnership-marquee-track">
+                        {Array.from({ length: 6 }, (_, index) => (
+                            <div key={`client-skeleton-top-${index}`} className="home-partnership-marquee-item">
+                                <ClientLogoSkeleton />
+                            </div>
+                        ))}
+                        {Array.from({ length: 6 }, (_, index) => (
+                            <div key={`client-skeleton-top-repeat-${index}`} className="home-partnership-marquee-item">
+                                <ClientLogoSkeleton />
                             </div>
                         ))}
                     </div>
                 </div>
-
-                <div className="marquee-row">
-                    <div className="marquee-track marquee-track-right">
-                        {allBottomRowClients.map((client, i) => (
-                            <div
-                                key={`bottom-${i}`}
-                                style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "12px",
-                                    background: cardBackground,
-                                    backdropFilter: "blur(8px)",
-                                    border: cardBorder,
-                                    borderRadius: "14px",
-                                    padding: "12px 20px",
-                                    marginRight: "16px",
-                                    minWidth: "220px",
-                                    maxWidth: "220px",
-                                    flexShrink: 0,
-                                }}
-                            >
-                                <div
-                                    style={{
-                                        width: "40px",
-                                        height: "40px",
-                                        borderRadius: "10px",
-                                        background: client.color,
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        fontWeight: "700",
-                                        fontSize: "13px",
-                                        color: "white",
-                                        flexShrink: 0,
-                                        overflow: "hidden",
-                                    }}
-                                >
-                                    {client.logo ? (
-                                        <img
-                                            src={client.logo}
-                                            alt={client.name}
-                                            style={{ width: "100%", height: "100%", objectFit: "contain", borderRadius: "10px", background: "#fff" }}
-                                            loading="lazy"
-                                            decoding="async"
-                                        />
-                                    ) : (
-                                        client.initials
-                                    )}
-                                </div>
-                                <div style={{ overflow: "hidden" }}>
-                                    <p style={{ fontWeight: "600", fontSize: "13px", color: titleColor, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                                        {client.name}
-                                    </p>
-                                    <p style={{ fontSize: "11px", color: taglineColor, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                                        {client.tagline}
-                                    </p>
-                                </div>
+                <div className="home-partnership-marquee-row home-partnership-marquee-row--right">
+                    <div className="home-partnership-marquee-track">
+                        {Array.from({ length: 6 }, (_, index) => (
+                            <div key={`client-skeleton-bottom-${index}`} className="home-partnership-marquee-item">
+                                <ClientLogoSkeleton />
+                            </div>
+                        ))}
+                        {Array.from({ length: 6 }, (_, index) => (
+                            <div key={`client-skeleton-bottom-repeat-${index}`} className="home-partnership-marquee-item">
+                                <ClientLogoSkeleton />
                             </div>
                         ))}
                     </div>
                 </div>
             </div>
-        </>
+        );
+    }
+
+    if ((status === "empty" || status === "error") && displayClients.length === 0) {
+        return (
+            <div className="home-partnership-grid" aria-label="Daftar partner belum tersedia">
+                <article className="home-partnership-card" style={{ gridColumn: "1 / -1", minHeight: "unset" }}>
+                    <div className="home-partnership-copy-block">
+                        <h3>{status === "error" ? "Partner belum bisa dimuat" : "Belum ada partner yang tampil"}</h3>
+                        <p>
+                            {status === "error"
+                                ? "Coba muat ulang halaman setelah data WordPress tersedia."
+                                : "Silakan isi post type client di WordPress agar logo partner tampil di sini."}
+                        </p>
+                    </div>
+                </article>
+            </div>
+        );
+    }
+
+    return (
+        <div className="home-partnership-marquee-viewport" aria-label="Daftar partner layanan Trimitra">
+            <div className="home-partnership-marquee-row home-partnership-marquee-row--left">
+                <div className="home-partnership-marquee-track">
+                    {rowOneClients.map((client, index) => (
+                        <div key={`row-one-${client.id || client.name}-${index}`} className="home-partnership-marquee-item">
+                            <ClientMarqueeCard client={client} isLight={theme === "light"} />
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <div className="home-partnership-marquee-row home-partnership-marquee-row--right">
+                <div className="home-partnership-marquee-track">
+                    {rowTwoClients.map((client, index) => (
+                        <div key={`row-two-${client.id || client.name}-${index}`} className="home-partnership-marquee-item">
+                            <ClientMarqueeCard client={client} isLight={theme === "light"} />
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
     );
 }

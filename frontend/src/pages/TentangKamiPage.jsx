@@ -31,7 +31,7 @@ const STORY_METRICS = [
   { value: 120, suffix: '+', label: 'Brand & Klien' },
 ]
 
-const ABOUT_SERVICE_PILLARS = ['Booth Pameran', 'Event Organizer', 'Media Outdoor', 'Interior Komersial']
+const ABOUT_SERVICE_PILLARS = ['Booth Pameran', 'Event Organizer', 'Advertising']
 
 const ABOUT_HERO_MILESTONES = [
   { year: '2017', title: 'Trimitra Berdiri' },
@@ -77,7 +77,7 @@ function AboutIdentityBand() {
         <p className="kicker">Apa Itu Trimitra?</p>
         <h2 className="about-identity-title">PT Trimitra Multi Kreasi</h2>
         <p className="about-identity-summary">
-          Kami adalah perusahaan jasa booth pameran, event organizer, dan media outdoor yang membantu brand tampil lebih menonjol
+          Kami adalah perusahaan jasa booth pameran, event organizer, dan advertising yang membantu brand tampil lebih menonjol
           dengan desain, produksi, dan eksekusi lapangan yang terintegrasi sejak 2017.
         </p>
 

@@ -101,7 +101,7 @@ function SyaratLayananPage() {
           <p className="muted" style={{ margin: 0, lineHeight: 1.75 }}>
             Pertanyaan mengenai syarat layanan dapat disampaikan ke PT Trimitra
             Multi Kreasi melalui email <a href="mailto:dhr@trimitramulti.co.id">dhr@trimitramulti.co.id</a>
-            {' '}atau telepon <a href="tel:+62217894561">+62 21 789 4561</a>.
+            {' '}atau telepon <a href="tel:+62811109842">0811109842</a>.
           </p>
         </article>
       </div>

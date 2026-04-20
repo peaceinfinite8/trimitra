@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import LazyImage from '../components/ui/LazyImage'
 import {
-  getWordPressGalleryMedia,
+  getWordPressGalleryFromPageId,
   getWordPressGalleryFromPageBySlugs,
   isWordPressConfiguredForPages,
 } from '../data/wordpressPages'
@@ -22,6 +22,35 @@ const queryToFilter = Object.fromEntries(
 
 const ITEMS_PER_PAGE = 18
 const MAX_PAGINATION_NUMBERS = 10
+const WORDPRESS_GALLERY_PAGE_ID = 605
+const GALLERY_SNAPSHOT_KEY = 'galeri:wp-gallery:v1'
+
+function readGallerySnapshot() {
+  if (typeof window === 'undefined') return null
+
+  try {
+    const raw = window.sessionStorage.getItem(GALLERY_SNAPSHOT_KEY)
+    if (!raw) return null
+
+    const parsed = JSON.parse(raw)
+    if (Array.isArray(parsed) && parsed.length > 0) return parsed
+  } catch {
+    return null
+  }
+
+  return null
+}
+
+function writeGallerySnapshot(items) {
+  if (typeof window === 'undefined') return
+  if (!Array.isArray(items) || items.length === 0) return
+
+  try {
+    window.sessionStorage.setItem(GALLERY_SNAPSHOT_KEY, JSON.stringify(items))
+  } catch {
+    // Ignore quota/session errors.
+  }
+}
 
 const curationContainerVariants = {
   hidden: {},
@@ -55,32 +84,7 @@ function CategoryGridIcon() {
   )
 }
 
-function extractUploadYearMonth(src = '') {
-  const match = String(src).match(/\/uploads\/(20\d{2})\/(\d{2})\//)
-  if (!match) return 0
-  return Number(`${match[1]}${match[2]}`)
-}
 
-function getDatasetRecencyScore(items = []) {
-  return items.reduce((latest, item) => {
-    return Math.max(latest, extractUploadYearMonth(item?.src || ''))
-  }, 0)
-}
-
-function chooseGalleryDataset(pageMedia = [], libraryMedia = []) {
-  if (pageMedia.length === 0) return libraryMedia
-  if (libraryMedia.length === 0) return pageMedia
-
-  const pageRecency = getDatasetRecencyScore(pageMedia)
-  const libraryRecency = getDatasetRecencyScore(libraryMedia)
-
-  // Prefer the newer source when page-level attachments are stale.
-  if (libraryRecency > pageRecency) {
-    return libraryMedia
-  }
-
-  return pageMedia
-}
 
 function buildPageItems(currentPage, totalPages) {
   if (totalPages <= MAX_PAGINATION_NUMBERS) {
@@ -127,9 +131,14 @@ function GaleriPage() {
   const prefersReducedMotion = useReducedMotion()
   const [searchParams, setSearchParams] = useSearchParams()
   const [activeIndex, setActiveIndex] = useState(null)
-  const [galleryItems, setGalleryItems] = useState([])
-  const [isLoadingWp, setIsLoadingWp] = useState(isWordPressConfiguredForPages())
+  const didMountRef = useRef(false)
+  const initialGallerySnapshot = useRef(readGallerySnapshot())
+  const [galleryItems, setGalleryItems] = useState(() => initialGallerySnapshot.current || [])
+  const [isLoadingWp, setIsLoadingWp] = useState(
+    () => isWordPressConfiguredForPages() && !(initialGallerySnapshot.current?.length > 0),
+  )
   const prefetchedImagesRef = useRef(new Set())
+  const galleryRefreshInProgressRef = useRef(false)
 
   const activeFilter =
     queryToFilter[searchParams.get('kategori') ?? 'semua'] ?? 'Semua'
@@ -138,36 +147,80 @@ function GaleriPage() {
   const currentPage = Number.isFinite(rawPage) && rawPage > 0 ? Math.floor(rawPage) : 1
 
   useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true
+      return
+    }
+
+    document.querySelector('#gallery-section')?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    })
+  }, [currentPage])
+
+  useEffect(() => {
     let cancelled = false
 
-    async function loadGalleryFromWordPress() {
+    async function loadGalleryFromWordPress({ forceFresh = false, initialLoad = false } = {}) {
       if (!isWordPressConfiguredForPages()) {
-        if (!cancelled) setIsLoadingWp(false)
+        if (!cancelled && initialLoad) setIsLoadingWp(false)
         return
       }
+
+      if (galleryRefreshInProgressRef.current) return
+      galleryRefreshInProgressRef.current = true
+
       try {
-        const [pageMedia, libraryMedia] = await Promise.all([
-          getWordPressGalleryFromPageBySlugs(['galeri', 'gallery']),
-          getWordPressGalleryMedia({ perPage: 100, allPages: true }),
-        ])
+        let pageMedia = await getWordPressGalleryFromPageId(WORDPRESS_GALLERY_PAGE_ID, {
+          skipCache: forceFresh,
+        })
+        if (!Array.isArray(pageMedia) || pageMedia.length === 0) {
+          pageMedia = await getWordPressGalleryFromPageBySlugs(['galeri', 'gallery'], {
+            skipCache: forceFresh,
+          })
+        }
 
         if (!cancelled) {
-          setGalleryItems(chooseGalleryDataset(pageMedia, libraryMedia))
+          setGalleryItems(pageMedia)
+          if (Array.isArray(pageMedia) && pageMedia.length > 0) {
+            writeGallerySnapshot(pageMedia)
+          }
         }
       } catch {
         if (!cancelled) {
           setGalleryItems([])
         }
       } finally {
+        galleryRefreshInProgressRef.current = false
         if (!cancelled) {
           setIsLoadingWp(false)
         }
       }
     }
 
-    loadGalleryFromWordPress()
+    loadGalleryFromWordPress({ initialLoad: true, forceFresh: false })
+
+    const onFocus = () => loadGalleryFromWordPress({ forceFresh: true })
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadGalleryFromWordPress({ forceFresh: true })
+      }
+    }
+
+    const intervalId = window.setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        loadGalleryFromWordPress({ forceFresh: true })
+      }
+    }, 20000)
+
+    window.addEventListener('focus', onFocus)
+    document.addEventListener('visibilitychange', onVisibilityChange)
+
     return () => {
       cancelled = true
+      window.clearInterval(intervalId)
+      window.removeEventListener('focus', onFocus)
+      document.removeEventListener('visibilitychange', onVisibilityChange)
     }
   }, [])
 
@@ -364,7 +417,7 @@ function GaleriPage() {
                 </button>
               ) : (
                 <div className="gallery-hero-feature-empty" role="status" aria-live="polite">
-                  <p>Belum ada foto dari GALERI WordPress.</p>
+                  <p>Foto Sedang Loading.</p>
                 </div>
               )}
             </motion.article>
@@ -519,7 +572,7 @@ function GaleriPage() {
         </div>
       </section>
 
-      <section className="gallery-grid-section" id="galeri-grid">
+      <section className="gallery-grid-section" id="gallery-section" style={{ scrollMarginTop: '96px' }}>
         <div className="container gallery-grid-head">
           <p className="gallery-grid-head-kicker">Curated Works</p>
           <h2>Eksplorasi Visual Pilihan</h2>
@@ -529,7 +582,7 @@ function GaleriPage() {
           </p>
         </div>
 
-        {isLoadingWp ? (
+        {isLoadingWp && visibleGallery.length === 0 ? (
           <div className="container gallery-grid" aria-label="Memuat galeri">
             {Array.from({ length: ITEMS_PER_PAGE }, (_, index) => (
               <article
@@ -581,8 +634,11 @@ function GaleriPage() {
                   >
                     <LazyImage
                       src={item.src}
+                      fallbackSrc={item.fullSrc || item.src}
                       alt={item.alt || `Gallery ${idx + 1}`}
                       className="gallery-image"
+                      loading={idx < 6 ? 'eager' : 'lazy'}
+                      fetchPriority={idx < 3 ? 'high' : 'auto'}
                     />
                     <span className="gallery-card-overlay" aria-hidden="true">
                       <span className="gallery-card-title">{item.alt || `Karya ${pageStart + idx + 1}`}</span>
@@ -696,7 +752,7 @@ function GaleriPage() {
 
           <figure className="gallery-lightbox-figure" onClick={(event) => event.stopPropagation()}>
             <img
-              src={pagedGallery[activeIndex].src}
+              src={pagedGallery[activeIndex].fullSrc || pagedGallery[activeIndex].src}
               alt={`Gallery ${activeIndex + 1}`}
               className="gallery-lightbox-image"
             />

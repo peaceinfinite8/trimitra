@@ -244,3 +244,52 @@ export function prefetchBlogPostBySlugFromWordPress(slug) {
     // Ignore prefetch errors; navigation should still work with normal fetch.
   })
 }
+
+export async function getFeaturedPostsForPortfolio({
+  perPage = 3,
+  skipCache = false,
+  staleWhileRevalidate = true,
+  ttlMs = WP_CACHE_TTL_MS,
+} = {}) {
+  if (!isWordPressConfigured()) return []
+
+  const fetchOptions = {
+    skipCache,
+    staleWhileRevalidate,
+    ttlMs,
+  }
+
+  const clampedPerPage = Math.min(100, Math.max(1, perPage))
+
+  const result = await fetchWp('posts', {
+    per_page: String(clampedPerPage),
+    page: '1',
+    status: 'publish',
+    orderby: 'date',
+    order: 'desc',
+    _embed: '1',
+    _fields: 'id,slug,title.rendered,excerpt.rendered,date,link,categories,_embedded',
+  }, fetchOptions)
+
+  const posts = Array.isArray(result.data) ? result.data : []
+  if (!Array.isArray(posts) || posts.length === 0) return []
+
+  return posts.map((post) => {
+    const featuredMedia = post._embedded?.['wp:featuredmedia']?.[0]
+    // Use default portfolio image if post has no featured image set in WordPress
+    const featuredImageUrl = featuredMedia?.source_url || '/images/billboard-pasti-alam-sutera.jpg'
+    const categoryTerms = post._embedded?.['wp:term']?.[0] || []
+    const categoryName = categoryTerms.length > 0 ? stripHtml(categoryTerms[0].name) : 'Proyek'
+
+    return {
+      id: post.id,
+      slug: post.slug,
+      title: stripHtml(post.title?.rendered || ''),
+      excerpt: stripHtml(post.excerpt?.rendered || ''),
+      date: post.date || '',
+      link: post.link || '',
+      image: featuredImageUrl,
+      category: categoryName,
+    }
+  })
+}

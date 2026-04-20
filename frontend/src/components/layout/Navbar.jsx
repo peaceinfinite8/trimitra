@@ -138,6 +138,13 @@ function Navbar() {
               className={({ isActive }) =>
                 isActive ? 'mobile-nav-link nav-link-active' : 'mobile-nav-link'
               }
+              style={({ isActive }) => ({
+                borderLeft: isActive ? '3px solid #0ea5e9' : 'none',
+                paddingLeft: isActive ? '12px' : '15px',
+                color: isActive ? '#0ea5e9' : 'inherit',
+                fontWeight: isActive ? 600 : 400,
+                transition: 'all 0.2s ease',
+              })}
             >
               {item.label}
             </NavLink>

@@ -5,14 +5,36 @@ const RAW_WP_SITE_URL = (import.meta.env.VITE_WP_SITE_URL || '').trim().replace(
 const WP_SITE_URL = (RAW_WP_SITE_URL || DEFAULT_WP_SITE_URL)
   .replace(/^https?:\/\/trimitramulti\.co\.id\/?$/i, DEFAULT_WP_SITE_URL)
   .replace(/\/$/, '')
-const DEFAULT_WP_CLIENTS_ENDPOINT = `${DEFAULT_WP_SITE_URL}/wp-json/wp/v2/client`
-const RAW_WP_CLIENTS_ENDPOINT = (import.meta.env.VITE_WP_CLIENTS_ENDPOINT || '').trim()
-const WP_CLIENTS_ENDPOINT = RAW_WP_CLIENTS_ENDPOINT || DEFAULT_WP_CLIENTS_ENDPOINT
 const WP_CACHE_TTL_MS = 5 * 60 * 1000
 const WP_CACHE_VERSION = 'v2'
 const WP_FETCH_TIMEOUT_MS = 6500
+const DEV_WP_PROXY_PREFIX = '/__wp_proxy__'
+
+let cachedClients = null
 
 const hasWindow = typeof window !== 'undefined'
+const isLocalhostRuntime = hasWindow && ['localhost', '127.0.0.1'].includes(window.location.hostname)
+
+function toRuntimeWpUrl(rawUrl) {
+  if (!rawUrl) return rawUrl
+
+  if (!isLocalhostRuntime) {
+    return rawUrl
+  }
+
+  try {
+    const wpOrigin = new URL(WP_SITE_URL).origin
+    const resolved = new URL(rawUrl, WP_SITE_URL)
+
+    if (resolved.origin !== wpOrigin) {
+      return rawUrl
+    }
+
+    return `${DEV_WP_PROXY_PREFIX}${resolved.pathname}${resolved.search}`
+  } catch {
+    return rawUrl
+  }
+}
 
 function normalizeWpAssetUrl(value) {
   if (!value || typeof value !== 'string') return ''
@@ -70,14 +92,124 @@ function isImageUrl(value) {
   return /\.(avif|webp|png|jpe?g|gif|bmp|svg)(\?.*)?$/i.test(value)
 }
 
+function getTimestampFromUrlPath(url) {
+  if (!url || typeof url !== 'string') return 0
+
+  const withDayMatch = url.match(/(\d{4})-(\d{2})-(\d{2})/)
+  if (withDayMatch) {
+    const year = Number(withDayMatch[1])
+    const month = Number(withDayMatch[2])
+    const day = Number(withDayMatch[3])
+    if (year >= 2000 && month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+      return Date.UTC(year, month - 1, day)
+    }
+  }
+
+  const uploadFolderMatch = url.match(/\/uploads\/(\d{4})\/(\d{2})\//)
+  if (uploadFolderMatch) {
+    const year = Number(uploadFolderMatch[1])
+    const month = Number(uploadFolderMatch[2])
+    if (year >= 2000 && month >= 1 && month <= 12) {
+      return Date.UTC(year, month - 1, 1)
+    }
+  }
+
+  return 0
+}
+
+function getGallerySortValue(item) {
+  const urlTimestamp = Math.max(
+    getTimestampFromUrlPath(item?.fullSrc),
+    getTimestampFromUrlPath(item?.src),
+  )
+
+  if (urlTimestamp > 0) return urlTimestamp
+
+  const numericId = Number(item?.id)
+  return Number.isFinite(numericId) ? numericId : 0
+}
+
+function pickPreferredSrcFromSrcSet(srcset, fallbackSrc = '') {
+  if (!srcset || typeof srcset !== 'string') return fallbackSrc
+
+  const candidates = srcset
+    .split(',')
+    .map((entry) => entry.trim())
+    .map((entry) => {
+      const parts = entry.split(/\s+/).filter(Boolean)
+      if (parts.length === 0) return null
+      const url = parts[0]
+      const descriptor = parts[1] || ''
+      const width = descriptor.endsWith('w') ? Number(descriptor.slice(0, -1)) : NaN
+
+      return {
+        url,
+        width: Number.isFinite(width) ? width : undefined,
+      }
+    })
+    .filter((item) => item && item.url)
+
+  if (candidates.length === 0) return fallbackSrc
+
+  const sized = candidates.filter((item) => Number.isFinite(item.width))
+  if (sized.length === 0) return candidates[0].url || fallbackSrc
+
+  const targetWidth = 1024
+  const closest = sized.reduce((best, current) => {
+    const currentDistance = Math.abs((current.width || targetWidth) - targetWidth)
+    const bestDistance = Math.abs((best.width || targetWidth) - targetWidth)
+    return currentDistance < bestDistance ? current : best
+  }, sized[0])
+
+  return closest?.url || fallbackSrc
+}
+
 function extractGalleryImagesFromHtml(html) {
   if (!html || !hasWindow) return []
 
   const parser = new window.DOMParser()
   const doc = parser.parseFromString(html, 'text/html')
-  const nodes = Array.from(doc.querySelectorAll('img, a[href]'))
+  const galleryItems = Array.from(doc.querySelectorAll('dl.gallery-item'))
+  const fromGalleryItems = galleryItems
+    .map((item) => {
+      const img = item.querySelector('img')
+      const anchor = item.querySelector('a[href]')
+      const caption = decodeHtml(item.querySelector('.gallery-caption')?.textContent || '')
+        .replace(/\s+/g, ' ')
+        .trim()
 
-  const items = nodes
+      const thumbSrc = img
+        ? (img.getAttribute('src') || img.getAttribute('data-src') || img.getAttribute('data-lazy-src') || '')
+        : ''
+      const srcSet = img ? (img.getAttribute('srcset') || '') : ''
+      const previewSrc = pickPreferredSrcFromSrcSet(srcSet, thumbSrc)
+      let fullSrc = ''
+      if (anchor) {
+        const href = anchor.getAttribute('href') || ''
+        if (isImageUrl(href)) {
+          fullSrc = href
+        }
+      }
+      const src = previewSrc || thumbSrc || fullSrc
+      if (!src || !src.includes('/uploads/')) return null
+
+      const altFromImage = decodeHtml(img?.getAttribute('alt') || '').replace(/\s+/g, ' ').trim()
+      const width = Number(img?.getAttribute('width') || '0') || undefined
+      const height = Number(img?.getAttribute('height') || '0') || undefined
+
+      return {
+        src,
+        fullSrc: fullSrc || src,
+        alt: caption || altFromImage,
+        caption,
+        width,
+        height,
+      }
+    })
+    .filter(Boolean)
+
+  const nodes = Array.from(doc.querySelectorAll('img, a[href]'))
+  const fromGenericNodes = nodes
     .map((node) => {
       if (node.tagName === 'A') {
         const href = node.getAttribute('href') || ''
@@ -88,11 +220,14 @@ function extractGalleryImagesFromHtml(html) {
           ? {
             src: href,
             alt,
+            caption: '',
           }
           : null
       }
 
       const src = node.getAttribute('src') || node.getAttribute('data-src') || node.getAttribute('data-lazy-src') || ''
+      const srcSet = node.getAttribute('srcset') || ''
+      const previewSrc = pickPreferredSrcFromSrcSet(srcSet, src)
       if (!src || !src.includes('/uploads/')) return null
 
       const alt = decodeHtml(node.getAttribute('alt') || '').replace(/\s+/g, ' ').trim()
@@ -100,18 +235,23 @@ function extractGalleryImagesFromHtml(html) {
       const height = Number(node.getAttribute('height') || '0') || undefined
 
       return {
-        src,
+        src: previewSrc || src,
+        fullSrc: src,
         alt,
+        caption: '',
         width,
         height,
       }
     })
     .filter(Boolean)
 
+  const items = fromGalleryItems.length > 0 ? fromGalleryItems : fromGenericNodes
+
   const seen = new Set()
   return items.filter((item) => {
-    if (seen.has(item.src)) return false
-    seen.add(item.src)
+    const identity = item.fullSrc || item.src
+    if (seen.has(identity)) return false
+    seen.add(identity)
     return true
   })
 }
@@ -182,18 +322,6 @@ function firstTextMatch(candidates, matcher) {
   return ''
 }
 
-function fetchMediaBySearchTerm(term, perPage) {
-  return fetchWp('media', {
-    media_type: 'image',
-    search: term,
-    per_page: String(perPage),
-    page: '1',
-    orderby: 'date',
-    order: 'desc',
-    _fields: 'id,source_url,alt_text,title.rendered,caption.rendered,media_details.width,media_details.height',
-  })
-}
-
 export function extractContactInfoFromHtml(html) {
   const fallback = {
     address: '',
@@ -252,17 +380,20 @@ export function extractContactInfoFromHtml(html) {
   }
 }
 
-async function fetchWp(endpoint, params = {}) {
+async function fetchWp(endpoint, params = {}, options = {}) {
   const query = new URLSearchParams(params).toString()
   const url = `${WP_SITE_URL}/wp-json/wp/v2/${endpoint}${query ? `?${query}` : ''}`
+  const requestUrl = toRuntimeWpUrl(url)
 
-  return withCache(`wp:${WP_CACHE_VERSION}:${url}`, WP_CACHE_TTL_MS, async () => {
+  const { skipCache = false } = options
+
+  const fetchFn = async () => {
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), WP_FETCH_TIMEOUT_MS)
 
     let response
     try {
-      response = await fetch(url, {
+      response = await fetch(requestUrl, {
         signal: controller.signal,
         cache: 'no-store',
         credentials: 'omit',
@@ -278,17 +409,26 @@ async function fetchWp(endpoint, params = {}) {
     const data = await response.json()
     const totalPages = Number(response.headers.get('X-WP-TotalPages') || '1')
     return { data, totalPages }
-  }, { staleWhileRevalidate: false })
+  }
+
+  // If skipCache is true, fetch directly without caching
+  if (skipCache) {
+    return fetchFn()
+  }
+
+  // Otherwise use cache as before
+  return withCache(`wp:${WP_CACHE_VERSION}:${url}`, WP_CACHE_TTL_MS, fetchFn, { staleWhileRevalidate: false })
 }
 
 async function fetchWpAbsolute(url) {
+  const requestUrl = toRuntimeWpUrl(url)
   return withCache(`wp:${WP_CACHE_VERSION}:${url}`, WP_CACHE_TTL_MS, async () => {
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), WP_FETCH_TIMEOUT_MS)
 
     let response
     try {
-      response = await fetch(url, {
+      response = await fetch(requestUrl, {
         signal: controller.signal,
         cache: 'no-store',
         credentials: 'omit',
@@ -306,12 +446,13 @@ async function fetchWpAbsolute(url) {
 }
 
 async function fetchWpAbsoluteNoStore(url) {
+  const requestUrl = toRuntimeWpUrl(url)
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), WP_FETCH_TIMEOUT_MS)
 
   let response
   try {
-    response = await fetch(url, {
+    response = await fetch(requestUrl, {
       signal: controller.signal,
       cache: 'no-store',
       credentials: 'omit',
@@ -330,15 +471,27 @@ async function fetchWpAbsoluteNoStore(url) {
 async function getMediaSourceById(mediaId) {
   if (!mediaId) return ''
   const result = await fetchWp(`media/${mediaId}`, {
-    _fields: 'id,source_url',
+    _fields: 'id,source_url,media_details.sizes.thumbnail.source_url,media_details.sizes.medium.source_url,media_details.sizes.medium_large.source_url',
   })
 
   const media = result?.data
   if (media && typeof media === 'object' && media.source_url) {
-    return normalizeWpAssetUrl(media.source_url)
+    return normalizeWpAssetUrl(pickSmallImageSource(media))
   }
 
   return ''
+}
+
+function pickSmallImageSource(media) {
+  const thumbnail = media?.media_details?.sizes?.thumbnail?.source_url
+  const medium = media?.media_details?.sizes?.medium?.source_url
+  const mediumLarge = media?.media_details?.sizes?.medium_large?.source_url
+  const sourceUrl = thumbnail || medium || mediumLarge || media?.source_url || ''
+
+  if (!sourceUrl) return ''
+  if (/([?&])w=\d+/i.test(sourceUrl)) return sourceUrl
+
+  return `${sourceUrl}${sourceUrl.includes('?') ? '&' : '?'}w=100`
 }
 
 export function isWordPressConfiguredForPages() {
@@ -386,232 +539,89 @@ export async function getWordPressPageBySlugs(slugs = []) {
   return null
 }
 
-export async function getWordPressClients({ perPage = 40 } = {}) {
+export async function getWordPressClients({ perPage = 40, skipCache = false } = {}) {
   if (!isWordPressConfiguredForPages()) return []
 
+  if (!skipCache && Array.isArray(cachedClients) && cachedClients.length > 0) {
+    return cachedClients
+  }
+
   const palette = ['#1877F2', '#E4405F', '#0A66C2', '#FF6B35', '#16A34A', '#7C3AED', '#0EA5E9']
-  const endpoints = ['client', 'clients']
+  const fetchOptions = skipCache ? { skipCache: true } : {}
 
-  if (WP_CLIENTS_ENDPOINT) {
-    try {
-      const customUrl = WP_CLIENTS_ENDPOINT.startsWith('http')
-        ? WP_CLIENTS_ENDPOINT
-        : `${WP_SITE_URL}${WP_CLIENTS_ENDPOINT.startsWith('/') ? '' : '/'}${WP_CLIENTS_ENDPOINT}`
+  async function mapClientItems(records) {
+    const mapped = await Promise.all(
+      records.map(async (item, index) => {
+        const name = stripHtml(item?.title?.rendered || item?.title || item?.name || '') || `Client ${index + 1}`
+        const label = 'Partner'
 
-      const response = await fetchWpAbsoluteNoStore(customUrl)
-      const records = Array.isArray(response)
-        ? response
-        : Array.isArray(response?.data)
-          ? response.data
-          : []
-
-      const mappedCustom = await Promise.all(records.map(async (item, index) => {
-        const name = stripHtml(
-          item?.name ||
-          item?.title ||
-          item?.title?.rendered ||
-          item?.post_title ||
-          '',
-        ) || `Client ${index + 1}`
-
-        const tagline = stripHtml(
-          item?.tagline ||
-          item?.excerpt ||
-          item?.excerpt?.rendered ||
-          item?.description ||
-          item?.content ||
-          item?.content?.rendered ||
-          '',
-        ) || 'Partner layanan Trimitra'
-
-        let logo =
-          item?.logo ||
-          item?.image ||
-          item?.source_url ||
-          item?.featured_image ||
-          item?.featured_media_url ||
-          item?.acf?.logo ||
-          item?.acf?.client_logo ||
-          item?.acf?.image ||
-          ''
-
-        if (logo && typeof logo === 'object') {
-          logo =
-            logo?.source_url ||
-            logo?.url ||
-            logo?.guid?.rendered ||
-            ''
-        }
-
-        const embedded = item?._embedded?.['wp:featuredmedia']
-        if ((!logo || typeof logo !== 'string') && Array.isArray(embedded) && embedded[0]?.source_url) {
-          logo = embedded[0].source_url
-        }
-
-        if ((!logo || typeof logo !== 'string') && item?.featured_media) {
+        let logo = ''
+        const embeddedMedia = item?._embedded?.['wp:featuredmedia']
+        if (Array.isArray(embeddedMedia) && embeddedMedia[0]) {
+          logo = pickSmallImageSource(embeddedMedia[0])
+        } else if (item?.featured_media) {
           logo = await getMediaSourceById(item.featured_media)
         }
 
         return {
-          id: item?.id || `custom-${index}`,
+          id: item?.id || `client-${index}`,
           initials: getInitialsFromName(name),
           name,
-          tagline,
+          tagline: label || 'Partner',
           color: palette[index % palette.length],
           logo: normalizeWpAssetUrl(logo),
         }
-      }))
+      }),
+    )
 
-      const usableCustom = mappedCustom.filter((item) => item.name)
-      if (usableCustom.length > 0) {
-        return usableCustom
-      }
-    } catch {
-      // Continue to default endpoint probing.
-    }
-  }
-
-  for (const endpoint of endpoints) {
-    try {
-      const first = await fetchWp(endpoint, {
-        status: 'publish',
-        per_page: String(Math.min(100, Math.max(1, perPage))),
-        page: '1',
-        orderby: 'menu_order',
-        order: 'asc',
-        _embed: '1',
-        _fields: 'id,title.rendered,excerpt.rendered,content.rendered,featured_media,_embedded',
-      })
-
-      let posts = Array.isArray(first.data) ? [...first.data] : []
-
-      if (Number(first.totalPages || 1) > 1) {
-        const requests = []
-        for (let page = 2; page <= first.totalPages; page += 1) {
-          requests.push(
-            fetchWp(endpoint, {
-              status: 'publish',
-              per_page: String(Math.min(100, Math.max(1, perPage))),
-              page: String(page),
-              orderby: 'menu_order',
-              order: 'asc',
-              _embed: '1',
-              _fields: 'id,title.rendered,excerpt.rendered,content.rendered,featured_media,_embedded',
-            }),
-          )
-        }
-
-        const rest = await Promise.all(requests)
-        rest.forEach((result) => {
-          if (Array.isArray(result.data)) {
-            posts = posts.concat(result.data)
-          }
-        })
-      }
-
-      const mapped = await Promise.all(
-        posts.map(async (post, index) => {
-          const name = stripHtml(post?.title?.rendered || '') || `Client ${index + 1}`
-          const excerpt = stripHtml(post?.excerpt?.rendered || '')
-          const content = stripHtml(post?.content?.rendered || '')
-          const tagline = excerpt || content || 'Partner layanan Trimitra'
-
-          let logo = ''
-          const embedded = post?._embedded?.['wp:featuredmedia']
-          if (Array.isArray(embedded) && embedded[0]?.source_url) {
-            logo = normalizeWpAssetUrl(embedded[0].source_url)
-          } else if (post?.featured_media) {
-            logo = await getMediaSourceById(post.featured_media)
-          }
-
-          return {
-            id: post?.id || `${endpoint}-${index}`,
-            initials: getInitialsFromName(name),
-            name,
-            tagline,
-            color: palette[index % palette.length],
-            logo: normalizeWpAssetUrl(logo),
-          }
-        }),
-      )
-
-      const usable = mapped.filter((item) => item.name)
-      if (usable.length > 0) {
-        return usable
-      }
-    } catch {
-      // Try next endpoint variant.
-    }
+    return mapped.filter((item) => item.name)
   }
 
   try {
-    // Fallback for installations where `client` CPT is not exposed in REST.
-    const first = await fetchWp('media', {
-      media_type: 'image',
-      per_page: '100',
+    const first = await fetchWp('client', {
+      per_page: String(Math.min(100, Math.max(1, perPage))),
       page: '1',
       orderby: 'date',
       order: 'desc',
-      _fields: 'id,title.rendered,source_url,media_details.sizes',
-    })
+      _embed: '1',
+      _fields: 'id,title.rendered,featured_media,_embedded',
+    }, fetchOptions)
 
-    let mediaItems = Array.isArray(first.data) ? [...first.data] : []
+    let posts = Array.isArray(first.data) ? [...first.data] : []
 
     if (Number(first.totalPages || 1) > 1) {
-      const maxPages = Math.min(Number(first.totalPages || 1), 5)
       const requests = []
-      for (let page = 2; page <= maxPages; page += 1) {
+      for (let page = 2; page <= first.totalPages; page += 1) {
         requests.push(
-          fetchWp('media', {
-            media_type: 'image',
-            per_page: '100',
+          fetchWp('client', {
+            per_page: String(Math.min(100, Math.max(1, perPage))),
             page: String(page),
             orderby: 'date',
             order: 'desc',
-            _fields: 'id,title.rendered,source_url,media_details.sizes',
-          }),
+            _embed: '1',
+            _fields: 'id,title.rendered,featured_media,_embedded',
+          }, fetchOptions),
         )
       }
 
       const rest = await Promise.all(requests)
       rest.forEach((result) => {
         if (Array.isArray(result.data)) {
-          mediaItems = mediaItems.concat(result.data)
+          posts = posts.concat(result.data)
         }
       })
     }
 
-    const logoItems = mediaItems.filter((item) => {
-      const sizes = item?.media_details?.sizes
-      return Boolean(sizes && sizes['clients-slider'])
-    })
-
-    if (logoItems.length > 0) {
-      const mappedMediaFallback = logoItems
-        .slice(0, Math.min(Math.max(1, perPage), 40))
-        .map((item, index) => {
-          const sliderLogo = item?.media_details?.sizes?.['clients-slider']?.source_url
-          const fullLogo = item?.source_url
-          return {
-            id: item?.id || `media-client-${index}`,
-            initials: getInitialsFromName(parseClientNameFromMediaTitle(item?.title?.rendered, index)),
-            name: parseClientNameFromMediaTitle(item?.title?.rendered, index),
-            tagline: 'Partner layanan Trimitra',
-            color: palette[index % palette.length],
-            logo: normalizeWpAssetUrl(sliderLogo || fullLogo || ''),
-          }
-        })
-        .filter((item) => item.logo)
-
-      if (mappedMediaFallback.length > 0) {
-        return mappedMediaFallback
-      }
-    }
+    const mapped = await mapClientItems(posts)
+    cachedClients = mapped
+    return mapped
   } catch {
-    // Keep empty and let UI fallback to hardcoded client cards.
+    return []
   }
+}
 
-  return []
+export function getCachedWordPressClients() {
+  return Array.isArray(cachedClients) && cachedClients.length > 0 ? cachedClients : null
 }
 
 export async function getWordPressGalleryMedia({ perPage = 100, allPages = true } = {}) {
@@ -665,6 +675,8 @@ export async function getWordPressGalleryMedia({ perPage = 100, allPages = true 
       return {
         id: item?.id,
         src: sourceUrl,
+        title: title || alt || 'Galeri',
+        date: item?.date || item?.date_gmt || '',
         alt: alt || title || 'Galeri',
         category: inferGalleryCategory(hintText),
         type: normalizeGalleryType(width, height),
@@ -693,8 +705,11 @@ export async function getWordPressGalleryMedia({ perPage = 100, allPages = true 
   return normalizedItems
 }
 
-export async function getWordPressGalleryFromPageBySlugs(slugs = ['galeri', 'gallery']) {
+export async function getWordPressGalleryFromPageBySlugs(slugs = ['galeri', 'gallery'], options = {}) {
   if (!isWordPressConfiguredForPages()) return []
+
+  const { skipCache = false } = options
+  const fetchOptions = skipCache ? { skipCache: true } : {}
 
   let page = null
   for (const slug of slugs) {
@@ -704,7 +719,7 @@ export async function getWordPressGalleryFromPageBySlugs(slugs = ['galeri', 'gal
       status: 'publish',
       per_page: '1',
       _fields: 'id,slug,link,content.rendered',
-    })
+    }, fetchOptions)
     const pages = Array.isArray(result.data) ? result.data : []
     if (pages.length > 0) {
       page = pages[0]
@@ -714,15 +729,61 @@ export async function getWordPressGalleryFromPageBySlugs(slugs = ['galeri', 'gal
 
   if (!page) return []
 
+  return extractGalleryFromWordPressPage(page, options)
+}
+
+export async function getWordPressGalleryFromPageId(pageId, options = {}) {
+  if (!isWordPressConfiguredForPages()) return []
+
+  const { skipCache = false } = options
+  const fetchOptions = skipCache ? { skipCache: true } : {}
+
+  const numericPageId = Number(pageId)
+  if (!Number.isFinite(numericPageId) || numericPageId <= 0) return []
+
+  let page
+  try {
+    const result = await fetchWp(`pages/${numericPageId}`, {
+      _fields: 'id,slug,link,content.rendered',
+    }, fetchOptions)
+
+    const pageData = result?.data
+    if (!pageData || typeof pageData !== 'object' || !pageData.id) {
+      return []
+    }
+
+    page = pageData
+  } catch {
+    return []
+  }
+
+  return extractGalleryFromWordPressPage(page, options)
+}
+
+async function extractGalleryFromWordPressPage(page, options = {}) {
+  if (!page || typeof page !== 'object') return []
+
+  const { skipCache = false } = options
+  const fetchOptions = skipCache ? { skipCache: true } : {}
+
   const pageId = page.id
   const pageUrl = page?.link || `${WP_SITE_URL}/${String(page.slug || '').replace(/^\/+|\/+$/g, '')}/`
+  const runtimePageUrl = toRuntimeWpUrl(pageUrl)
 
   let renderedHtml = ''
   try {
-    const response = await fetch(pageUrl, {
-      credentials: 'omit',
-      cache: 'no-store',
-    })
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), Math.min(WP_FETCH_TIMEOUT_MS, 5000))
+    let response
+    try {
+      response = await fetch(runtimePageUrl, {
+        signal: controller.signal,
+        credentials: 'omit',
+        cache: 'no-store',
+      })
+    } finally {
+      clearTimeout(timeoutId)
+    }
     if (response.ok) {
       renderedHtml = await response.text()
     }
@@ -734,11 +795,14 @@ export async function getWordPressGalleryFromPageBySlugs(slugs = ['galeri', 'gal
   const inlineImages = parseImagesFromRenderedHtml(page?.content?.rendered || '')
 
   const fromRendered = renderedImages.map((item) => {
-    const hintText = `${item.alt || ''} ${item.src || ''}`
+    const caption = decodeHtml(item.caption || '').replace(/\s+/g, ' ').trim()
+    const alt = decodeHtml(item.alt || '').replace(/\s+/g, ' ').trim()
+    const hintText = `${caption} ${alt} ${item.src || ''}`
     return {
       id: `rendered-${item.src}`,
       src: item.src,
-      alt: item.alt || 'Galeri',
+      fullSrc: item.fullSrc || item.src,
+      alt: caption || alt || 'Galeri',
       category: inferGalleryCategory(hintText),
       type: inferGalleryTypeFromRatio(item.width, item.height),
       width: item.width,
@@ -751,6 +815,7 @@ export async function getWordPressGalleryFromPageBySlugs(slugs = ['galeri', 'gal
     return {
       id: `inline-${item.src}`,
       src: item.src,
+      fullSrc: item.src,
       alt: item.alt || 'Galeri',
       category: inferGalleryCategory(hintText),
       type: inferGalleryTypeFromRatio(item.width, item.height),
@@ -772,7 +837,7 @@ export async function getWordPressGalleryFromPageBySlugs(slugs = ['galeri', 'gal
       orderby: 'date',
       order: 'desc',
       _fields: 'id,source_url,alt_text,title.rendered,caption.rendered,media_details.width,media_details.height',
-    })
+    }, fetchOptions)
 
     let mediaItems = Array.isArray(mediaFirstPage.data) ? mediaFirstPage.data : []
 
@@ -788,7 +853,7 @@ export async function getWordPressGalleryFromPageBySlugs(slugs = ['galeri', 'gal
             orderby: 'date',
             order: 'desc',
             _fields: 'id,source_url,alt_text,title.rendered,caption.rendered,media_details.width,media_details.height',
-          }),
+          }, fetchOptions),
         )
       }
 
@@ -812,6 +877,7 @@ export async function getWordPressGalleryFromPageBySlugs(slugs = ['galeri', 'gal
         return {
           id: item?.id,
           src: item?.source_url,
+          fullSrc: item?.source_url,
           alt: alt || title || 'Galeri',
           category: inferGalleryCategory(hintText),
           type: inferGalleryTypeFromRatio(width, height),
@@ -830,6 +896,8 @@ export async function getWordPressGalleryFromPageBySlugs(slugs = ['galeri', 'gal
     seen.add(item.src)
     uniqueBySrc.push(item)
   })
+
+  uniqueBySrc.sort((a, b) => getGallerySortValue(b) - getGallerySortValue(a))
 
   return uniqueBySrc
 }

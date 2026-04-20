@@ -23,6 +23,20 @@ Dokumen ini dibuat supaya proses deploy berikutnya cepat, konsisten, dan minim s
 
 ## Step-by-step Detail
 
+### 0) Sinkronkan ENV untuk data Client (WAJIB)
+Data client di homepage harus mengambil dari post type `client` di WordPress admin, bukan dari fallback statis.
+
+Set nilai berikut di environment frontend sebelum build:
+
+```env
+VITE_WP_SITE_URL=https://cms.trimitramulti.co.id
+VITE_WP_CLIENTS_ENDPOINT=https://cms.trimitramulti.co.id/wp-json/trimitra/v1/clients
+```
+
+Catatan penting:
+- Perubahan ini hanya untuk section Client/Partner.
+- Endpoint Berita/Artikel tetap menggunakan alur WordPress yang sudah live.
+
 ### 1) Build di lokal
 Jalankan dari root repository:
 

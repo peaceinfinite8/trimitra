@@ -20,7 +20,7 @@ const GOOGLE_MAPS_PLACE_URL = "https://maps.app.goo.gl/br2X3Bdp7dtWtNVj7";
 const GOOGLE_MAPS_EMBED_URL =
   "https://www.google.com/maps?q=Tirtajaya,+Kec.+Sukmajaya,+Kota+Depok,+Jawa+Barat+16413&z=17&output=embed";
 const OFFICE_ADDRESS =
-  "Tirtajaya, Kec. Sukmajaya, Kota Depok, Jawa Barat 16413";
+  "Ruko Anggrek 1, No 37, Grand Depok City, Jl Boulevard Raya Kota Depok";
 const EMPTY_FORM_DATA = {
   name: "",
   email: "",
@@ -623,8 +623,8 @@ function KontakKamiPage() {
                 <div className="contact-map-note">
                   <p className="kicker">Temukan Kami</p>
                   <p className="muted">
-                    Kantor Trimitra berada di Tirtajaya, Sukmajaya, Kota Depok,
-                    dengan akses mudah untuk koordinasi proyek dan meeting.
+                    Kantor Trimitra berada di Grand Depok City dengan akses
+                    mudah untuk koordinasi proyek dan meeting.
                   </p>
                   <a
                     className="contact-map-link"

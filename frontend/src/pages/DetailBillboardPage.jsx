@@ -7,6 +7,7 @@ import { getWordPressGalleryMedia, isWordPressConfiguredForPages } from '../data
 
 const WHATSAPP_URL = `https://wa.me/6281234567890?text=${encodeURIComponent(billboardData.cta.whatsapp)}`
 const MARQUEE_TEXT = 'ADVERTISING BILLBOARD | 150+ LOKASI STRATEGIS | 40+ KOTA | PRODUKSI PREMIUM | ON-TIME DELIVERY | TRIMITRA BILLBOARD | '
+const PREFERRED_BILLBOARD_IMAGE = '/images/billboard-pasti-alam-sutera.jpg'
 const REACH_STATS = [
     { value: '150+', label: 'Lokasi Billboard Aktif' },
     { value: '40+', label: 'Kota Terjangkau' },
@@ -88,8 +89,11 @@ function DetailBillboardPage() {
     }, [])
 
     const heroImage = useMemo(() => {
+        const exactMatched = galleryItems.find((item) => item?.src === PREFERRED_BILLBOARD_IMAGE)
+        if (exactMatched?.src) return exactMatched.src
+
         const matched = galleryItems.find((item) => item?.category === 'Billboard' && item?.src)
-        return matched?.src || billboardData.hero.image
+        return matched?.src || PREFERRED_BILLBOARD_IMAGE || billboardData.hero.image
     }, [galleryItems])
 
     return (

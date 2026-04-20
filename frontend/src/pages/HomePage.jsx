@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
+import { animate } from 'animejs'
 import { SectionReveal } from '../components/animation/Reveal'
 import LazyImage from '../components/ui/LazyImage'
 import AccordionHero from '../components/ui/AccordionHero'
@@ -10,7 +11,8 @@ import ValueNarrativeSection from '../components/ui/ValueNarrativeSection'
 import { blogPosts } from '../data/blogPosts'
 import { getBlogPostsFromWordPress, isWordPressConfigured } from '../data/wordpressBlog'
 import {
-  getWordPressGalleryMedia,
+  getWordPressGalleryFromPageId,
+  getWordPressGalleryFromPageBySlugs,
   getWordPressPageBySlugs,
   isWordPressConfiguredForPages,
 } from '../data/wordpressPages'
@@ -44,9 +46,173 @@ const portfolioCardVariants = {
 }
 
 const LIVE_JOURNAL_REFRESH_INTERVAL_MS = 20000
+const PREFERRED_BILLBOARD_IMAGE = '/images/billboard-pasti-alam-sutera.jpg'
+const WORDPRESS_GALLERY_PAGE_ID = 605
 
-function PortfolioShowcase({ kicker, title, images }) {
+function formatPortfolioDate(dateString) {
+  if (!dateString) return ''
+  try {
+    const date = new Date(dateString)
+    return new Intl.DateTimeFormat('id-ID', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    }).format(date)
+  } catch {
+    return dateString
+  }
+}
+
+function detectCategory(title) {
+  const t = (title || '').toLowerCase().trim()
+  if (t.startsWith('billboard')) return 'Billboard'
+  if (t.startsWith('booth')) return 'Booth Pameran'
+  if (t.startsWith('event')) return 'Event'
+  return 'Lainnya'
+}
+
+function matchesKeyword(value, pattern) {
+  return pattern.test(String(value || '').toLowerCase())
+}
+
+function PortfolioCardSkeleton() {
+  return (
+    <div className="portfolio-card card" style={{ background: 'rgba(255,255,255,0.8)' }}>
+      <div style={{ width: '100%', height: '100%', background: 'rgba(200,200,200,0.2)' }} />
+    </div>
+  )
+}
+
+function PortfolioCard({ item, isLarge = false, href = '/galeri' }) {
   const prefersReducedMotion = useReducedMotion()
+  const imageUrl = item.fullSrc ?? item.src ?? PREFERRED_BILLBOARD_IMAGE
+  const titleText = item.alt ?? item.rendered ?? item.title ?? 'Galeri Trimitra'
+  const cardHeight = isLarge ? '460px' : '220px'
+  const categoryLabel = detectCategory(item.alt ?? item.rendered ?? item.title ?? 'Galeri')
+
+  return (
+    <motion.article
+      className="portfolio-card card"
+      style={{
+        height: cardHeight,
+        overflow: 'hidden',
+        cursor: 'pointer',
+        position: 'relative',
+      }}
+      variants={portfolioCardVariants}
+      initial={prefersReducedMotion ? false : 'hidden'}
+      animate={prefersReducedMotion ? {} : 'show'}
+      whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
+      onClick={() => window.location.href = href}
+    >
+      <img
+        src={imageUrl}
+        alt={titleText}
+        className="w-full h-full object-cover object-center"
+        style={{ display: 'block', width: '100%', height: '100%' }}
+      />
+      <span
+        style={{
+          position: 'absolute',
+          top: '12px',
+          left: '12px',
+          zIndex: 2,
+          display: 'inline-flex',
+          alignItems: 'center',
+          padding: '4px 12px',
+          borderRadius: '999px',
+          background: 'rgba(0, 0, 0, 0.5)',
+          color: '#fff',
+          fontSize: '12px',
+          lineHeight: 1,
+          fontWeight: 600,
+          letterSpacing: '0.08em',
+          textTransform: 'uppercase',
+        }}
+      >
+        {categoryLabel}
+      </span>
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)',
+          opacity: 0,
+          transition: 'opacity 0.3s ease',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-end',
+          padding: '20px',
+          color: '#fff',
+        }}
+        className="portfolio-overlay"
+      >
+        <h3 style={{ margin: '0 0 8px', fontSize: '16px', fontWeight: 700, lineHeight: 1.2 }}>
+          {titleText}
+        </h3>
+        {isLarge && item.excerpt && (
+          <p style={{ margin: '0 0 12px', fontSize: '13px', lineHeight: 1.4, opacity: 0.9 }}>
+            {item.excerpt.slice(0, 100)}...
+          </p>
+        )}
+        <p style={{ margin: 0, fontSize: '12px', opacity: 0.8 }}>
+          {formatPortfolioDate(item.date)}
+        </p>
+      </div>
+      <style>{`
+        .portfolio-card:hover .portfolio-overlay {
+          opacity: 1;
+        }
+      `}</style>
+    </motion.article>
+  )
+}
+
+function PortfolioShowcase({ kicker, title, items = [], status = 'loading' }) {
+  const prefersReducedMotion = useReducedMotion()
+  const displayItems = items.slice(0, 3)
+
+  if (status === 'loading') {
+    return (
+      <SectionReveal className="section home-portfolio-section">
+        <div className="container">
+          <p className="kicker">{kicker}</p>
+          <h2 className="home-portfolio-title text-shimmer">{title}</h2>
+          <motion.div
+            className="portfolio-grid"
+            variants={portfolioContainerVariants}
+            initial={prefersReducedMotion ? false : 'hidden'}
+            animate={prefersReducedMotion ? {} : 'show'}
+          >
+            <PortfolioCardSkeleton />
+            <div className="portfolio-right" style={{ gap: '14px', display: 'flex', flexDirection: 'column' }}>
+              <PortfolioCardSkeleton />
+              <PortfolioCardSkeleton />
+            </div>
+          </motion.div>
+        </div>
+      </SectionReveal>
+    )
+  }
+
+  if (status === 'error' || displayItems.length === 0) {
+    return (
+      <SectionReveal className="section home-portfolio-section">
+        <div className="container">
+          <p className="kicker">{kicker}</p>
+          <h2 className="home-portfolio-title text-shimmer">{title}</h2>
+          <div className="portfolio-empty-state card" style={{ padding: '28px', textAlign: 'center' }}>
+            <p className="muted" style={{ margin: 0 }}>
+              Data galeri belum bisa dimuat saat ini.
+            </p>
+            <Link className="btn" to="/galeri" style={{ marginTop: '16px' }} data-magnetic>
+              Buka Galeri
+            </Link>
+          </div>
+        </div>
+      </SectionReveal>
+    )
+  }
 
   return (
     <SectionReveal className="section home-portfolio-section">
@@ -59,16 +225,16 @@ function PortfolioShowcase({ kicker, title, images }) {
           initial={prefersReducedMotion ? false : 'hidden'}
           animate={prefersReducedMotion ? {} : 'show'}
         >
-          <motion.article className="portfolio-main portfolio-card card" variants={portfolioCardVariants}>
-            <LazyImage src={images[0]} alt="Proyek booth pameran Trimitra" />
-          </motion.article>
+          {displayItems[0] && (
+            <PortfolioCard item={displayItems[0]} isLarge href="/galeri" />
+          )}
           <motion.div className="portfolio-right" variants={portfolioContainerVariants}>
-            <motion.article className="portfolio-card card" variants={portfolioCardVariants}>
-              <LazyImage src={images[1]} alt="Proyek event activation Trimitra" />
-            </motion.article>
-            <motion.article className="portfolio-card card" variants={portfolioCardVariants}>
-              <LazyImage src={images[2]} alt="Proyek media billboard outdoor Trimitra" />
-            </motion.article>
+            {displayItems[1] && (
+              <PortfolioCard item={displayItems[1]} href="/galeri" />
+            )}
+            {displayItems[2] && (
+              <PortfolioCard item={displayItems[2]} href="/galeri" />
+            )}
           </motion.div>
         </motion.div>
       </div>
@@ -79,12 +245,11 @@ function PortfolioShowcase({ kicker, title, images }) {
 function HomeIdentitySection({
   kicker = 'Tentang Website Ini',
   title = 'PT Trimitra Multi Kreasi',
-  summary = 'Kami adalah perusahaan jasa booth pameran, event organizer, dan media outdoor untuk membantu brand tampil menonjol dengan eksekusi yang rapi dan terukur.',
+  summary = 'Kami adalah perusahaan jasa booth exhibition, event organizer, dan advertising untuk membantu brand tampil menonjol dengan eksekusi yang rapi dan terukur.',
   pillars = [
-    'Booth Pameran',
+    'Booth Exhibition',
     'Event Organizer',
-    'Media Outdoor',
-    'Interior Komersial',
+    'Advertising',
   ],
   primaryLabel = 'Lihat Layanan',
   primaryLink = '/layanan',
@@ -173,9 +338,9 @@ function HomeJournalSection({
 }
 
 function HomePartnershipSection({
-  kicker = 'Dipercaya Untuk',
-  title = 'Partner yang Sejalan dengan Skala dan Ritme Kerja Kami',
-  copy = 'Kami mendukung berbagai kebutuhan brand experience, dari aktivasi korporat sampai media outdoor, dengan eksekusi yang rapi dan presisi.',
+  kicker = 'Partnership',
+  title = 'Dipercaya oleh Berbagai Brand untuk Berbagai Skala Kebutuhan',
+  copy = 'Kami telah bekerja sama dengan berbagai perusahaan dalam menghadirkan event, booth, dan media advertising dengan eksekusi yang rapi dan berdampak.',
 }) {
   return (
     <SectionReveal className="section home-partnership-section">
@@ -202,10 +367,9 @@ const DEFAULT_HOME_HIGHLIGHTS = [
 ]
 
 const DEFAULT_HOME_PILLARS = [
-  'Booth Pameran',
+  'Booth Exhibition',
   'Event Organizer',
-  'Media Outdoor',
-  'Interior Komersial',
+  'Advertising',
 ]
 
 function normalizeHighlightItem(item, fallbackItem) {
@@ -267,14 +431,202 @@ function parseHighlightField(value, fallbackItem) {
   return fallbackItem
 }
 
+function HomeLumenStatCard({ item, index, scrollYProgress, prefersReducedMotion }) {
+  const exitRange = [0.62, 1]
+
+  const exitX = useTransform(
+    scrollYProgress,
+    exitRange,
+    index === 1 || index === 3
+      ? [0, index === 1 ? 240 : 280]
+      : [0, index === 0 ? -240 : -280],
+  )
+
+  const exitY = useTransform(
+    scrollYProgress,
+    exitRange,
+    index === 2 || index === 3
+      ? [0, 150]
+      : [0, index === 0 ? -36 : 0],
+  )
+
+  const exitRotate = useTransform(
+    scrollYProgress,
+    exitRange,
+    index === 0
+      ? [0, -9]
+      : index === 1
+        ? [0, 9]
+        : index === 2
+          ? [0, -13]
+          : [0, 13],
+  )
+
+  return (
+    <motion.article
+      className="home-lumen-stat-card home-lumen-stat-card--wow"
+      data-home-intro-card
+      style={
+        prefersReducedMotion
+          ? undefined
+          : {
+            x: exitX,
+            y: exitY,
+            rotate: exitRotate,
+          }
+      }
+      whileHover={
+        prefersReducedMotion
+          ? undefined
+          : {
+            y: -5,
+            scale: 1.015,
+            boxShadow: '0 18px 30px rgba(64, 121, 163, 0.28)',
+          }
+      }
+      whileTap={prefersReducedMotion ? undefined : { scale: 0.985 }}
+    >
+      <p className="home-lumen-stat-label">{item.label}</p>
+      <p className="home-lumen-stat-value">{item.value}</p>
+      <p className="home-lumen-stat-note">{item.note}</p>
+    </motion.article>
+  )
+}
+
+function HomeLumenIntroSection({ title, copy, highlights, headingTag = 'h2' }) {
+  const prefersReducedMotion = useReducedMotion()
+  const HeadingTag = headingTag
+  const introGridRef = useRef(null)
+  const introAnimatedRef = useRef(false)
+  const { scrollYProgress } = useScroll({
+    target: introGridRef,
+    offset: ['start 70%', 'end 10%'],
+  })
+
+  useEffect(() => {
+    if (prefersReducedMotion) return undefined
+
+    const introNode = introGridRef.current
+    if (!introNode) return undefined
+
+    const runIntroAnimation = () => {
+      if (introAnimatedRef.current) return
+      introAnimatedRef.current = true
+
+      const copyCard = introNode.querySelector('[data-home-intro-copy]')
+      const titleNode = introNode.querySelector('[data-home-intro-title]')
+      const textNode = introNode.querySelector('[data-home-intro-text]')
+      const statCards = introNode.querySelectorAll('[data-home-intro-card]')
+
+      if (copyCard) {
+        animate(copyCard, {
+          opacity: [0, 1],
+          translateY: [32, 0],
+          scale: [0.96, 1],
+          rotateX: [12, 0],
+          filter: ['blur(12px)', 'blur(0px)'],
+          duration: 950,
+          ease: 'outExpo',
+        })
+      }
+
+      if (titleNode) {
+        animate(titleNode, {
+          opacity: [0, 1],
+          translateY: [30, -5, 0],
+          scale: [0.93, 1.03, 1],
+          rotateX: [18, -4, 0],
+          filter: ['blur(12px)', 'blur(0px)'],
+          duration: 1050,
+          delay: 80,
+          ease: 'outExpo',
+        })
+      }
+
+      if (textNode) {
+        animate(textNode, {
+          opacity: [0, 1],
+          translateY: [18, 0],
+          clipPath: ['inset(0 0 100% 0)', 'inset(0 0 0% 0)'],
+          filter: ['blur(8px)', 'blur(0px)'],
+          duration: 760,
+          delay: 180,
+          ease: 'outCubic',
+        })
+      }
+
+      if (statCards.length > 0) {
+        statCards.forEach((card, index) => {
+          animate(card, {
+            opacity: [0, 1],
+            translateY: [34, -6, 0],
+            translateX: [index % 2 === 0 ? -20 : 20, 0],
+            scale: [0.88, 1.03, 1],
+            rotateX: [index % 2 === 0 ? 16 : -16, index % 2 === 0 ? -3 : 3, 0],
+            rotateY: [index % 2 === 0 ? -12 : 12, 0],
+            filter: ['blur(12px)', 'blur(0px)'],
+            duration: 900,
+            delay: 240 + index * 130,
+            ease: 'outExpo',
+          })
+        })
+      }
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            runIntroAnimation()
+          }
+        })
+      },
+      { threshold: 0.3 },
+    )
+
+    observer.observe(introNode)
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [prefersReducedMotion])
+
+  return (
+    <SectionReveal className="section home-lumen-intro">
+      <motion.div
+        ref={introGridRef}
+        className="container home-lumen-intro-grid home-lumen-intro-grid--wow"
+      >
+        <motion.div className="home-lumen-intro-copy home-lumen-intro-copy--wow" data-home-intro-copy>
+          <span className="home-lumen-intro-radiance" aria-hidden="true" />
+          <HeadingTag className="home-lumen-title">
+            <span data-home-intro-title>{title}</span>
+          </HeadingTag>
+          <p className="muted home-lumen-copy" data-home-intro-text>{copy}</p>
+          <span className="home-lumen-intro-beam" aria-hidden="true" />
+        </motion.div>
+
+        <motion.div className="home-lumen-stat-grid home-lumen-stat-grid--wow">
+          {highlights.map((item, index) => (
+            <HomeLumenStatCard
+              key={item.label}
+              item={item}
+              index={index}
+              scrollYProgress={scrollYProgress}
+              prefersReducedMotion={prefersReducedMotion}
+            />
+          ))}
+        </motion.div>
+      </motion.div>
+    </SectionReveal>
+  )
+}
+
 function HomePage() {
   const [wpHomePage, setWpHomePage] = useState(null)
   const [journalPosts, setJournalPosts] = useState(blogPosts.slice(0, 3))
-  const [portfolioImages, setPortfolioImages] = useState([
-    'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1526498460520-4c246339dccb?auto=format&fit=crop&w=900&q=80',
-  ])
+  const [portfolioItems, setPortfolioItems] = useState([])
+  const [portfolioStatus, setPortfolioStatus] = useState('loading')
   const journalRefreshInProgressRef = useRef(false)
 
   useEffect(() => {
@@ -361,15 +713,65 @@ function HomePage() {
     let cancelled = false
 
     async function loadPortfolioFromWordPress() {
-      if (!isWordPressConfiguredForPages()) return
       try {
-        const media = await getWordPressGalleryMedia({ perPage: 9, allPages: false })
-        const firstThree = media.slice(0, 3).map((item) => item.src)
-        if (!cancelled && firstThree.length === 3) {
-          setPortfolioImages(firstThree)
+        let galleryItems = await getWordPressGalleryFromPageId(WORDPRESS_GALLERY_PAGE_ID, {
+          skipCache: false,
+        })
+
+        if (!Array.isArray(galleryItems) || galleryItems.length === 0) {
+          galleryItems = await getWordPressGalleryFromPageBySlugs(['galeri', 'gallery'], {
+            skipCache: false,
+          })
+        }
+
+        if (!Array.isArray(galleryItems)) return
+
+        if (galleryItems.length > 0) {
+          console.log('GALLERY API ITEM:', galleryItems[0])
+        }
+
+        if (!cancelled) {
+          const normalizedItems = (galleryItems || []).slice(0, 3).map((item) => {
+            const titleValue = item.alt || item.rendered || item.title || 'Galeri'
+            return {
+              id: item.id,
+              alt: titleValue,
+              rendered: titleValue,
+              title: titleValue,
+              excerpt: item.excerpt || '',
+              date: item.date || '',
+              src: item.src || '',
+              fullSrc: item.fullSrc || item.src || '',
+              category: detectCategory(titleValue),
+              type: item.type || '',
+              link: '/galeri',
+            }
+          })
+
+          const pickCategoryItem = (categoryName, fallbackIndex) => {
+            const matched = normalizedItems.find((item) => detectCategory(item.alt || item.rendered) === categoryName)
+            return matched || normalizedItems[fallbackIndex] || null
+          }
+
+          const selectedItems = [
+            pickCategoryItem('Booth Pameran', 0),
+            pickCategoryItem('Event', 1),
+            pickCategoryItem('Billboard', 2),
+          ].filter(Boolean)
+
+          if (selectedItems.length > 0) {
+            setPortfolioItems(selectedItems)
+            setPortfolioStatus('ready')
+          } else {
+            setPortfolioItems([])
+            setPortfolioStatus('error')
+          }
         }
       } catch {
-        // Keep fallback portfolio images.
+        if (!cancelled) {
+          setPortfolioItems([])
+          setPortfolioStatus('error')
+        }
       }
     }
 
@@ -389,31 +791,18 @@ function HomePage() {
   const featuredJournal = journals[0]
   const sideJournals = journals.slice(1)
   const pageFields = wpHomePage ? { ...(wpHomePage.meta || {}), ...(wpHomePage.acf || {}) } : {}
-  const introKicker = pickTextField(pageFields, ['intro_kicker', 'home_intro_kicker'], 'Studio Trimitra')
-  const introTitle = pickTextField(
-    pageFields,
-    ['intro_title', 'home_intro_title'],
-    'Siap Membuat Booth Anda Jadi Pusat Perhatian di Setiap Pameran?',
-  )
-  const introCopy = pickTextField(
-    pageFields,
-    ['intro_copy', 'home_intro_copy'],
-    'Kami membantu brand tampil standout melalui desain, produksi, dan instalasi booth exhibition profesional.',
-  )
-  const heroKicker = pickTextField(pageFields, ['hero_kicker', 'home_hero_kicker'], 'Trimitra Campaign Selector')
+  const introTitle = 'Konsultasi Gratis'
+  const introCopy = 'Dirancang untuk Menarik Perhatian. Dibuat untuk Berdampak.'
+  const heroKicker = pickTextField(pageFields, ['hero_kicker', 'home_hero_kicker'], 'PT Trimitra Multi Kreasi')
   const heroPrimaryLink = pickLinkField(pageFields, ['hero_primary_link', 'home_hero_primary_link'], '/kontak-kami')
   const heroSecondaryLink = pickLinkField(pageFields, ['hero_secondary_link', 'home_hero_secondary_link'], '/galeri')
   const identityKicker = pickTextField(pageFields, ['identity_kicker', 'home_identity_kicker'], 'Tentang Website Ini')
   const identityTitle = pickTextField(pageFields, ['identity_title', 'home_identity_title'], 'PT Trimitra Multi Kreasi')
-  const identitySummary = pickTextField(
-    pageFields,
-    ['identity_summary', 'home_identity_summary'],
-    'Website ini adalah profil layanan Trimitra untuk booth pameran, event organizer, dan media outdoor. Fokus kami adalah membantu brand terlihat kuat dengan desain, produksi, dan eksekusi yang terintegrasi.',
-  )
+  const identitySummary = 'Website ini adalah profil layanan Trimitra untuk Booth Pameran, Event Organizer, dan Media Outdoor. Fokus kami adalah membantu Brand terlihat kuat dengan desain, produksi, dan eksekusi yang terintegrasi.'
   const identityPillars = normalizeStringList(
     pickArrayField(pageFields, ['identity_pillars', 'home_identity_pillars'], DEFAULT_HOME_PILLARS),
     DEFAULT_HOME_PILLARS,
-  )
+  ).filter((pillar) => pillar.trim().toLowerCase() !== 'interior komersial')
   const identityPrimaryLabel = pickTextField(pageFields, ['identity_primary_label', 'home_identity_primary_label'], 'Lihat Layanan')
   const identityPrimaryLink = pickLinkField(pageFields, ['identity_primary_link', 'home_identity_primary_link'], '/layanan')
   const identitySecondaryLabel = pickTextField(
@@ -426,16 +815,16 @@ function HomePage() {
     ['identity_secondary_link', 'home_identity_secondary_link'],
     '/kontak-kami',
   )
-  const partnershipKicker = pickTextField(pageFields, ['partnership_kicker', 'home_partnership_kicker'], 'Dipercaya Untuk')
+  const partnershipKicker = pickTextField(pageFields, ['partnership_kicker', 'home_partnership_kicker'], 'Partnership')
   const partnershipTitle = pickTextField(
     pageFields,
     ['partnership_title', 'home_partnership_title'],
-    'Partner yang Sejalan dengan Skala dan Ritme Kerja Kami',
+    'Dipercaya oleh Berbagai Brand untuk Berbagai Skala Kebutuhan',
   )
   const partnershipCopy = pickTextField(
     pageFields,
     ['partnership_copy', 'home_partnership_copy'],
-    'Kami mendukung berbagai kebutuhan brand experience, dari aktivasi korporat sampai media outdoor, dengan eksekusi yang rapi dan presisi.',
+    'Kami telah bekerja sama dengan berbagai perusahaan dalam menghadirkan event, booth, dan media advertising dengan eksekusi yang rapi dan berdampak.',
   )
   const homeHighlights = [
     parseHighlightField(pageFields.highlight_1, DEFAULT_HOME_HIGHLIGHTS[0]),
@@ -451,7 +840,7 @@ function HomePage() {
     const portfolioKicker = pickTextField(pageFields, ['portfolio_kicker'], 'Portofolio')
     const portfolioTitle = pickTextField(pageFields, ['portfolio_title'], 'Proyek Unggulan')
     const ctaTitle = pickTextField(pageFields, ['cta_title', 'home_cta_title'], 'Siap Wujudkan Aktivasi Brand yang Lebih Berdampak?')
-    const ctaCopy = pickTextField(pageFields, ['cta_copy', 'home_cta_copy'], 'Konsultasikan kebutuhan booth, event, dan media outdoor Anda bersama tim Trimitra untuk eksekusi yang lebih presisi.')
+    const ctaCopy = pickTextField(pageFields, ['cta_copy', 'home_cta_copy'], 'Konsultasikan kebutuhan booth exhibition, event, dan advertising Anda bersama tim Trimitra untuk eksekusi yang lebih presisi.').replace(/\bmedia outdoor\b/gi, 'advertising')
     const ctaPrimaryLabel = pickTextField(pageFields, ['cta_primary_label'], 'Konsultasi Sekarang')
     const ctaPrimaryLink = pickLinkField(pageFields, ['cta_primary_link'], '/kontak-kami')
     const ctaSecondaryLabel = pickTextField(pageFields, ['cta_secondary_label'], 'Lihat Portofolio')
@@ -461,25 +850,12 @@ function HomePage() {
       <div className="home-page-lumen">
         <AccordionHero kicker={heroKicker} primaryLink={heroPrimaryLink} secondaryLink={heroSecondaryLink} />
 
-        <SectionReveal className="section home-lumen-intro">
-          <div className="container home-lumen-intro-grid">
-            <div className="home-lumen-intro-copy">
-              <p className="kicker">{introKicker}</p>
-              <h2 className="home-lumen-title">{introTitle}</h2>
-              <p className="muted home-lumen-copy">{introCopy}</p>
-            </div>
-
-            <div className="home-lumen-stat-grid">
-              {homeHighlights.map((item) => (
-                <article key={item.label} className="home-lumen-stat-card">
-                  <p className="home-lumen-stat-label">{item.label}</p>
-                  <p className="home-lumen-stat-value">{item.value}</p>
-                  <p className="home-lumen-stat-note">{item.note}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </SectionReveal>
+        <HomeLumenIntroSection
+          title={introTitle}
+          copy={introCopy}
+          highlights={homeHighlights}
+          headingTag="h2"
+        />
 
         <HomeIdentitySection
           kicker={identityKicker}
@@ -494,7 +870,7 @@ function HomePage() {
 
         <ServiceShowcaseSection />
 
-        <PortfolioShowcase kicker={portfolioKicker} title={portfolioTitle} images={portfolioImages} />
+        <PortfolioShowcase kicker={portfolioKicker} title={portfolioTitle} items={portfolioItems} status={portfolioStatus} />
 
         <ValueNarrativeSection />
 
@@ -534,25 +910,12 @@ function HomePage() {
     <div className="home-page-lumen">
       <AccordionHero kicker={heroKicker} primaryLink={heroPrimaryLink} secondaryLink={heroSecondaryLink} />
 
-      <SectionReveal className="section home-lumen-intro">
-        <div className="container home-lumen-intro-grid">
-          <div className="home-lumen-intro-copy">
-            <p className="kicker">{introKicker}</p>
-            <h1 className="home-lumen-title">{introTitle}</h1>
-            <p className="muted home-lumen-copy">{introCopy}</p>
-          </div>
-
-          <div className="home-lumen-stat-grid">
-            {homeHighlights.map((item) => (
-              <article key={item.label} className="home-lumen-stat-card">
-                <p className="home-lumen-stat-label">{item.label}</p>
-                <p className="home-lumen-stat-value">{item.value}</p>
-                <p className="home-lumen-stat-note">{item.note}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </SectionReveal>
+      <HomeLumenIntroSection
+        title={introTitle}
+        copy={introCopy}
+        highlights={homeHighlights}
+        headingTag="h1"
+      />
 
       <HomeIdentitySection
         kicker={identityKicker}
@@ -567,7 +930,7 @@ function HomePage() {
 
       <ServiceShowcaseSection />
 
-      <PortfolioShowcase kicker="Portofolio" title="Proyek Unggulan" images={portfolioImages} />
+      <PortfolioShowcase kicker="Portofolio" title="Proyek Unggulan" items={portfolioItems} status={portfolioStatus} />
 
       <ValueNarrativeSection />
 
@@ -589,7 +952,7 @@ function HomePage() {
         <div className="container home-dark-cta-shell">
           <h2 className="home-dark-cta-title">Siap Wujudkan Aktivasi Brand yang Lebih Berdampak?</h2>
           <p className="muted home-dark-cta-copy">
-            Konsultasikan kebutuhan booth, event, dan media outdoor Anda bersama tim Trimitra untuk eksekusi yang lebih presisi.
+            Konsultasikan kebutuhan booth exhibition, event, dan advertising Anda bersama tim Trimitra untuk eksekusi yang lebih presisi.
           </p>
           <div className="home-dark-cta-actions">
             <Link className="btn" to="/kontak-kami" data-magnetic>Konsultasi Sekarang</Link>

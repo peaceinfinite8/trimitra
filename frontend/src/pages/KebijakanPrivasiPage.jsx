@@ -94,7 +94,7 @@ function KebijakanPrivasiPage() {
           <p className="muted" style={{ margin: 0, lineHeight: 1.75 }}>
             Untuk pertanyaan terkait privasi data, silakan hubungi PT Trimitra
             Multi Kreasi melalui email <a href="mailto:dhr@trimitramulti.co.id">dhr@trimitramulti.co.id</a>
-            {' '}atau telepon <a href="tel:+62217894561">+62 21 789 4561</a>.
+            {' '}atau telepon <a href="tel:+62811109842">0811109842</a>.
           </p>
           <p className="muted" style={{ margin: 0, lineHeight: 1.75 }}>
             Alamat korespondensi: Tirtajaya, Kec. Sukmajaya, Kota Depok, Jawa Barat 16413.

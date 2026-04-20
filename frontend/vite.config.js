@@ -4,6 +4,16 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  server: {
+    proxy: {
+      '/__wp_proxy__': {
+        target: 'https://cms.trimitramulti.co.id',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) => path.replace(/^\/__wp_proxy__/, ''),
+      },
+    },
+  },
   build: {
     rolldownOptions: {
       output: {

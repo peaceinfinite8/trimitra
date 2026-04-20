@@ -9,7 +9,7 @@ const SLIDES = [
         stat: '98% on-time handover',
         ctaLabel: 'Konsultasi Material',
         ctaTo: '/kontak-kami',
-        image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1400&q=80',
+        image: '/images/billboard-pasti-alam-sutera.jpg',
         description: 'Kami menyaring bahan konstruksi terbaik untuk ketahanan jangka panjang dan estetika yang tetap relevan.',
     },
     {

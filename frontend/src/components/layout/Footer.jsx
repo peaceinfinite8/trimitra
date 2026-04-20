@@ -1,34 +1,26 @@
 import { Link } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
+import { MapPin, Phone, Mail } from 'lucide-react'
 import { prefetchRoute } from '../../app/routePrefetch'
 
 const socialItems = [
-  { label: 'Facebook', href: 'https://www.facebook.com/pages/Trimitra-Adv-EO-/875557699145830' },
-  { label: 'Twitter', href: 'https://x.com/2D3DComm' },
-  { label: 'Instagram', href: 'https://www.instagram.com/2d3dcomm' },
-  { label: 'YouTube', href: 'https://www.youtube.com/channel/UCej-FukQIiutfpdACxx8ygA' },
+  { label: 'TikTok', href: 'https://www.tiktok.com/@trimitraorganizer' },
+  { label: 'Instagram', href: 'https://www.instagram.com/trimitra_organizer/' },
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/dharmawan-5a4253319/' },
 ]
 
 const brandSocialItems = [
-  { label: 'Facebook', icon: 'facebook', href: 'https://www.facebook.com/pages/Trimitra-Adv-EO-/875557699145830' },
-  { label: 'Twitter', icon: 'twitter', href: 'https://x.com/2D3DComm' },
-  { label: 'Instagram', icon: 'instagram', href: 'https://www.instagram.com/2d3dcomm' },
-  { label: 'YouTube', icon: 'youtube', href: 'https://www.youtube.com/channel/UCej-FukQIiutfpdACxx8ygA' },
+  { label: 'TikTok', icon: 'tiktok', href: 'https://www.tiktok.com/@trimitraorganizer' },
+  { label: 'Instagram', icon: 'instagram', href: 'https://www.instagram.com/trimitra_organizer/' },
+  { label: 'LinkedIn', icon: 'linkedin', href: 'https://www.linkedin.com/in/dharmawan-5a4253319/' },
 ]
 
 function BrandSocialIcon({ type }) {
-  if (type === 'facebook') {
+  if (type === 'tiktok') {
     return (
       <svg viewBox="0 0 24 24" fill="none" role="presentation" aria-hidden="true">
-        <path d="M13.4 21v-7h2.3l.4-3h-2.7V9.1c0-.87.24-1.46 1.5-1.46h1.3V5a15.74 15.74 0 0 0-1.9-.1c-2.5 0-4.2 1.52-4.2 4.31V11H7.8v3h2.3v7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    )
-  }
-
-  if (type === 'twitter') {
-    return (
-      <svg viewBox="0 0 24 24" fill="none" role="presentation" aria-hidden="true">
-        <path d="M5 5h3.1l3.1 4.4L15.2 5H19l-5.9 6.6L19.2 19H16l-3.4-4.8L8.3 19H5l6-6.8z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M13 5.5v8.1a3.8 3.8 0 1 1-3.5-3.8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M13 5.5c.8 1.9 2.2 3.2 4.3 3.6v2.2c-1.4-.1-2.7-.6-3.8-1.4v4.6a5.7 5.7 0 1 1-5-5.6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     )
   }
@@ -43,21 +35,18 @@ function BrandSocialIcon({ type }) {
     )
   }
 
-  if (type === 'youtube') {
+  if (type === 'linkedin') {
     return (
       <svg viewBox="0 0 24 24" fill="none" role="presentation" aria-hidden="true">
-        <rect x="4" y="7" width="16" height="10" rx="3" stroke="currentColor" strokeWidth="1.8" />
-        <path d="M10.5 10.3 15 12l-4.5 1.7z" fill="currentColor" />
+        <path d="M6.5 9.5V18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        <circle cx="6.5" cy="6.5" r="1.2" fill="currentColor" />
+        <path d="M11 18v-4.6c0-1.6 1.1-2.9 2.8-2.9 1.7 0 2.7 1.1 2.7 3V18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M11 9.5V18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
     )
   }
 
-  return (
-    <svg viewBox="0 0 24 24" fill="none" role="presentation" aria-hidden="true">
-      <rect x="4.8" y="7" width="14.4" height="10" rx="2" stroke="currentColor" strokeWidth="1.8" />
-      <path d="M6 8.3 12 12.5l6-4.2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
+  return null
 }
 
 const socialListVariants = {
@@ -132,95 +121,115 @@ function Footer() {
         </svg>
       </div>
 
-      <div className="container footer-grid">
-        <section className="footer-brand">
-          <div className="footer-brand-head">
-            <img className="footer-brand-logo" src="/logo-trimitra.webp" alt="Logo Trimitra" />
+      <div className="container footer-grid" style={{ paddingTop: '48px', paddingBottom: '48px' }}>
+        <section className="footer-brand" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '32px', marginBottom: '32px' }}>
+          <div className="footer-brand-head" style={{ marginBottom: '20px' }}>
+            <img className="footer-brand-logo" src="/logo-trimitra.webp" alt="Logo Trimitra" style={{ height: '40px', width: 'auto' }} />
           </div>
-          <p>
-            Mendefinisikan ulang standar arsitektur temporer melalui presisi
-            teknik dan estetika modern sejak 2017.
+          <p style={{ marginBottom: '24px', lineHeight: '1.6', fontSize: '14px', color: 'rgba(255,255,255,0.8)' }}>
+            PT Trimitra Multi Kreasi adalah partner untuk kebutuhan event,
+            booth exhibition, dan advertising yang siap membantu Anda dalam
+            menyusun perencanaan, design, budgeting, tata laksana, sampai
+            penyelenggaraannya.
           </p>
-          <motion.div
-            className="footer-social-icons"
-            variants={socialListVariants}
-            initial={prefersReducedMotion ? false : 'hidden'}
-            animate={prefersReducedMotion ? {} : 'show'}
-            aria-label="Brand social links"
-          >
-            {brandSocialItems.map((item) => (
-              <motion.a
-                key={item.label}
-                href={item.href}
-                target={item.href.startsWith('http') ? '_blank' : undefined}
-                rel={item.href.startsWith('http') ? 'noreferrer' : undefined}
-                className="social-orb"
-                aria-label={item.label}
-                variants={socialItemVariants}
-              >
-                <span className="social-orb-core" aria-hidden="true">
-                  <BrandSocialIcon type={item.icon} />
-                </span>
-                <span className="social-orb-label">{item.label}</span>
-              </motion.a>
-            ))}
-          </motion.div>
+          <div className="footer-brand-social">
+            <span className="footer-brand-social-label" style={{ fontSize: '12px', letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.7)', marginBottom: '16px', display: 'block' }}>Ikuti Kami</span>
+            <motion.div
+              className="footer-social-icons"
+              variants={socialListVariants}
+              initial={prefersReducedMotion ? false : 'hidden'}
+              animate={prefersReducedMotion ? {} : 'show'}
+              aria-label="Brand social links"
+              style={{ display: 'flex', gap: '12px' }}
+            >
+              {brandSocialItems.map((item) => (
+                <motion.a
+                  key={item.label}
+                  href={item.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="social-orb"
+                  aria-label={item.label}
+                  variants={socialItemVariants}
+                  style={{
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'rgba(14, 165, 233, 0.15)',
+                    color: '#0ea5e9',
+                    transition: 'all 0.3s ease',
+                    border: '1px solid rgba(14, 165, 233, 0.3)',
+                    cursor: 'pointer',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(14, 165, 233, 0.25)'
+                    e.currentTarget.style.transform = 'scale(1.1)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(14, 165, 233, 0.15)'
+                    e.currentTarget.style.transform = 'scale(1)'
+                  }}
+                >
+                  <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px' }}>
+                    <BrandSocialIcon type={item.icon} />
+                  </span>
+                </motion.a>
+              ))}
+            </motion.div>
+          </div>
         </section>
 
-        <section>
-          <h4>Layanan</h4>
-          <ul>
-            <li><Link to="/layanan/detail-billboard" onMouseEnter={() => prefetchRoute('/layanan')} data-prefetch-route="/layanan">Advertising (Billboard)</Link></li>
-            <li><Link to="/layanan/detail-event" onMouseEnter={() => prefetchRoute('/layanan')} data-prefetch-route="/layanan">Event Organizer</Link></li>
-            <li><Link to="/layanan/detail-booth" onMouseEnter={() => prefetchRoute('/layanan')} data-prefetch-route="/layanan">Booth Exhibition</Link></li>
+        <section style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '32px', marginBottom: '32px' }}>
+          <h4 style={{ fontSize: '12px', letterSpacing: '0.08em', textTransform: 'uppercase', color: '#0ea5e9', marginBottom: '16px', fontWeight: 600 }}>Layanan</h4>
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+            <li style={{ marginBottom: '12px' }}><Link to="/layanan/detail-billboard" onMouseEnter={() => prefetchRoute('/layanan')} data-prefetch-route="/layanan" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none', transition: 'color 0.2s ease' }} onMouseEnter={(e) => e.currentTarget.style.color = '#fff'} onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.7)'}>Advertising (Billboard)</Link></li>
+            <li style={{ marginBottom: '12px' }}><Link to="/layanan/detail-event" onMouseEnter={() => prefetchRoute('/layanan')} data-prefetch-route="/layanan" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none', transition: 'color 0.2s ease' }} onMouseEnter={(e) => e.currentTarget.style.color = '#fff'} onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.7)'}>Event Organizer</Link></li>
+            <li><Link to="/layanan/detail-booth" onMouseEnter={() => prefetchRoute('/layanan')} data-prefetch-route="/layanan" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none', transition: 'color 0.2s ease' }} onMouseEnter={(e) => e.currentTarget.style.color = '#fff'} onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.7)'}>Booth Exhibition</Link></li>
           </ul>
         </section>
 
-        <section>
-          <h4>Perusahaan</h4>
-          <ul>
-            <li><Link to="/tentang-kami" onMouseEnter={() => prefetchRoute('/tentang-kami')} data-prefetch-route="/tentang-kami">Tentang Kami</Link></li>
-            <li><Link to="/kontak-kami" onMouseEnter={() => prefetchRoute('/kontak-kami')} data-prefetch-route="/kontak-kami">Kontak</Link></li>
-            <li><Link to="/kebijakan-privasi" onMouseEnter={() => prefetchRoute('/kebijakan-privasi')} data-prefetch-route="/kebijakan-privasi">Kebijakan Privasi</Link></li>
-            <li><Link to="/syarat-layanan" onMouseEnter={() => prefetchRoute('/syarat-layanan')} data-prefetch-route="/syarat-layanan">Syarat Layanan</Link></li>
+        <section style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '32px', marginBottom: '32px' }}>
+          <h4 style={{ fontSize: '12px', letterSpacing: '0.08em', textTransform: 'uppercase', color: '#0ea5e9', marginBottom: '16px', fontWeight: 600 }}>Perusahaan</h4>
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+            <li style={{ marginBottom: '12px' }}><Link to="/tentang-kami" onMouseEnter={() => prefetchRoute('/tentang-kami')} data-prefetch-route="/tentang-kami" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none', transition: 'color 0.2s ease' }} onMouseEnter={(e) => e.currentTarget.style.color = '#fff'} onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.7)'}>Tentang Kami</Link></li>
+            <li><Link to="/kontak-kami" onMouseEnter={() => prefetchRoute('/kontak-kami')} data-prefetch-route="/kontak-kami" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none', transition: 'color 0.2s ease' }} onMouseEnter={(e) => e.currentTarget.style.color = '#fff'} onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.7)'}>Kontak</Link></li>
           </ul>
         </section>
 
-        <section>
-          <h4>Hubungi Kami</h4>
-          <ul>
-            <li>Tirtajaya, Kec. Sukmajaya, Kota Depok, Jawa Barat 16413</li>
-            <li><a href="tel:+62217894561">+62 21 789 4561</a></li>
-            <li><a href="mailto:dhr@trimitramulti.co.id">dhr@trimitramulti.co.id</a></li>
+        <section style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '32px' }}>
+          <h4 style={{ fontSize: '12px', letterSpacing: '0.08em', textTransform: 'uppercase', color: '#0ea5e9', marginBottom: '16px', fontWeight: 600 }}>Hubungi Kami</h4>
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+            <li style={{ marginBottom: '16px', display: 'flex', gap: '12px', alignItems: 'flex-start', color: 'rgba(255,255,255,0.7)', fontSize: '14px' }}>
+              <MapPin size={18} style={{ marginTop: '2px', flexShrink: 0, color: '#0ea5e9' }} />
+              <span>Ruko Anggrek 1, No 37, Grand Depok City, Jl Boulevard Raya Kota Depok</span>
+            </li>
+            <li style={{ marginBottom: '16px', display: 'flex', gap: '12px', alignItems: 'flex-start', color: 'rgba(255,255,255,0.7)', fontSize: '14px' }}>
+              <MapPin size={18} style={{ marginTop: '2px', flexShrink: 0, color: '#0ea5e9' }} />
+              <span>Workshop Pameran: Jalan Serua Raya, Bojongsari Kota Depok</span>
+            </li>
+            <li style={{ marginBottom: '16px', display: 'flex', gap: '12px', alignItems: 'center', color: 'rgba(255,255,255,0.7)', fontSize: '14px' }}>
+              <MapPin size={18} style={{ flexShrink: 0, color: '#0ea5e9' }} />
+              <span>Workshop Reklame: Jalan Reformasi Raya no 2, Pondok Aren, Tangerang Selatan</span>
+            </li>
+            <li style={{ marginBottom: '12px', display: 'flex', gap: '12px', alignItems: 'center', color: 'rgba(255,255,255,0.7)', fontSize: '14px' }}>
+              <Phone size={18} style={{ flexShrink: 0, color: '#0ea5e9' }} />
+              <a href="tel:+62811109842" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none', transition: 'color 0.2s ease' }} onMouseEnter={(e) => e.currentTarget.style.color = '#fff'} onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.7)'}>0811109842</a>
+            </li>
+            <li style={{ display: 'flex', gap: '12px', alignItems: 'center', color: 'rgba(255,255,255,0.7)', fontSize: '14px' }}>
+              <Mail size={18} style={{ flexShrink: 0, color: '#0ea5e9' }} />
+              <a href="mailto:dhr@trimitramulti.co.id" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none', transition: 'color 0.2s ease' }} onMouseEnter={(e) => e.currentTarget.style.color = '#fff'} onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.7)'}>dhr@trimitramulti.co.id</a>
+            </li>
           </ul>
         </section>
       </div>
 
-      <div className="container footer-bottom">
-        <div className="footer-copy">
+      <div className="container" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '24px', paddingBottom: '24px', textAlign: 'center' }}>
+        <p style={{ margin: 0, fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>
           © 2026 PT Trimitra Multi Kreasi. Seluruh hak cipta dilindungi.
-        </div>
-        <motion.div
-          className="footer-social-pills"
-          variants={socialListVariants}
-          initial={prefersReducedMotion ? false : 'hidden'}
-          animate={prefersReducedMotion ? {} : 'show'}
-          aria-label="Social media"
-        >
-          {socialItems.map((item) => (
-            <motion.a
-              key={item.label}
-              href={item.href}
-              target="_blank"
-              rel="noreferrer"
-              className="social-pill"
-              variants={socialItemVariants}
-            >
-              <span className="social-pill-dot" aria-hidden="true" />
-              <span className="social-pill-label">{item.label}</span>
-            </motion.a>
-          ))}
-        </motion.div>
+        </p>
       </div>
     </footer>
   )

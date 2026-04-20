@@ -10,14 +10,21 @@ const HERO_CAMPAIGN_MODES = [
     image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=2200&q=80',
     imageAlt: 'Booth pameran modern dengan keramaian pengunjung.',
     imagePosition: 'center center',
-    headline: 'Booth Exhibition yang Menjadi Magnet Keramaian',
+    headline: 'Menghadirkan Experience Brand yang Kuat di Setiap Titik Interaksi',
     pitch:
-      'Kami desain alur booth yang membuat orang berhenti, masuk, dan berdialog dengan tim sales tanpa terasa dipaksa.',
+      'Kami merancang event, booth exhibition, dan media advertising yang menarik audiens dan menciptakan impact nyata.',
     accent: '#f0cf8f',
     accentSoft: 'rgba(240, 207, 143, 0.24)',
     ctaPrimary: 'Rancang Booth Saya',
     ctaSecondary: 'Lihat Showcase Booth',
-    pillars: ['Spatial Storytelling', 'Interactive Display', 'High-Intent Flow'],
+    pillars: [
+      'Free Design',
+      'Custom Booth Production',
+      'One-Site Setup',
+      'Dismantling Service',
+      'Full Maintenance',
+      'Event Support',
+    ],
     stats: [
       { value: '41%', label: 'Avg Dwell Lift' },
       { value: '3.2x', label: 'Touchpoint Depth' },
@@ -151,12 +158,12 @@ const HERO_CAMPAIGN_MODES = [
 ]
 
 const HERO_MARQUEE_TEXT =
-  'BOOTH EXHIBITION ● EVENT ACTIVATION ● OUTDOOR MEDIA ● TRIMITRA SERVICE EXPLORER ● ' +
-  'BOOTH EXHIBITION ● EVENT ACTIVATION ● OUTDOOR MEDIA ● TRIMITRA SERVICE EXPLORER ● ' +
-  'BOOTH EXHIBITION ● EVENT ACTIVATION ● OUTDOOR MEDIA ● TRIMITRA SERVICE EXPLORER ● '
+  'BOOTH EXHIBITION • EVENT ORGANIZER • BILLBOARD • BACKDROP • EQUIPMENT RENTAL • ' +
+  'BOOTH EXHIBITION • EVENT ORGANIZER • BILLBOARD • BACKDROP • EQUIPMENT RENTAL • ' +
+  'BOOTH EXHIBITION • EVENT ORGANIZER • BILLBOARD • BACKDROP • EQUIPMENT RENTAL • '
 
 function AccordionHero({
-  kicker = 'Trimitra Campaign Selector',
+  kicker = 'PT Trimitra Multi Kreasi',
   modes = HERO_CAMPAIGN_MODES,
   primaryLink = '/kontak-kami',
   secondaryLink = '/galeri',
