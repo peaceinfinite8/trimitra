@@ -382,7 +382,9 @@ function BeritaPage() {
                     src={featuredPost.image}
                     alt={featuredPost.title}
                     wrapperClassName="berita-featured-media"
+                    wrapperStyle={{ maxHeight: '240px', overflow: 'hidden', width: '100%', height: '240px' }}
                     className="berita-featured-img"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', maxHeight: '240px' }}
                   />
                 </Link>
                 <div className="berita-featured-copy">
@@ -416,7 +418,9 @@ function BeritaPage() {
                           src={item.image}
                           alt={item.title}
                           wrapperClassName="berita-card3-media"
+                          wrapperStyle={{ maxHeight: '240px', overflow: 'hidden' }}
                           className="berita-card3-img"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', maxHeight: '240px' }}
                         />
                       </Link>
                       <div className="berita-card3-copy">
@@ -455,7 +459,9 @@ function BeritaPage() {
                             src={item.image}
                             alt={item.title}
                             wrapperClassName="berita-terbaru-thumb-wrap"
+                            wrapperStyle={{ width: '96px', height: '72px', maxHeight: '72px', overflow: 'hidden', flexShrink: 0 }}
                             className="berita-terbaru-thumb-img"
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                           />
                         </Link>
                         <div className="berita-terbaru-copy">
@@ -490,67 +496,92 @@ function BeritaPage() {
                       </Link>
                     ) : null}
                   </div>
-                  <div className="berita-editorial-grid4">
-                    {section.items.slice(0, 4).map((item, index, visibleItems) => {
-                      const visibleCount = visibleItems.length;
 
-                      let gridVariantClass = "is-wide";
-                      if (visibleCount === 1) {
-                        gridVariantClass = "is-full";
-                      } else if (visibleCount === 2) {
-                        gridVariantClass = "is-half";
-                      } else if (visibleCount === 3) {
-                        gridVariantClass = index === 0 ? "is-lead" : "is-regular";
-                      } else {
-                        gridVariantClass =
-                          index === 0
-                            ? "is-lead"
-                            : index === 1
-                              ? "is-tall"
-                              : index === 2
-                                ? "is-regular"
-                                : "is-wide";
-                      }
-
+                  {/* Alternating full-width card layout */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    {section.items.slice(0, 4).map((item, index) => {
+                      const isEven = index % 2 === 0;
                       return (
                         <article
                           key={item.slug}
-                          className={`berita-grid-card ${gridVariantClass}`}
+                          className="berita-alt-card"
+                          style={{
+                            display: 'flex',
+                            flexDirection: isEven ? 'row' : 'row-reverse',
+                            borderRadius: '16px',
+                            overflow: 'hidden',
+                            background: 'linear-gradient(160deg, rgba(13,37,70,0.95), rgba(9,26,53,0.88))',
+                            border: '1px solid rgba(255,255,255,0.08)',
+                            boxShadow: '0 8px 24px rgba(3,10,24,0.28)',
+                            transition: 'transform 0.3s ease-out, box-shadow 0.3s ease-out',
+                            minHeight: '160px',
+                          }}
+                          onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 20px 40px rgba(3,10,24,0.44)'; }}
+                          onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 8px 24px rgba(3,10,24,0.28)'; }}
                         >
+                          {/* Image column */}
                           <Link
                             to={`/berita/${item.slug}`}
-                            className="berita-image-link"
-                            data-chip={getContentChipLabel(item.category)}
-                            onMouseEnter={() =>
-                              prefetchDetail(item.slug, item.image)
-                            }
-                            onFocus={() =>
-                              prefetchDetail(item.slug, item.image)
-                            }
+                            style={{
+                              display: 'block',
+                              width: '55%',
+                              flexShrink: 0,
+                              overflow: 'hidden',
+                              maxHeight: '280px',
+                            }}
+                            onMouseEnter={() => prefetchDetail(item.slug, item.image)}
+                            onFocus={() => prefetchDetail(item.slug, item.image)}
                           >
                             <LazyImage
                               src={item.image}
                               alt={item.title}
                               wrapperClassName="berita-grid-media"
+                              wrapperStyle={{ width: '100%', height: '100%', minHeight: '160px', maxHeight: '280px', overflow: 'hidden' }}
                               className="berita-grid-image"
+                              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.5s ease-out' }}
                             />
                           </Link>
-                          <div className="berita-grid-copy">
+
+                          {/* Text column */}
+                          <div style={{
+                            width: '45%',
+                            padding: '20px 24px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+                            gap: '10px',
+                            minWidth: 0,
+                          }}>
                             <CategoryBadge category={item.category} />
                             <Link
                               to={`/berita/${item.slug}`}
                               className="berita-grid-title"
+                              style={{ fontSize: '17px', lineHeight: 1.25 }}
                             >
                               {item.title}
                             </Link>
+                            {item.excerpt && (
+                              <p style={{
+                                color: '#CBD5E1',
+                                fontSize: '13px',
+                                lineHeight: 1.55,
+                                margin: 0,
+                                display: '-webkit-box',
+                                WebkitLineClamp: 3,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden',
+                              }}>
+                                {item.excerpt}
+                              </p>
+                            )}
                             <p className="berita-date">{item.date}</p>
-                            <p>{item.excerpt}</p>
                           </div>
                         </article>
                       );
                     })}
                   </div>
                 </section>
+
               ))}
 
               {spotlightMain ? (
@@ -589,7 +620,9 @@ function BeritaPage() {
                           src={spotlightMain.image}
                           alt={spotlightMain.title}
                           wrapperClassName="berita-spotlight-main-media"
+                          wrapperStyle={{ maxHeight: '240px', overflow: 'hidden', width: '100%' }}
                           className="berita-spotlight-main-img"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', maxHeight: '240px' }}
                         />
                       </Link>
                       <div className="berita-spotlight-main-copy">
@@ -626,7 +659,9 @@ function BeritaPage() {
                               src={item.image}
                               alt={item.title}
                               wrapperClassName="berita-spotlight-small-media"
+                              wrapperStyle={{ maxHeight: '160px', overflow: 'hidden', width: '100%' }}
                               className="berita-spotlight-small-img"
+                              style={{ width: '100%', height: '100%', objectFit: 'cover', maxHeight: '160px' }}
                             />
                           </Link>
                           <div className="berita-spotlight-small-copy">

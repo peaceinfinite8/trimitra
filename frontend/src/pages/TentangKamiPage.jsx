@@ -104,7 +104,7 @@ function AboutStorySection() {
           <div className="story-visual-overlay" aria-hidden="true" />
           <div className="story-visual-badge" aria-hidden="true">
             <span>Since</span>
-            <strong>2017</strong>
+            <strong>2012</strong>
           </div>
         </div>
 

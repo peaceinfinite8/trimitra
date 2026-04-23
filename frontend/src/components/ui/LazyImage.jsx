@@ -6,6 +6,7 @@ function LazyImage({
   alt,
   className,
   wrapperClassName = '',
+  wrapperStyle,
   style,
   loading = 'lazy',
   fetchPriority,
@@ -22,7 +23,7 @@ function LazyImage({
   }, [src])
 
   return (
-    <div className={`lazy-image-wrap ${wrapperClassName}`.trim()}>
+    <div className={`lazy-image-wrap ${wrapperClassName}`.trim()} style={wrapperStyle}>
       <img
         src={resolvedSrc}
         alt={alt}

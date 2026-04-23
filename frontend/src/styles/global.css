@@ -14737,8 +14737,7 @@ body.route-news .berita-page-btn.is-active {
 .berita-featured-card {
   display: flex;
   flex-direction: row;
-  align-items: stretch;
-  min-height: 320px;
+  align-items: flex-start;
   border-radius: 18px;
   overflow: hidden;
   background: linear-gradient(160deg, rgba(13, 37, 70, 0.95), rgba(9, 26, 53, 0.88));
@@ -14754,10 +14753,12 @@ body.route-news .berita-page-btn.is-active {
   box-shadow: 0 28px 50px rgba(3, 12, 26, 0.44);
 }
 
-/* Image column — left, 55% width */
+/* Image column — left, 55% width, fixed 240px height */
 .berita-featured-image-col {
   display: block;
   width: 55%;
+  height: 240px;
+  max-height: 240px;
   flex-shrink: 0;
   overflow: hidden;
 }
@@ -15109,6 +15110,117 @@ body.route-news .berita-page-btn.is-active,
 }
 
 /* ── end BeritaPage upgraded layout ── */
+
+/* ── Uniform card image height (max 240px) ───────────────────────────────── */
+
+/* 3-col grid cards */
+.berita-card3-media {
+  max-height: 240px;
+}
+
+/* Featured hero — image column is full-height row, cap it */
+.berita-featured-image-col {
+  max-height: 240px;
+}
+
+/* Section editorial grid (berita-grid-card) */
+.berita-grid-media {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 240px;
+  overflow: hidden;
+  background: #1e3a60;
+  flex-shrink: 0;
+}
+
+.berita-grid-media .lazy-image-wrap {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.berita-grid-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s ease-out;
+}
+
+.berita-grid-card:hover .berita-grid-image {
+  transform: scale(1.05);
+}
+
+/* Spotlight main */
+.berita-spotlight-main-media {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 240px;
+  overflow: hidden;
+  background: #1e3a60;
+}
+
+.berita-spotlight-main-media .lazy-image-wrap {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.berita-spotlight-main-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s ease-out;
+}
+
+.berita-spotlight-main:hover .berita-spotlight-main-img {
+  transform: scale(1.04);
+}
+
+/* Spotlight small cards */
+.berita-spotlight-small-media {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 160px;
+  overflow: hidden;
+  background: #1e3a60;
+}
+
+.berita-spotlight-small-media .lazy-image-wrap {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.berita-spotlight-small-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease-out;
+}
+
+.berita-spotlight-small:hover .berita-spotlight-small-img {
+  transform: scale(1.05);
+}
+
+
 
 /* Layanan page premium sky-blue revamp */
 
