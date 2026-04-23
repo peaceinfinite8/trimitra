@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import MainLayout from '../layouts/MainLayout'
 import { pageImporters } from './routePrefetch'
 import MaintenancePage from '../pages/MaintenancePage'
+import RouteTransitionLoader from '../components/ui/RouteTransitionLoader'
 
 const HomePage = lazy(pageImporters['/'])
 const TentangKamiPage = lazy(pageImporters['/tentang-kami'])
@@ -18,20 +19,11 @@ const KebijakanPrivasiPage = lazy(pageImporters['/kebijakan-privasi'])
 const SyaratLayananPage = lazy(pageImporters['/syarat-layanan'])
 
 function RouteFallback() {
-  return <div className="route-loader" aria-label="Memuat halaman" />
+  return <RouteTransitionLoader />
 }
 
 function DetailFallback() {
-  return (
-    <div style={{ width: '100%', minHeight: '100vh', background: '#060d1a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '20px' }}>
-      <div style={{ padding: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '100px', display: 'flex', border: '1px solid rgba(255,255,255,0.1)' }}>
-        <div style={{ width: '24px', height: '24px', borderRadius: '50%', border: '2px solid transparent', borderTopColor: '#38bdf8', borderRightColor: '#38bdf8', animation: 'spin 1s linear infinite' }} />
-      </div>
-      <style>{`
-         @keyframes spin { 100% { transform: rotate(360deg); } }
-       `}</style>
-    </div>
-  )
+  return <RouteTransitionLoader label="Memuat detail halaman" />
 }
 
 function AppRouter() {

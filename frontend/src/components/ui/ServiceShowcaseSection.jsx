@@ -190,7 +190,7 @@ function ServiceFeatureIcon({ icon }) {
     )
 }
 
-const MotionLink = motion(Link)
+const MotionLink = motion.create(Link)
 
 function ServiceShowcaseSection({ items = SERVICE_SPLIT_ITEMS } = {}) {
     const prefersReducedMotion = useReducedMotion()

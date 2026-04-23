@@ -60,7 +60,16 @@ function inferContentTypeFromText(value) {
 }
 
 function getContentChipLabel(value) {
-  return inferContentTypeFromText(value).toUpperCase();
+  return inferContentTypeFromText(value);
+}
+
+function CategoryBadge({ category }) {
+  const type = inferContentTypeFromText(category);
+  return (
+    <span className={`berita-category-badge berita-category-badge--${type}`}>
+      {category || type.toUpperCase()}
+    </span>
+  );
 }
 
 function toSectionSlug(value) {
@@ -355,99 +364,115 @@ function BeritaPage() {
                 </div>
               </section>
 
-              <section className="berita-editorial-hero">
-                <div className="berita-editorial-left">
-                  {sideHeroPosts.map((item) => (
-                    <article key={item.slug} className="berita-mini-card">
+              {/* Featured Article — two-column hero */}
+              <article
+                className="berita-featured-card"
+                onMouseEnter={() =>
+                  prefetchDetail(featuredPost.slug, featuredPost.image)
+                }
+                onFocus={() =>
+                  prefetchDetail(featuredPost.slug, featuredPost.image)
+                }
+              >
+                <Link
+                  to={`/berita/${featuredPost.slug}`}
+                  className="berita-featured-image-col"
+                >
+                  <LazyImage
+                    src={featuredPost.image}
+                    alt={featuredPost.title}
+                    wrapperClassName="berita-featured-media"
+                    className="berita-featured-img"
+                  />
+                </Link>
+                <div className="berita-featured-copy">
+                  <CategoryBadge category={featuredPost.category} />
+                  <Link
+                    to={`/berita/${featuredPost.slug}`}
+                    className="berita-featured-title"
+                  >
+                    {featuredPost.title}
+                  </Link>
+                  <p className="berita-featured-excerpt">{featuredPost.excerpt}</p>
+                  <p className="berita-date">{featuredPost.date}</p>
+                </div>
+              </article>
+
+              {/* 3-column uniform blog grid */}
+              <section className="berita-grid3-section">
+                <div className="berita-grid3">
+                  {pagedEditorialPosts.slice(1).map((item) => (
+                    <article
+                      key={item.slug}
+                      className="berita-card3"
+                      onMouseEnter={() => prefetchDetail(item.slug, item.image)}
+                      onFocus={() => prefetchDetail(item.slug, item.image)}
+                    >
                       <Link
                         to={`/berita/${item.slug}`}
-                        className="berita-image-link"
-                        data-chip={getContentChipLabel(item.category)}
-                        onMouseEnter={() =>
-                          prefetchDetail(item.slug, item.image)
-                        }
-                        onFocus={() => prefetchDetail(item.slug, item.image)}
+                        className="berita-card3-image-link"
                       >
                         <LazyImage
                           src={item.image}
                           alt={item.title}
-                          wrapperClassName="berita-mini-media"
-                          className="berita-mini-image"
+                          wrapperClassName="berita-card3-media"
+                          className="berita-card3-img"
                         />
                       </Link>
-                      <div className="berita-mini-copy">
-                        <p className="berita-kicker">{item.category}</p>
+                      <div className="berita-card3-copy">
+                        <CategoryBadge category={item.category} />
                         <Link
                           to={`/berita/${item.slug}`}
-                          className="berita-mini-title"
+                          className="berita-card3-title"
                         >
                           {item.title}
                         </Link>
+                        <p className="berita-card3-excerpt">{item.excerpt}</p>
                         <p className="berita-date">{item.date}</p>
                       </div>
                     </article>
                   ))}
                 </div>
+              </section>
 
-                <article className="berita-editorial-main">
-                  <Link
-                    to={`/berita/${featuredPost.slug}`}
-                    className="berita-image-link"
-                    data-chip={getContentChipLabel(featuredPost.category)}
-                    onMouseEnter={() =>
-                      prefetchDetail(featuredPost.slug, featuredPost.image)
-                    }
-                    onFocus={() =>
-                      prefetchDetail(featuredPost.slug, featuredPost.image)
-                    }
-                  >
-                    <LazyImage
-                      src={featuredPost.image}
-                      alt={featuredPost.title}
-                      wrapperClassName="berita-main-media"
-                      className="berita-main-image"
-                    />
-                  </Link>
-                  <div className="berita-main-copy">
-                    <p className="berita-kicker">{featuredPost.category}</p>
-                    <h1>{featuredPost.title}</h1>
-                    <p>{featuredPost.excerpt}</p>
-                    <p className="berita-date">{featuredPost.date}</p>
+              {/* Artikel Terbaru — horizontal 2-col section below grid */}
+              {latestPosts.length > 0 && (
+                <section className="berita-terbaru-section">
+                  <div className="berita-terbaru-head">
+                    <span className="berita-terbaru-kicker">Pilihan Redaksi</span>
+                    <h2 className="berita-terbaru-title">Artikel Terbaru</h2>
                   </div>
-                </article>
-
-                <aside className="berita-editorial-latest">
-                  <div className="berita-latest-head">LATEST</div>
-                  {latestPosts.map((item) => (
-                    <article key={item.slug} className="berita-latest-item">
-                      <div className="berita-latest-copy">
+                  <div className="berita-terbaru-grid">
+                    {latestPosts.map((item) => (
+                      <article key={item.slug} className="berita-terbaru-item">
                         <Link
                           to={`/berita/${item.slug}`}
-                          className="berita-latest-title"
-                          onMouseEnter={() =>
-                            prefetchDetail(item.slug, item.image)
-                          }
+                          className="berita-terbaru-thumb-link"
+                          onMouseEnter={() => prefetchDetail(item.slug, item.image)}
                           onFocus={() => prefetchDetail(item.slug, item.image)}
                         >
-                          {item.title}
+                          <LazyImage
+                            src={item.image}
+                            alt={item.title}
+                            wrapperClassName="berita-terbaru-thumb-wrap"
+                            className="berita-terbaru-thumb-img"
+                          />
                         </Link>
-                        <p className="berita-date">{item.date}</p>
-                      </div>
-                      <Link
-                        to={`/berita/${item.slug}`}
-                        className="berita-latest-thumb"
-                      >
-                        <LazyImage
-                          src={item.image}
-                          alt={item.title}
-                          wrapperClassName="berita-latest-thumb-wrap"
-                          className="berita-latest-thumb-img"
-                        />
-                      </Link>
-                    </article>
-                  ))}
-                </aside>
-              </section>
+                        <div className="berita-terbaru-copy">
+                          <CategoryBadge category={item.category} />
+                          <Link
+                            to={`/berita/${item.slug}`}
+                            className="berita-terbaru-item-title"
+                          >
+                            {item.title}
+                          </Link>
+                          <p className="berita-date">{item.date}</p>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              )}
 
               {sectionGroups.map((section) => (
                 <section
@@ -511,7 +536,7 @@ function BeritaPage() {
                             />
                           </Link>
                           <div className="berita-grid-copy">
-                            <p className="berita-kicker">{item.category}</p>
+                            <CategoryBadge category={item.category} />
                             <Link
                               to={`/berita/${item.slug}`}
                               className="berita-grid-title"
@@ -568,9 +593,7 @@ function BeritaPage() {
                         />
                       </Link>
                       <div className="berita-spotlight-main-copy">
-                        <p className="berita-kicker">
-                          {spotlightMain.category}
-                        </p>
+                        <CategoryBadge category={spotlightMain.category} />
                         <Link
                           to={`/berita/${spotlightMain.slug}`}
                           className="berita-spotlight-main-title"
@@ -607,7 +630,7 @@ function BeritaPage() {
                             />
                           </Link>
                           <div className="berita-spotlight-small-copy">
-                            <p className="berita-kicker">{item.category}</p>
+                            <CategoryBadge category={item.category} />
                             <Link
                               to={`/berita/${item.slug}`}
                               className="berita-spotlight-small-title"

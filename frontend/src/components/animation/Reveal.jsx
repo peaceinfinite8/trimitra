@@ -52,11 +52,18 @@ const itemVariants = {
 
 export function SectionReveal({ children, className = '', style, ...rest }) {
   const prefersReducedMotion = useReducedMotion()
+  const sectionStyle = prefersReducedMotion
+    ? style
+    : {
+      ...style,
+      opacity: 0,
+      willChange: 'opacity, transform, clip-path, filter',
+    }
 
   return (
     <motion.section
       className={className}
-      style={style}
+      style={sectionStyle}
       {...rest}
       variants={sectionVariants}
       initial={prefersReducedMotion ? false : 'hidden'}
