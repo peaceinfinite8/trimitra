@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import LazyImage from "../components/ui/LazyImage";
 import { blogPosts } from "../data/blogPosts";
 import {
@@ -336,6 +336,77 @@ function BeritaPage() {
     }
   };
 
+  // ── Search ────────────────────────────────────────────────────────────────
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchFocus, setSearchFocus] = useState(0);
+  const searchRef = useRef(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setSearchOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  // Score + filter by relevance
+  const searchResults = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return [];
+    return editorialPosts
+      .map((post) => {
+        const title = (post.title || '').toLowerCase();
+        const excerpt = (post.excerpt || '').toLowerCase();
+        const cat = (post.category || '').toLowerCase();
+        let score = 0;
+        if (title.startsWith(q)) score += 100;
+        else if (title.includes(q)) score += 70 - title.indexOf(q) * 0.3;
+        if (excerpt.includes(q)) score += 25;
+        if (cat.includes(q)) score += 10;
+        return { ...post, _score: score };
+      })
+      .filter((p) => p._score > 0)
+      .sort((a, b) => b._score - a._score)
+      .slice(0, 7);
+  }, [searchQuery, editorialPosts]);
+
+  // Highlight matching substring
+  const highlightText = useCallback((text, query) => {
+    if (!query.trim()) return text;
+    const idx = text.toLowerCase().indexOf(query.toLowerCase());
+    if (idx === -1) return text;
+    return (
+      <>
+        {text.slice(0, idx)}
+        <mark style={{ background: 'transparent', color: '#f5c518', fontWeight: 700 }}>
+          {text.slice(idx, idx + query.length)}
+        </mark>
+        {text.slice(idx + query.length)}
+      </>
+    );
+  }, []);
+
+  const handleSearchKeyDown = (e) => {
+    if (!searchResults.length) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setSearchFocus(f => Math.min(f + 1, searchResults.length - 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setSearchFocus(f => Math.max(f - 1, 0));
+    } else if (e.key === 'Enter') {
+      const hit = searchResults[searchFocus];
+      if (hit) { setSearchOpen(false); setSearchQuery(''); navigate(`/berita/${hit.slug}`); }
+    } else if (e.key === 'Escape') {
+      setSearchOpen(false);
+    }
+  };
+
   return (
     <div className="berita-editorial-page">
       <section className="section blog-news-page berita-editorial-wrap" data-nav-hero>
@@ -348,19 +419,202 @@ function BeritaPage() {
             <>
               <div id="berita-list" />
               <section className="berita-editorial-intro">
-                <div>
-                  <p className="berita-intro-kicker">Editorial Feed</p>
-                  <h1 className="berita-intro-title">Berita & Insight Trimitra</h1>
-                  <p className="berita-intro-lead">
-                    Update proyek terbaru, insight event, dan studi eksekusi lapangan
-                    yang relevan untuk kebutuhan brand activation.
-                  </p>
+                {/* Top row: heading + meta stats */}
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+                  <div>
+                    <p className="berita-intro-kicker">Editorial Feed</p>
+                    <h1 className="berita-intro-title">Berita &amp; Insight Trimitra</h1>
+                    <p className="berita-intro-lead">
+                      Update proyek terbaru, insight event, dan studi eksekusi lapangan
+                      yang relevan untuk kebutuhan brand activation.
+                    </p>
+                  </div>
+                  <div className="berita-intro-meta" aria-label="Ringkasan halaman berita">
+                    <span>{filteredPosts.length} artikel</span>
+                    <span>
+                      Halaman {currentPage} / {totalPages}
+                    </span>
+                  </div>
                 </div>
-                <div className="berita-intro-meta" aria-label="Ringkasan halaman berita">
-                  <span>{filteredPosts.length} artikel</span>
-                  <span>
-                    Halaman {currentPage} / {totalPages}
-                  </span>
+
+                {/* Search bar — inside hero, full width */}
+                <div ref={searchRef} style={{ position: 'relative', marginTop: '20px' }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    background: 'rgba(10,22,48,0.85)',
+                    border: `1.5px solid ${searchOpen && searchQuery ? '#f5c518' : 'rgba(255,255,255,0.14)'}`,
+                    borderRadius: '12px',
+                    padding: '10px 16px',
+                    backdropFilter: 'blur(8px)',
+                    transition: 'border-color 0.2s ease',
+                  }}>
+                    {/* Search icon */}
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}>
+                      <circle cx="11" cy="11" r="8" />
+                      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                    <input
+                      type="text"
+                      placeholder="Cari artikel..."
+                      value={searchQuery}
+                      aria-label="Cari artikel berita"
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        setSearchOpen(true);
+                        setSearchFocus(0);
+                      }}
+                      onFocus={() => setSearchOpen(true)}
+                      onKeyDown={handleSearchKeyDown}
+                      style={{
+                        flex: 1,
+                        background: 'transparent',
+                        border: 'none',
+                        outline: 'none',
+                        color: '#fff',
+                        fontSize: '15px',
+                        fontFamily: 'inherit',
+                      }}
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => { setSearchQuery(''); setSearchOpen(false); }}
+                        aria-label="Hapus pencarian"
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '2px', lineHeight: 1 }}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                          <line x1="18" y1="6" x2="6" y2="18" />
+                          <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Dropdown results */}
+                  {searchOpen && searchQuery.trim() && (
+                    <div
+                      role="listbox"
+                      aria-label="Hasil pencarian"
+                      style={{
+                        position: 'absolute',
+                        top: 'calc(100% + 6px)',
+                        left: 0,
+                        right: 0,
+                        zIndex: 200,
+                        background: '#0d1f40',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: '12px',
+                        boxShadow: '0 16px 40px rgba(0,0,0,0.5)',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      {searchResults.length === 0 ? (
+                        <div style={{ padding: '16px 18px', color: '#64748b', fontSize: '14px' }}>
+                          Tidak ada artikel yang cocok untuk &ldquo;<strong style={{ color: '#94a3b8' }}>{searchQuery}</strong>&rdquo;
+                        </div>
+                      ) : (
+                        searchResults.map((post, idx) => (
+                          <button
+                            key={post.slug}
+                            role="option"
+                            aria-selected={idx === searchFocus}
+                            onClick={() => {
+                              setSearchOpen(false);
+                              setSearchQuery('');
+                              navigate(`/berita/${post.slug}`);
+                            }}
+                            onMouseEnter={() => setSearchFocus(idx)}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '14px',
+                              width: '100%',
+                              minHeight: '72px',
+                              padding: '12px 16px',
+                              background: idx === searchFocus
+                                ? 'rgba(245,197,24,0.07)'
+                                : 'transparent',
+                              border: 'none',
+                              borderBottom: idx < searchResults.length - 1
+                                ? '1px solid rgba(255,255,255,0.05)'
+                                : 'none',
+                              cursor: 'pointer',
+                              textAlign: 'left',
+                              transition: 'background 0.15s ease',
+                            }}
+                          >
+                            {/* Thumbnail — fixed 56×56, always square */}
+                            <div style={{
+                              width: '56px',
+                              height: '56px',
+                              flexShrink: 0,
+                              borderRadius: '8px',
+                              overflow: 'hidden',
+                              background: '#1e3a60',
+                            }}>
+                              {post.image && (
+                                <img
+                                  src={post.image}
+                                  alt=""
+                                  aria-hidden="true"
+                                  style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'cover',
+                                    display: 'block',
+                                  }}
+                                />
+                              )}
+                            </div>
+
+                            {/* Text — title + meta */}
+                            <div style={{ minWidth: 0, flex: 1, display: 'flex', flexDirection: 'column', gap: '4px', justifyContent: 'center' }}>
+                              <div style={{
+                                color: idx === searchFocus ? '#f5c518' : '#e2e8f0',
+                                fontSize: '14px',
+                                fontWeight: 600,
+                                lineHeight: '1.35',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                transition: 'color 0.15s ease',
+                              }}>
+                                {highlightText(post.title || '', searchQuery)}
+                              </div>
+                              <div style={{
+                                color: '#475569',
+                                fontSize: '11.5px',
+                                fontWeight: 500,
+                                letterSpacing: '0.01em',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                              }}>
+                                {post.category} · {post.date}
+                              </div>
+                            </div>
+
+                            {/* Arrow — vertically centered */}
+                            <svg
+                              width="14" height="14"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke={idx === searchFocus ? '#f5c518' : '#334155'}
+                              strokeWidth="2.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              style={{ flexShrink: 0, transition: 'stroke 0.15s ease' }}
+                            >
+                              <polyline points="9 18 15 12 9 6" />
+                            </svg>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  )}
                 </div>
               </section>
 

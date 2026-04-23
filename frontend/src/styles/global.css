@@ -13647,12 +13647,11 @@ body.nav-over-hero .berita-editorial-wrap {
 
 .berita-editorial-intro {
   position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 20px;
-  align-items: end;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
   padding: clamp(18px, 2.2vw, 28px);
-  margin-bottom: 0;
+  margin-bottom: 20px;
   border: 0;
   border-radius: 22px;
   background:
@@ -13661,7 +13660,7 @@ body.nav-over-hero .berita-editorial-wrap {
       rgba(58, 150, 220, 0) 60%),
     linear-gradient(145deg, rgba(13, 37, 67, 0.8), rgba(10, 28, 58, 0.7));
   box-shadow: 0 22px 40px rgba(4, 14, 30, 0.34);
-  overflow: hidden;
+  /* no overflow:hidden — dropdown must escape */
 }
 
 /* Gradient bridge: dark hero → #EEF2F7 content area */
