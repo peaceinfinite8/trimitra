@@ -11,6 +11,8 @@ function LazyImage({
   loading = 'lazy',
   fetchPriority,
   onLoad,
+  width,
+  height,
   ...rest
 }) {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -32,6 +34,8 @@ function LazyImage({
         loading={loading}
         fetchPriority={fetchPriority}
         decoding="async"
+        width={width}
+        height={height}
         onLoad={(event) => {
           setIsLoaded(true)
           setLoadedSrc(resolvedSrc)

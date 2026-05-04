@@ -204,7 +204,7 @@ function Footer() {
           <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
             <li style={{ marginBottom: '16px', display: 'flex', gap: '12px', alignItems: 'flex-start', color: 'rgba(255,255,255,0.7)', fontSize: '14px' }}>
               <MapPin size={18} style={{ marginTop: '2px', flexShrink: 0, color: '#0ea5e9' }} />
-              <span>Ruko Anggrek 1, No 37, Grand Depok City, Jl Boulevard Raya Kota Depok</span>
+              <a href="https://www.google.com/maps/place/Trimitra+Multi+Kreasi+Office/@-6.4201307,106.8255109,867m/data=!3m2!1e3!4b1!4m6!3m5!1s0x2e69eb000b0a7947:0x9d6ee4b61223ea90!8m2!3d-6.420136!4d106.8280858!16s%2Fg%2F11yzp1knfq?entry=ttu&g_ep=EgoyMDI2MDQyOS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none', transition: 'color 0.2s ease' }} onMouseEnter={(e) => e.currentTarget.style.color = '#fff'} onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.7)'}><span>Trimitra Multi Kreasi Office</span></a>
             </li>
             <li style={{ marginBottom: '16px', display: 'flex', gap: '12px', alignItems: 'flex-start', color: 'rgba(255,255,255,0.7)', fontSize: '14px' }}>
               <MapPin size={18} style={{ marginTop: '2px', flexShrink: 0, color: '#0ea5e9' }} />

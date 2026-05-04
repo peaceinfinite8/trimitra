@@ -16,11 +16,11 @@ import { pickTextField } from "../data/wpUiFields";
 const CONTACT_DRAFT_KEY = "trimitra-contact-draft-v1";
 const WHATSAPP_NUMBER = "62811109842";
 const WHATSAPP_BASE_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
-const GOOGLE_MAPS_PLACE_URL = "https://maps.app.goo.gl/br2X3Bdp7dtWtNVj7";
+const GOOGLE_MAPS_PLACE_URL = "https://www.google.com/maps/place/Trimitra+Multi+Kreasi+Office/@-6.4201307,106.8255109,867m/data=!3m2!1e3!4b1!4m6!3m5!1s0x2e69eb000b0a7947:0x9d6ee4b61223ea90!8m2!3d-6.420136!4d106.8280858!16s%2Fg%2F11yzp1knfq?entry=ttu&g_ep=EgoyMDI2MDQyOS4wIKXMDSoASAFQAw%3D%3D";
 const GOOGLE_MAPS_EMBED_URL =
-  "https://www.google.com/maps?q=Tirtajaya,+Kec.+Sukmajaya,+Kota+Depok,+Jawa+Barat+16413&z=17&output=embed";
+  "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3964.2155693698357!2d106.8255109!3d-6.4201307!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69eb000b0a7947:0x9d6ee4b61223ea90!2sTrimitra%20Multi%20Kreasi%20Office!5e0!3m2!1sid!2sid!4v1715000000000";
 const OFFICE_ADDRESS =
-  "Ruko Anggrek 1, No 37, Grand Depok City, Jl Boulevard Raya Kota Depok";
+  "Trimitra Multi Kreasi Office";
 const EMPTY_FORM_DATA = {
   name: "",
   email: "",

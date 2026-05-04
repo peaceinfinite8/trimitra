@@ -10126,14 +10126,15 @@ button,
 .gallery-page-simple .gallery-hero-feature {
   justify-self: end;
   width: min(520px, 100%);
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 16 / 14;
   min-height: 0;
   border-radius: 26px;
   border: 1px solid rgba(125, 171, 202, 0.42);
   background: rgba(255, 255, 255, 0.14);
   box-shadow:
-    0 24px 42px rgba(4, 13, 27, 0.38),
-    0 0 0 1px rgba(124, 186, 231, 0.2);
+    0 32px 64px rgba(4, 13, 27, 0.52),
+    0 0 0 1px rgba(124, 186, 231, 0.28),
+    0 0 48px rgba(56, 189, 248, 0.18);
   transform: perspective(1200px) rotateY(-3deg);
 }
 
@@ -10235,10 +10236,6 @@ button,
   margin: 0;
   color: var(--muted);
   line-height: 1.6;
-}
-
-.gallery-page-simple .gallery-curation-band {
-  padding: 16px 0 28px;
 }
 
 .gallery-page-simple .gallery-curation-head {
@@ -10383,41 +10380,62 @@ button,
 }
 
 .gallery-page-simple .gallery-filter-shell {
-  display: grid;
-  grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
-  justify-content: flex-start;
-  align-items: start;
-  gap: 10px;
-  padding: 14px 16px;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(10px) saturate(120%);
-  -webkit-backdrop-filter: blur(10px) saturate(120%);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 0;
+  border-radius: 0;
+  border: none;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .gallery-page-simple .gallery-filter-intro {
   display: grid;
   gap: 4px;
   min-width: 0;
-  margin-right: 0;
-  align-content: center;
+}
+
+/* Scroll wrapper — fade mask on edges, hidden scrollbar */
+.gallery-page-simple .gallery-filter-scroll-wrap {
+  position: relative;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right,
+      transparent 0%,
+      black 5%,
+      black 95%,
+      transparent 100%);
+  mask-image: linear-gradient(to right,
+      transparent 0%,
+      black 5%,
+      black 95%,
+      transparent 100%);
 }
 
 .gallery-page-simple .gallery-filter-actions {
   display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  min-width: 0;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 2px;
+  /* prevent clipping on focus ring */
+  /* Hide scrollbar — all browsers */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.gallery-page-simple .gallery-filter-actions::-webkit-scrollbar {
+  display: none;
 }
 
 .gallery-page-simple .gallery-filter-eyebrow {
   margin: 0;
   color: var(--gold);
-  font:
-    700 10px/1 "Inter",
-    sans-serif;
+  font: 700 10px/1 "Plus Jakarta Sans", sans-serif;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -10428,30 +10446,189 @@ button,
   font: 700 clamp(18px, 2vw, 24px)/1.1 "Playfair Display", serif;
 }
 
+/* ─── Pills ──────────────────────────────────────────────────── */
+
 .gallery-page-simple .pill {
-  padding: 10px 14px;
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.14);
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  padding: 10px 24px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
   color: var(--text);
+  opacity: 0.75;
+  font: 600 12px/1 "Plus Jakarta Sans", sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   width: auto;
-  transition: all 0.22s ease;
+  cursor: pointer;
+  transition: opacity 0.2s ease, border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
 }
 
 .gallery-page-simple .pill:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(56, 189, 248, 0.3);
+  opacity: 1;
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .gallery-page-simple .pill.active {
   background: linear-gradient(135deg, var(--gold) 0%, var(--gold-deep) 100%);
+  border-color: transparent;
   color: #0a1e32;
-  border-color: rgba(56, 189, 248, 0.6);
-  font-weight: 700;
+  opacity: 1;
+  font-weight: 600;
 }
 
 .gallery-page-simple .pill strong {
-  background: rgba(255, 255, 255, 0.18);
-  color: inherit;
+  display: none;
+}
+
+.gallery-page-simple .pill-count {
+  margin-left: 6px;
+  font: 600 10px/1 "Plus Jakarta Sans", sans-serif;
+  opacity: 0.55;
+  letter-spacing: 0.04em;
+}
+
+.gallery-page-simple .pill.active .pill-count {
+  opacity: 0.7;
+}
+
+/* ─── Mobile dropdown ────────────────────────────────────────── */
+
+/* Hidden on desktop, shown on mobile */
+.gallery-page-simple .gallery-filter-dropdown-wrap {
+  display: none;
+}
+
+@media (max-width: 768px) {
+
+  /* Hide pills on mobile */
+  .gallery-page-simple .gallery-filter-scroll-wrap {
+    display: none;
+  }
+
+  /* Show dropdown on mobile */
+  .gallery-page-simple .gallery-filter-dropdown-wrap {
+    display: block;
+    width: 100%;
+  }
+
+  /* ── Trigger button ── */
+  .cat-dropdown {
+    position: relative;
+    width: 100%;
+  }
+
+  .cat-dropdown-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    color: #fff;
+    font: 600 13px/1 "Plus Jakarta Sans", sans-serif;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+    text-align: left;
+  }
+
+  .cat-dropdown-trigger:hover,
+  .cat-dropdown-trigger:focus-visible {
+    border-color: rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.08);
+    outline: none;
+  }
+
+  .cat-dropdown-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .cat-dropdown-chevron {
+    flex-shrink: 0;
+    color: #38bdf8;
+    display: flex;
+    align-items: center;
+    transition: transform 0.3s ease;
+  }
+
+  .cat-dropdown-chevron.is-open {
+    transform: rotate(180deg);
+  }
+
+  /* ── Dropdown panel ── */
+  .cat-dropdown-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: #0d1b2e;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    padding: 8px 0;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+
+  .cat-dropdown-panel.is-open {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  /* ── Option items ── */
+  .cat-dropdown-option {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font: 500 13px/1 "Plus Jakarta Sans", sans-serif;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .cat-dropdown-option:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+  }
+
+  .cat-dropdown-option.is-active {
+    color: #38bdf8;
+    font-weight: 600;
+  }
+
+  .cat-dropdown-option-count {
+    font: 500 11px/1 "Plus Jakarta Sans", sans-serif;
+    opacity: 0.55;
+    letter-spacing: 0.04em;
+  }
+
+  .cat-dropdown-option.is-active .cat-dropdown-option-count {
+    opacity: 0.75;
+  }
 }
 
 .gallery-page-simple .gallery-curation-band {
@@ -10706,7 +10883,7 @@ button,
 
 .gallery-page-simple .gallery-curation-card--image:hover .gallery-curation-image,
 .gallery-page-simple .gallery-curation-card--image:focus-visible .gallery-curation-image {
-  transform: scale(1.08);
+  transform: scale(1.05);
 }
 
 .gallery-page-simple .gallery-curation-card--image .gallery-curation-image {
@@ -10716,8 +10893,9 @@ button,
 .gallery-page-simple .gallery-curation-card--image:hover .gallery-curation-overlay,
 .gallery-page-simple .gallery-curation-card--image:focus-visible .gallery-curation-overlay {
   background: linear-gradient(to top,
-      rgba(2, 12, 27, 0.92) 0%,
-      rgba(2, 12, 27, 0.48) 54%,
+      rgba(2, 12, 27, 0.96) 0%,
+      rgba(2, 12, 27, 0.72) 46%,
+      rgba(2, 12, 27, 0.18) 78%,
       transparent 100%);
 }
 
@@ -10788,26 +10966,27 @@ button,
 }
 
 .gallery-page-simple .gallery-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
+  /* Layout handled by MasonryGrid component (flex columns, shortest-first) */
+  display: block;
 }
 
 @media (min-width: 640px) {
   .gallery-page-simple .gallery-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: block;
   }
 }
 
 @media (min-width: 1180px) {
   .gallery-page-simple .gallery-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    display: block;
   }
 }
 
 .gallery-page-simple .gallery-grid-item {
+  break-inside: avoid;
   margin: 0;
   min-width: 0;
+  display: block;
 }
 
 .gallery-page-simple .gallery-card {
@@ -10842,7 +11021,8 @@ button,
 .gallery-page-simple .gallery-card img {
   background: var(--bg-soft);
   object-fit: cover;
-  aspect-ratio: 4 / 3;
+  width: 100%;
+  display: block;
 }
 
 .gallery-page-simple .gallery-image {
@@ -10980,17 +11160,65 @@ button,
 }
 
 .gallery-page-simple .gallery-layout-cta-shell {
+  position: relative;
+  overflow: hidden;
   border-radius: 22px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background:
-    radial-gradient(90% 160% at 12% 0%,
-      rgba(56, 189, 248, 0.14) 0%,
+    radial-gradient(ellipse 80% 120% at 8% 0%,
+      rgba(56, 189, 248, 0.12) 0%,
+      rgba(14, 165, 233, 0.06) 40%,
       rgba(56, 189, 248, 0) 72%),
+    radial-gradient(ellipse 60% 80% at 92% 100%,
+      rgba(99, 102, 241, 0.08) 0%,
+      rgba(99, 102, 241, 0) 60%),
     rgba(255, 255, 255, 0.04);
   padding: clamp(20px, 2.8vw, 32px);
   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.16);
   backdrop-filter: blur(14px) saturate(130%);
   -webkit-backdrop-filter: blur(14px) saturate(130%);
+}
+
+/* Decorative geometric pattern in CTA background */
+.gallery-page-simple .gallery-layout-cta-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(45deg,
+      rgba(56, 189, 248, 0.03) 0px,
+      rgba(56, 189, 248, 0.03) 1px,
+      transparent 1px,
+      transparent 28px),
+    repeating-linear-gradient(-45deg,
+      rgba(56, 189, 248, 0.03) 0px,
+      rgba(56, 189, 248, 0.03) 1px,
+      transparent 1px,
+      transparent 28px);
+  border-radius: inherit;
+  z-index: 0;
+}
+
+/* Large low-opacity decorative icon */
+.gallery-page-simple .gallery-layout-cta-shell::after {
+  content: '◈';
+  position: absolute;
+  right: -20px;
+  bottom: -40px;
+  font-size: 220px;
+  line-height: 1;
+  color: rgba(56, 189, 248, 0.05);
+  pointer-events: none;
+  z-index: 0;
+  user-select: none;
+}
+
+.gallery-page-simple .gallery-layout-cta-kicker,
+.gallery-page-simple .gallery-layout-cta-shell h3,
+.gallery-page-simple .gallery-layout-cta-actions {
+  position: relative;
+  z-index: 1;
 }
 
 .gallery-page-simple .gallery-layout-cta-kicker {
@@ -11087,40 +11315,10 @@ button,
     padding: 10px 0;
   }
 
-  .gallery-page-simple .gallery-filter-shell {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 10px;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    padding-inline: 12px;
-    border-radius: 12px;
-  }
-
-  .gallery-page-simple .gallery-filter-intro h2 {
-    font-size: 20px;
-    line-height: 1.08;
-  }
-
-  .gallery-page-simple .gallery-filter-intro {
-    min-width: 100%;
-  }
-
-  .gallery-page-simple .gallery-filter-actions {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-    width: 100%;
-  }
-
+  /* Mobile pill sizing — smaller but still flex-row */
   .gallery-page-simple .pill {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-width: 0;
-    padding: 9px 10px;
-    font-size: 13px;
+    padding: 8px 16px;
+    font-size: 11px;
   }
 
   .gallery-page-simple .gallery-curation-grid {
@@ -11134,6 +11332,19 @@ button,
 
   .gallery-page-simple .gallery-grid-section {
     padding-bottom: 2.5rem;
+  }
+
+  /* Mobile masonry grid — single column, clean cards */
+  .gallery-page-simple .gallery-grid-item .gallery-card {
+    border-radius: 12px;
+  }
+
+  .gallery-page-simple .gallery-grid-item .lazy-image-wrap {
+    height: auto;
+  }
+
+  .gallery-page-simple .gallery-grid-item .gallery-image {
+    height: auto;
   }
 
   .gallery-page-simple .gallery-layout-cta-actions {
@@ -11151,9 +11362,7 @@ button,
 }
 
 @media (max-width: 420px) {
-  .gallery-page-simple .gallery-filter-actions {
-    grid-template-columns: 1fr;
-  }
+  /* filter actions no longer need grid override — always flex-row scroll */
 }
 
 /* Sky Blue Glassmorphism refresh */

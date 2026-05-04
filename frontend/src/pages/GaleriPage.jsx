@@ -2,18 +2,22 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import LazyImage from '../components/ui/LazyImage'
+import MasonryGrid from '../components/ui/MasonryGrid'
+import CategoryDropdown from '../components/ui/CategoryDropdown'
 import {
   getWordPressGalleryFromPageId,
   getWordPressGalleryFromPageBySlugs,
   isWordPressConfiguredForPages,
 } from '../data/wordpressPages'
 
-const galleryFilters = ['Semua', 'Booth Pameran', 'Event', 'Billboard']
+const galleryFilters = ['Semua', 'Booth Pameran', 'Event', 'Billboard', 'Backdrop', 'Gate']
 const filterToQuery = {
   Semua: 'semua',
   'Booth Pameran': 'booth-pameran',
   Event: 'event',
   Billboard: 'billboard',
+  Backdrop: 'backdrop',
+  Gate: 'gate',
 }
 
 const queryToFilter = Object.fromEntries(
@@ -23,7 +27,7 @@ const queryToFilter = Object.fromEntries(
 const ITEMS_PER_PAGE = 18
 const MAX_PAGINATION_NUMBERS = 10
 const WORDPRESS_GALLERY_PAGE_ID = 605
-const GALLERY_SNAPSHOT_KEY = 'galeri:wp-gallery:v1'
+const GALLERY_SNAPSHOT_KEY = 'galeri:wp-gallery:v2'
 
 function readGallerySnapshot() {
   if (typeof window === 'undefined') return null
@@ -51,39 +55,6 @@ function writeGallerySnapshot(items) {
     // Ignore quota/session errors.
   }
 }
-
-const curationContainerVariants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.15,
-    },
-  },
-}
-
-const curationCardVariants = {
-  hidden: { opacity: 0, y: 40 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.6,
-      ease: [0.16, 1, 0.3, 1],
-    },
-  },
-}
-
-function CategoryGridIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" role="presentation" aria-hidden="true">
-      <rect x="3.5" y="3.5" width="7" height="7" rx="1.4" stroke="currentColor" strokeWidth="1.8" />
-      <rect x="13.5" y="3.5" width="7" height="7" rx="1.4" stroke="currentColor" strokeWidth="1.8" />
-      <rect x="3.5" y="13.5" width="7" height="7" rx="1.4" stroke="currentColor" strokeWidth="1.8" />
-      <rect x="13.5" y="13.5" width="7" height="7" rx="1.4" stroke="currentColor" strokeWidth="1.8" />
-    </svg>
-  )
-}
-
 
 
 function buildPageItems(currentPage, totalPages) {
@@ -131,7 +102,6 @@ function GaleriPage() {
   const prefersReducedMotion = useReducedMotion()
   const [searchParams, setSearchParams] = useSearchParams()
   const [activeIndex, setActiveIndex] = useState(null)
-  const didMountRef = useRef(false)
   const initialGallerySnapshot = useRef(readGallerySnapshot())
   const [galleryItems, setGalleryItems] = useState(() => initialGallerySnapshot.current || [])
   const [isLoadingWp, setIsLoadingWp] = useState(
@@ -139,6 +109,8 @@ function GaleriPage() {
   )
   const prefetchedImagesRef = useRef(new Set())
   const galleryRefreshInProgressRef = useRef(false)
+  // Only scroll to filter section when user explicitly clicks pagination — not on mount/load
+  const hasInteractedRef = useRef(false)
 
   const activeFilter =
     queryToFilter[searchParams.get('kategori') ?? 'semua'] ?? 'Semua'
@@ -146,16 +118,19 @@ function GaleriPage() {
   const rawPage = Number(searchParams.get('page') ?? '1')
   const currentPage = Number.isFinite(rawPage) && rawPage > 0 ? Math.floor(rawPage) : 1
 
+  // On mount: always start from top of page, never mid-page
   useEffect(() => {
-    if (!didMountRef.current) {
-      didMountRef.current = true
-      return
-    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+  }, [])
 
-    document.querySelector('#gallery-section')?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
-    })
+  useEffect(() => {
+    // Only scroll when user has explicitly clicked a pagination control.
+    // On mount/hard refresh hasInteractedRef is false — no scroll triggered.
+    if (!hasInteractedRef.current) return
+
+    const filterSection = document.querySelector('#filter-section')
+    if (!filterSection) return
+    filterSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [currentPage])
 
   useEffect(() => {
@@ -250,26 +225,6 @@ function GaleriPage() {
       return counts
     }, {})
   }, [galleryItems])
-  const gallerySnapshots = useMemo(
-    () => galleryFilters
-      .filter((filter) => filter !== 'Semua')
-      .map((filter) => {
-        const preview = galleryItems.find((item) => item.category === filter)
-        return {
-          filter,
-          count: categoryCounts[filter] ?? 0,
-          preview,
-        }
-      }),
-    [categoryCounts, galleryItems],
-  )
-  const curatedCategoryCards = useMemo(
-    () => gallerySnapshots.map((snapshot) => ({
-      ...snapshot,
-      totalLabel: `${String(snapshot.count).padStart(2, '0')} visual tersedia`,
-    })),
-    [gallerySnapshots],
-  )
 
   useEffect(() => {
     if (activeIndex === null) return undefined
@@ -340,8 +295,15 @@ function GaleriPage() {
     return `?${next.toString()}`
   }
 
+  const handlePageClick = () => {
+    hasInteractedRef.current = true
+  }
+
   const scrollToGrid = () => {
-    document.getElementById('galeri-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    const el = document.getElementById('gallery-section')
+    if (!el) return
+    const top = el.getBoundingClientRect().top + window.scrollY - 96
+    window.scrollTo({ top, behavior: 'smooth' })
   }
 
   return (
@@ -452,7 +414,7 @@ function GaleriPage() {
             <p className="gallery-narrative-eyebrow">Kurasi kategori</p>
             <h2>Filter cepat, hasil jelas</h2>
             <p>
-              Anda bisa menelusuri Booth, Event, atau Billboard tanpa kehilangan konteks visual.
+              Anda bisa menelusuri Booth, Event, Billboard, Backdrop, atau Gate tanpa kehilangan konteks visual.
             </p>
           </motion.article>
 
@@ -472,102 +434,45 @@ function GaleriPage() {
         </div>
       </section>
 
-      <section className="gallery-curation-band" aria-label="Eksplorasi kategori unggulan">
-        <div className="container">
-          <div className="gallery-curation-head">
-            <p className="gallery-curation-kicker">Pilihan Cepat</p>
-            <h2>Mulai dari kategori yang paling Anda butuhkan</h2>
-            <motion.div
-              initial={prefersReducedMotion ? false : { scaleX: 0 }}
-              whileInView={prefersReducedMotion ? { scaleX: 1 } : { scaleX: 1 }}
-              viewport={{ once: true, margin: '-100px' }}
-              transition={{ duration: 0.6, ease: 'easeOut', delay: 0.2 }}
-              style={{ originX: 0 }}
-              className="gallery-curation-underline"
-            />
-            <p>
-              Gunakan panel ini untuk langsung melompat ke kumpulan karya yang relevan,
-              lalu lanjutkan ke grid utama untuk melihat detailnya.
-            </p>
-          </div>
-
-          <motion.div
-            className="gallery-curation-grid"
-            variants={curationContainerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-100px' }}
-          >
-            {curatedCategoryCards.map((snapshot, index) => {
-              const isAllCard = snapshot.filter === 'Semua'
-              const isActive = snapshot.filter === activeFilter
-
-              return (
-                <motion.button
-                  key={snapshot.filter}
-                  type="button"
-                  className={`group gallery-curation-card ${isAllCard ? 'gallery-curation-card--all' : 'gallery-curation-card--image'} ${isActive ? 'is-active' : ''}`}
-                  variants={curationCardVariants}
-                  whileHover={prefersReducedMotion ? undefined : {
-                    scale: 1.02,
-                    boxShadow: '0 0 0 1px rgba(125,211,252,0.35), 0 0 24px rgba(125,211,252,0.15)',
-                  }}
-                  whileFocus={prefersReducedMotion ? undefined : {
-                    scale: 1.02,
-                    boxShadow: '0 0 0 1px rgba(125,211,252,0.35), 0 0 24px rgba(125,211,252,0.15)',
-                  }}
-                  onClick={() => {
-                    handleFilterChange(snapshot.filter)
-                    scrollToGrid()
-                  }}
-                  style={{ animationDelay: `${index * 0.05}s` }}
-                >
-                  <span className="gallery-curation-media" aria-hidden="true">
-                    {snapshot.preview?.src ? (
-                      <LazyImage
-                        src={snapshot.preview.src}
-                        alt={snapshot.preview.alt || snapshot.filter}
-                        className="gallery-image gallery-curation-image"
-                        wrapperClassName="gallery-curation-image-wrap"
-                      />
-                    ) : null}
-                  </span>
-                  <span className="gallery-curation-topline" aria-hidden="true" />
-                  <span className="gallery-curation-badge">{snapshot.filter}</span>
-                  <span className="gallery-curation-overlay" aria-hidden="true" />
-                  <span className="gallery-curation-body">
-                    <span className="gallery-curation-separator" aria-hidden="true" />
-                    <span className="gallery-curation-meta">{snapshot.totalLabel}</span>
-                    <span className="gallery-curation-title">{snapshot.filter}</span>
-                    <span className="gallery-curation-action">Lihat Semua →</span>
-                  </span>
-                </motion.button>
-              )
-            })}
-          </motion.div>
-        </div>
-      </section>
-
       <section
+        id="filter-section"
         className="gallery-filter gallery-filter-sticky"
+        style={{ scrollMarginTop: '80px' }}
       >
-        <div className="container filter-pills gallery-filter-shell">
+        <div className="container gallery-filter-shell">
           <div className="gallery-filter-intro">
             <p className="gallery-filter-eyebrow">Kategori koleksi</p>
             <h2>Temukan karya paling relevan</h2>
           </div>
-          <div className="gallery-filter-actions" role="group" aria-label="Pilih kategori koleksi">
-            {galleryFilters.map((filter) => (
-              <button
-                key={filter}
-                className={filter === activeFilter ? 'pill active' : 'pill'}
-                onClick={() => handleFilterChange(filter)}
-                type="button"
-              >
-                <span>{filter}</span>
-                <strong>{String(categoryCounts[filter] ?? 0).padStart(2, '0')}</strong>
-              </button>
-            ))}
+          <div className="gallery-filter-scroll-wrap" aria-label="Pilih kategori koleksi">
+            <div className="gallery-filter-actions" role="group">
+              {galleryFilters.map((filter) => {
+                const count = categoryCounts[filter] ?? 0
+                // Hide non-"Semua" pills with 0 items (no content in that category yet)
+                if (filter !== 'Semua' && count === 0) return null
+                return (
+                  <button
+                    key={filter}
+                    className={filter === activeFilter ? 'pill active' : 'pill'}
+                    onClick={() => handleFilterChange(filter)}
+                    type="button"
+                  >
+                    {filter}
+                    <span className="pill-count">{String(count).padStart(2, '0')}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Mobile dropdown — replaces pills on small screens */}
+          <div className="gallery-filter-dropdown-wrap">
+            <CategoryDropdown
+              filters={galleryFilters}
+              activeFilter={activeFilter}
+              categoryCounts={categoryCounts}
+              onSelect={handleFilterChange}
+            />
           </div>
         </div>
       </section>
@@ -603,50 +508,54 @@ function GaleriPage() {
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={activeFilterTransitionKey}
-              className="container gallery-grid gallery-grid-premium"
+              className="container gallery-grid-premium"
               initial={prefersReducedMotion ? false : { opacity: 0, scale: 1.05 }}
               animate={prefersReducedMotion ? { opacity: 1, scale: 1 } : { opacity: 1, scale: 1 }}
               exit={prefersReducedMotion ? undefined : { opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
             >
-              {pagedGallery.map((item, idx) => (
-                <motion.article
-                  key={item.id || item.src}
-                  className={`gallery-grid-item gallery-card group card ${item.type}`}
-                  initial={
-                    prefersReducedMotion
-                      ? false
-                      : {
-                        opacity: 0,
-                        y: 26,
-                        scale: 0.985,
-                      }
-                  }
-                  whileInView={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
-                  viewport={{ once: true, amount: 0.2 }}
-                  transition={{ duration: 0.42, delay: (idx % 6) * 0.04, ease: [0.22, 1, 0.36, 1] }}
-                >
-                  <button
-                    type="button"
-                    className="gallery-lightbox-trigger"
-                    onClick={() => setActiveIndex(idx)}
-                    aria-label={`Buka gambar galeri ${pageStart + idx + 1}`}
+              <MasonryGrid
+                items={pagedGallery}
+                className="gallery-grid"
+                gap={16}
+                renderItem={(item, globalIdx) => (
+                  <motion.article
+                    key={item.id || item.src}
+                    className={`gallery-grid-item gallery-card group card ${item.type}`}
+                    initial={
+                      prefersReducedMotion
+                        ? false
+                        : { opacity: 0, y: 26, scale: 0.985 }
+                    }
+                    whileInView={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+                    viewport={{ once: true, amount: 0.2 }}
+                    transition={{ duration: 0.42, delay: (globalIdx % 6) * 0.04, ease: [0.22, 1, 0.36, 1] }}
                   >
-                    <LazyImage
-                      src={item.src}
-                      fallbackSrc={item.fullSrc || item.src}
-                      alt={item.alt || `Gallery ${idx + 1}`}
-                      className="gallery-image"
-                      loading={idx < 6 ? 'eager' : 'lazy'}
-                      fetchPriority={idx < 3 ? 'high' : 'auto'}
-                    />
-                    <span className="gallery-card-overlay" aria-hidden="true">
-                      <span className="gallery-card-title">{item.alt || `Karya ${pageStart + idx + 1}`}</span>
-                      <span className="gallery-card-badge">{item.category || 'Galeri'}</span>
-                    </span>
-                  </button>
-                </motion.article>
-              ))}
+                    <button
+                      type="button"
+                      className="gallery-lightbox-trigger"
+                      onClick={() => setActiveIndex(globalIdx)}
+                      aria-label={`Buka gambar galeri ${pageStart + globalIdx + 1}`}
+                    >
+                      <LazyImage
+                        src={item.src}
+                        fallbackSrc={item.fullSrc || item.src}
+                        alt={item.alt || `Gallery ${globalIdx + 1}`}
+                        className="gallery-image"
+                        loading={globalIdx < 6 ? 'eager' : 'lazy'}
+                        fetchPriority={globalIdx < 3 ? 'high' : 'auto'}
+                        width={item.width || undefined}
+                        height={item.height || undefined}
+                        data-masonry-key={item.id ?? item.src}
+                      />
+                      <span className="gallery-card-overlay" aria-hidden="true">
+                        <span className="gallery-card-title">{item.alt || `Karya ${pageStart + globalIdx + 1}`}</span>
+                        <span className="gallery-card-badge">{item.category || 'Galeri'}</span>
+                      </span>
+                    </button>
+                  </motion.article>
+                )}
+              />
             </motion.div>
           </AnimatePresence>
         )}
@@ -658,7 +567,7 @@ function GaleriPage() {
                 Prev
               </button>
             ) : (
-              <Link className="gallery-page-btn" to={getPageHref(currentPage - 1)}>
+              <Link className="gallery-page-btn" to={getPageHref(currentPage - 1)} onClick={handlePageClick}>
                 Prev
               </Link>
             )}
@@ -685,7 +594,7 @@ function GaleriPage() {
                       {item}
                     </button>
                   ) : (
-                    <Link key={item} className="gallery-page-btn" to={getPageHref(item)}>
+                    <Link key={item} className="gallery-page-btn" to={getPageHref(item)} onClick={handlePageClick}>
                       {item}
                     </Link>
                   )
@@ -698,7 +607,7 @@ function GaleriPage() {
                 Next
               </button>
             ) : (
-              <Link className="gallery-page-btn" to={getPageHref(currentPage + 1)}>
+              <Link className="gallery-page-btn" to={getPageHref(currentPage + 1)} onClick={handlePageClick}>
                 Next
               </Link>
             )}

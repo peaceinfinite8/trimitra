@@ -75,6 +75,8 @@ function normalizeGalleryType(width, height) {
 function inferGalleryCategory(text) {
   const source = (text || '').toLowerCase()
   if (source.includes('billboard') || source.includes('reklame')) return 'Billboard'
+  if (source.includes('backdrop')) return 'Backdrop'
+  if (source.includes('gate') || source.includes('gerbang')) return 'Gate'
   if (source.includes('event') || source.includes('acara') || source.includes('wisuda')) return 'Event'
   return 'Booth Pameran'
 }
